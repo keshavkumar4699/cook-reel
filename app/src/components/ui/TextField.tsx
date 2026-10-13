@@ -1,6 +1,6 @@
 import { forwardRef, type ReactNode } from 'react';
 import { StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
-import { fonts, radius, useTheme } from '@/theme';
+import { fonts, inputReset, radius, useTheme } from '@/theme';
 import { Icon, type IconName } from './Icon';
 import { Txt } from './Text';
 
@@ -45,6 +45,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           {...rest}
           style={[
             styles.input,
+            inputReset,
             { color: colors.text, fontFamily: fonts.medium, paddingTop: multiline ? 14 : 0, textAlignVertical: multiline ? 'top' : 'center' },
             style,
           ]}

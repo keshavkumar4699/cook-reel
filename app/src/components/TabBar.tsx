@@ -57,7 +57,8 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
           {Platform.OS === 'ios' ? (
             <BlurView intensity={80} tint={isDark ? 'systemThickMaterialDark' : 'systemThickMaterialLight'} style={StyleSheet.absoluteFill} />
           ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(28,25,23,0.97)' : 'rgba(255,255,255,0.97)' }]} />
+            // No native blur here, so an opaque fill reads cleaner than ghosted content.
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface }]} />
           )}
           {renderTab(0)}
           {renderTab(1)}

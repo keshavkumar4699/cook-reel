@@ -7,7 +7,7 @@ import { coverGradients, useTheme } from '@/theme';
 import { Badge } from '../ui/Badge';
 import { Txt } from '../ui/Text';
 
-type CoverRecipe = Pick<ApiRecipe, 'id' | 'title' | 'emoji' | 'youtube' | 'source'>;
+type CoverRecipe = Pick<ApiRecipe, 'id' | 'title' | 'emoji' | 'youtube' | 'source'> & Partial<Pick<ApiRecipe, 'nutrition'>>;
 
 export interface RecipeCoverProps {
   recipe: CoverRecipe;
@@ -16,10 +16,12 @@ export interface RecipeCoverProps {
   /** Show source/short badges in the corner. */
   badges?: boolean;
   rounded?: number;
+  /** Protein per serving, shown as a pill on the bottom-left corner. */
+  proteinPill?: boolean;
 }
 
 /** YouTube thumbnail for imported recipes; a warm gradient with the dish emoji otherwise. */
-export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, rounded = 0 }: RecipeCoverProps) {
+export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, rounded = 0, proteinPill = false }: RecipeCoverProps) {
   const { scheme } = useTheme();
   const gradients = coverGradients[scheme];
   const [from, to] = gradients[hashIndex(recipe.id + recipe.title, gradients.length)]!;
@@ -41,7 +43,12 @@ export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, roun
         </>
       ) : (
         <LinearGradient colors={[from, to]} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={[StyleSheet.absoluteFill, styles.center]}>
-          <View style={[styles.glow, { width: emojiSize * 1.9, height: emojiSize * 1.9, borderRadius: emojiSize }]} />
+          <View
+            style={[
+              styles.glow,
+              { width: emojiSize * 1.9, height: emojiSize * 1.9, borderRadius: emojiSize, backgroundColor: scheme === 'dark' ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.35)' },
+            ]}
+          />
           <Txt style={{ fontSize: emojiSize, lineHeight: emojiSize * 1.2 }} accessibilityElementsHidden importantForAccessibility="no">
             {recipe.emoji}
           </Txt>
@@ -53,6 +60,9 @@ export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, roun
           {recipe.source === 'ai' ? <Badge label="Chef" icon="sparkles" tone="ai" /> : null}
         </View>
       ) : null}
+      {proteinPill && recipe.nutrition ? (
+        <Badge label={`${Math.round(recipe.nutrition.perServing.proteinG)} g protein`} icon="barbell-outline" tone="dark" style={styles.pill} />
+      ) : null}
     </View>
   );
 }
@@ -60,6 +70,7 @@ export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, roun
 const styles = StyleSheet.create({
   cover: { overflow: 'hidden', backgroundColor: '#E9E1D6' },
   center: { alignItems: 'center', justifyContent: 'center' },
-  glow: { position: 'absolute', backgroundColor: 'rgba(255,255,255,0.35)' },
+  glow: { position: 'absolute' },
+  pill: { position: 'absolute', left: 10, bottom: 10 },
   badges: { position: 'absolute', top: 10, left: 10, flexDirection: 'row', gap: 6 },
 });

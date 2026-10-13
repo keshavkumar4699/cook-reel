@@ -23,11 +23,11 @@ export function PressableScale({ style, children, scaleTo = 0.97, haptic = 'tap'
       {...rest}
       disabled={disabled}
       onPressIn={(e) => {
-        scale.value = withSpring(scaleTo, { damping: 20, stiffness: 400 });
+        scale.set(withSpring(scaleTo, { damping: 20, stiffness: 400 }));
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        scale.value = withSpring(1, { damping: 14, stiffness: 300 });
+        scale.set(withSpring(1, { damping: 14, stiffness: 300 }));
         onPressOut?.(e);
       }}
       onPress={(e) => {

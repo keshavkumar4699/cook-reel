@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
@@ -270,9 +270,11 @@ export default function Plan() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<'plan' | 'shopping'>(params.tab === 'shopping' ? 'shopping' : 'plan');
-  useEffect(() => {
+  const [tabParam, setTabParam] = useState(params.tab);
+  if (params.tab !== tabParam) {
+    setTabParam(params.tab);
     if (params.tab === 'shopping') setTab('shopping');
-  }, [params.tab]);
+  }
   const pending = useKitchen((s) => Object.values(s.shopping).filter((i) => !i.checked).length);
 
   return (

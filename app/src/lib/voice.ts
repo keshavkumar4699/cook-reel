@@ -18,7 +18,7 @@ const WAKE = /^(?:(?:hey|ok|okay|hi)\s+)?(?:chef|cookreel|cook reel)\b[\s,!.]*/;
  * Ordered most-specific first ("stop the timer" must not become "stop"). Hindi/Hinglish words that
  * speech recognisers commonly transcribe in Latin script are included for Indian cooks.
  */
-const RULES: Array<[VoiceCommand, RegExp]> = [
+const RULES: [VoiceCommand, RegExp][] = [
   ['stopTimer', /\b(stop|cancel|end|reset)\s+(the\s+)?timer\b/],
   ['timer', /\b((start|set)\s+(a\s+|the\s+)?timer|timer)\b/],
   ['ingredients', /\b(ingredients?|what do i need|saamaan|samaan)\b/],
@@ -38,6 +38,7 @@ const MAX_PLAIN_WORDS = 4;
 export function normalizeTranscript(transcript: string): string {
   return transcript
     .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
     .replace(/[^a-z0-9\u00c0-\u024f\u0900-\u097f'\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -57,7 +58,7 @@ export function parseCommand(transcript: string): VoiceCommand | null {
   return null;
 }
 
-export const VOICE_HELP: Array<{ say: string; does: string }> = [
+export const VOICE_HELP: { say: string; does: string }[] = [
   { say: '“Next” · “Back”', does: 'Move between steps' },
   { say: '“Stop” · “Play”', does: 'Pause or resume the clip' },
   { say: '“Repeat”', does: 'Replay this step from the start' },
@@ -66,3 +67,18 @@ export const VOICE_HELP: Array<{ say: string; does: string }> = [
   { say: '“Ingredients”', does: 'Hear what you need' },
   { say: '“Hey Chef, …”', does: 'Use for longer phrases' },
 ];
+
+/**
+ * Picks a command out of a recogniser transcript. Short utterances ("next") are matched directly;
+ * in longer, noisy transcripts (video audio, chatter) only a phrase after the wake word counts —
+ * "…and then we add salt chef next" → next.
+ */
+export function commandFromTranscript(transcript: string): VoiceCommand | null {
+  const direct = parseCommand(transcript);
+  if (direct) return direct;
+  const text = normalizeTranscript(transcript);
+  const wake = Math.max(text.lastIndexOf('chef'), text.lastIndexOf('cookreel'));
+  return wake >= 0 ? parseCommand(text.slice(wake)) : null;
+}
+
+export const wordCount = (transcript: string) => normalizeTranscript(transcript).split(' ').filter(Boolean).length;

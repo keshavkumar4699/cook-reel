@@ -14,6 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
+import { useImports } from '@/state/imports';
 import { useKitchen } from '@/state/kitchen';
 import { useLibrary } from '@/state/library';
 import { useProfile } from '@/state/profile';
@@ -51,6 +52,7 @@ export default function RootLayout() {
     Promise.allSettled([
       persisted(useProfile),
       persisted(useSettings),
+      persisted(useImports),
       useSession.getState().hydrate(),
       useLibrary.getState().hydrate(),
       useKitchen.getState().hydrate(),

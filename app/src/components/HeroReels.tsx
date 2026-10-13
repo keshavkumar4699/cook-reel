@@ -32,7 +32,7 @@ function useFloat(delay: number, distance = 6) {
   return useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
 }
 
-function SideCard({ emoji, colors, step, title, rotate, side }: { emoji: string; colors: [string, string]; step: string; title: string; rotate: string; side: 'left' | 'right' }) {
+function SideCard({ emoji, colors, step, rotate, side }: { emoji: string; colors: [string, string]; step: string; rotate: string; side: 'left' | 'right' }) {
   const float = useFloat(side === 'left' ? 300 : 900, 5);
   return (
     <Animated.View
@@ -40,16 +40,20 @@ function SideCard({ emoji, colors, step, title, rotate, side }: { emoji: string;
       style={[styles.side, side === 'left' ? styles.left : styles.right, { transform: [{ rotate }] }]}
     >
       <Animated.View style={[styles.sideInner, float]}>
-        <LinearGradient colors={colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.sideCover}>
-          <Txt style={{ fontSize: 44, lineHeight: 52 }}>{emoji}</Txt>
+        <LinearGradient
+          colors={colors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.sideCover, side === 'left' ? styles.alignStart : styles.alignEnd]}
+        >
+          <Txt style={{ fontSize: 40, lineHeight: 48 }}>{emoji}</Txt>
         </LinearGradient>
-        <View style={styles.sideBody}>
+        <View style={[styles.sideBody, side === 'left' ? styles.alignStart : styles.alignEnd]}>
           <Txt variant="caption" color="#8A7F75">
             {step}
           </Txt>
-          <Txt variant="subheadStrong" color="#1D1A17" numberOfLines={1}>
-            {title}
-          </Txt>
+          <View style={styles.sideBar} />
+          <View style={[styles.sideBar, { width: 34 }]} />
         </View>
       </Animated.View>
     </Animated.View>
@@ -61,8 +65,8 @@ export function HeroReels() {
   const float = useFloat(0, 7);
   return (
     <View style={styles.stage} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <SideCard side="left" emoji="🍳" colors={['#FFE3D5', '#FFC5A6']} step="STEP 2 OF 5" title="Soften the onion" rotate="-9deg" />
-      <SideCard side="right" emoji="🥗" colors={['#E3F2E8', '#BFE3CD']} step="STEP 4 OF 6" title="Toss & season" rotate="9deg" />
+      <SideCard side="left" emoji="🍳" colors={['#FFE3D5', '#FFC5A6']} step="STEP 2" rotate="-10deg" />
+      <SideCard side="right" emoji="🥗" colors={['#E3F2E8', '#BFE3CD']} step="STEP 4" rotate="10deg" />
       <Animated.View entering={FadeInDown.springify().damping(14)} style={styles.mainWrap}>
         <Animated.View style={[styles.main, float]}>
           <View style={styles.segments}>
@@ -99,9 +103,9 @@ export function HeroReels() {
 const CARD_W = 182;
 const styles = StyleSheet.create({
   stage: { height: 330, alignItems: 'center', justifyContent: 'center' },
-  side: { position: 'absolute', top: 54 },
-  left: { left: '7%' },
-  right: { right: '7%' },
+  side: { position: 'absolute', top: 62 },
+  left: { left: '2%' },
+  right: { right: '2%' },
   sideInner: {
     width: 138,
     borderRadius: radius.lg,
@@ -113,8 +117,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     elevation: 6,
   },
-  sideCover: { height: 120, alignItems: 'center', justifyContent: 'center' },
-  sideBody: { padding: 10, gap: 2 },
+  sideCover: { height: 120, justifyContent: 'center', paddingHorizontal: 18 },
+  sideBody: { paddingHorizontal: 14, paddingVertical: 12, gap: 6 },
+  sideBar: { height: 6, width: 48, borderRadius: 3, backgroundColor: '#EFE7DC' },
+  alignStart: { alignItems: 'flex-start' },
+  alignEnd: { alignItems: 'flex-end' },
   mainWrap: { zIndex: 2 },
   main: {
     width: CARD_W,

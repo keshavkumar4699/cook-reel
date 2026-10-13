@@ -59,7 +59,7 @@ export const DEFAULT_PRICING: Pricing = {
       productIds: ['cookreel_basic_monthly', 'cookreel_basic_yearly', 'cookreel_basic:monthly', 'cookreel_basic:yearly'],
       displayPrice: { monthly: '$2.99', yearly: '$24.99' },
       highlight: false,
-      perks: ['60 credits every month', 'AI recipes & experiments', 'YouTube step reels'],
+      perks: ['AI recipes, fridge mode & twists', 'YouTube & Shorts step reels', 'Top-up packs when you run out'],
     },
     {
       id: 'pro',
@@ -69,7 +69,7 @@ export const DEFAULT_PRICING: Pricing = {
       productIds: ['cookreel_pro_monthly', 'cookreel_pro_yearly', 'cookreel_pro:monthly', 'cookreel_pro:yearly'],
       displayPrice: { monthly: '$6.99', yearly: '$54.99' },
       highlight: true,
-      perks: ['200 credits every month', 'Everything in Basic', 'Top-up packs when you run out'],
+      perks: ['Everything in Basic', 'Over 3× the credits of Basic'],
     },
     {
       id: 'max',
@@ -79,7 +79,7 @@ export const DEFAULT_PRICING: Pricing = {
       productIds: ['cookreel_max_monthly', 'cookreel_max_yearly', 'cookreel_max:monthly', 'cookreel_max:yearly'],
       displayPrice: { monthly: '$14.99', yearly: '$119.99' },
       highlight: false,
-      perks: ['600 credits every month', 'Everything in Pro', 'Best price per credit'],
+      perks: ['Everything in Pro', 'Best price per credit'],
     },
   ],
   topups: [

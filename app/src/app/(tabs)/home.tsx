@@ -24,7 +24,7 @@ import { useLibrary } from '@/state/library';
 import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { useSettings } from '@/state/settings';
-import { fonts, GUTTER, radius, shadow, useTheme } from '@/theme';
+import { fonts, GUTTER, inputReset, radius, shadow, useTheme } from '@/theme';
 
 const PROMPTS = [
   { label: 'High-protein dinner', emoji: '💪' },
@@ -121,9 +121,11 @@ export default function Home() {
           <View style={{ flex: 1 }}>
             <Txt variant="subhead" color="textMuted">
               {greeting()}
-              {name ? ',' : ''}
+              {name && !greeting().endsWith('?') ? ',' : ''}
             </Txt>
-            <Txt variant="title1">{name ? `${name} 👋` : 'What’s cooking? 👋'}</Txt>
+            <Txt variant="title1" numberOfLines={1}>
+              {name ? `${name} 👋` : 'Hey there 👋'}
+            </Txt>
           </View>
           <CreditsPill />
         </Animated.View>
@@ -140,9 +142,9 @@ export default function Home() {
               <TextInput
                 value={prompt}
                 onChangeText={setPrompt}
-                placeholder="e.g. spicy paneer, 20 minutes, no oven"
+                placeholder="e.g. spicy paneer in 20 min"
                 placeholderTextColor={colors.textFaint}
-                style={[styles.input, { color: colors.text, fontFamily: fonts.medium }]}
+                style={[styles.input, inputReset, { color: colors.text, fontFamily: fonts.medium }]}
                 returnKeyType="send"
                 onSubmitEditing={() => ask(prompt)}
                 accessibilityLabel="Describe what you want to cook"
@@ -183,7 +185,7 @@ export default function Home() {
           <Animated.View entering={FadeInDown.delay(160).springify().damping(18)} style={styles.gutter}>
             <Card tone="ai" style={styles.unlock}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Badge label="Free credits" icon="flash" tone="ai" />
+                <Badge label="Free credits" icon="flash" tone="ai" style={{ backgroundColor: colors.surface, marginBottom: 4 }} />
                 <Txt variant="title3">Unlock Chef & YouTube reels</Txt>
                 <Txt variant="footnote" color="textMuted">
                   Create a free account to use AI — your first recipes are on us.

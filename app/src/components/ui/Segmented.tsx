@@ -3,7 +3,7 @@ import { radius, shadow, useTheme } from '@/theme';
 import { PressableScale } from './PressableScale';
 import { Txt } from './Text';
 
-export function Segmented<T extends string>({ options, value, onChange }: { options: Array<{ value: T; label: string }>; value: T; onChange: (v: T) => void }) {
+export function Segmented<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
   const { colors, isDark } = useTheme();
   return (
     <View style={[styles.track, { backgroundColor: colors.surfaceMuted }]} accessibilityRole="tablist">

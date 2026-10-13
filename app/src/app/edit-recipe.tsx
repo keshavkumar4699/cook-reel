@@ -200,7 +200,9 @@ export default function EditRecipe() {
               <Txt variant="footnote" color="textMuted" style={styles.label}>
                 Servings
               </Txt>
-              <Stepper value={servings} onChange={setServings} min={1} max={24} />
+              <View style={styles.stepperBox}>
+                <Stepper value={servings} onChange={setServings} min={1} max={24} />
+              </View>
             </View>
             <TextField label="Prep (min)" value={prep} onChangeText={setPrep} keyboardType="number-pad" containerStyle={{ width: 92 }} />
             <TextField label="Cook (min)" value={cook} onChangeText={setCook} keyboardType="number-pad" containerStyle={{ width: 92 }} />
@@ -318,7 +320,9 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: GUTTER },
   emojis: { gap: 8, paddingBottom: 16 },
   label: { marginBottom: 6, marginLeft: 4 },
-  rowFields: { flexDirection: 'row', gap: 10, marginTop: 16, alignItems: 'flex-end' },
+  rowFields: { flexDirection: 'row', gap: 10, marginTop: 16, alignItems: 'flex-start' },
+  // Same height as a TextField so the labels and controls line up across the row.
+  stepperBox: { height: 52, justifyContent: 'center', alignItems: 'flex-start' },
   sectionHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 28, marginBottom: 12 },
   ingredientRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   addButton: { alignSelf: 'flex-start', marginTop: 6 },

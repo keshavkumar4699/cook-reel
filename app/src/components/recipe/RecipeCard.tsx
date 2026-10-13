@@ -21,7 +21,7 @@ export function RecipeCard({ recipe, width, coverHeight }: { recipe: Recipe; wid
       style={[styles.card, { width, backgroundColor: colors.surface, borderColor: colors.border }, !isDark ? shadow(colors, 1) : null]}
     >
       <View>
-        <RecipeCover recipe={recipe} style={{ height: coverHeight ?? width * 0.9 }} emojiSize={Math.round(width * 0.26)} />
+        <RecipeCover recipe={recipe} style={{ height: coverHeight ?? width * 0.86 }} emojiSize={Math.round(width * 0.26)} proteinPill />
         <IconButton
           icon={recipe.cookLater ? 'bookmark' : 'bookmark-outline'}
           label={recipe.cookLater ? 'Remove from cook later' : 'Cook later'}
@@ -40,7 +40,7 @@ export function RecipeCard({ recipe, width, coverHeight }: { recipe: Recipe; wid
         <Txt variant="headline" numberOfLines={2} style={styles.title}>
           {recipe.title}
         </Txt>
-        <RecipeMeta recipe={recipe} compact={width < 170} />
+        <RecipeMeta recipe={recipe} compact />
       </View>
     </PressableScale>
   );

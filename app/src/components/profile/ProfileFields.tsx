@@ -9,7 +9,7 @@ import { Txt } from '@/components/ui/Text';
 import type { CookProfile, Persona } from '@/data/types';
 import { radius, useTheme } from '@/theme';
 
-export const PERSONAS: Array<{ id: Persona; emoji: string; title: string; body: string }> = [
+export const PERSONAS: { id: Persona; emoji: string; title: string; body: string }[] = [
   { id: 'saver', emoji: '📌', title: 'Save YouTube recipes', body: 'Keep what I find and cook it later' },
   { id: 'quick', emoji: '⚡', title: 'Quick meals on the go', body: 'Busy with work, study or the gym' },
   { id: 'fridge', emoji: '🧺', title: 'Cook with what I have', body: 'Use up the fridge, waste less' },
@@ -18,7 +18,7 @@ export const PERSONAS: Array<{ id: Persona; emoji: string; title: string; body: 
   { id: 'learner', emoji: '🍳', title: 'Learn to cook', body: 'Step by step, from the basics' },
 ];
 
-const DIETS: Array<{ id: NonNullable<CookProfile['diet']>; emoji: string; label: string }> = [
+const DIETS: { id: NonNullable<CookProfile['diet']>; emoji: string; label: string }[] = [
   { id: 'vegetarian', emoji: '🥦', label: 'Vegetarian' },
   { id: 'eggetarian', emoji: '🥚', label: 'Eggetarian' },
   { id: 'non-vegetarian', emoji: '🍗', label: 'Non-veg' },
@@ -26,12 +26,12 @@ const DIETS: Array<{ id: NonNullable<CookProfile['diet']>; emoji: string; label:
   { id: 'pescatarian', emoji: '🐟', label: 'Pescatarian' },
 ];
 const ALLERGIES = ['Peanuts', 'Tree nuts', 'Dairy', 'Gluten', 'Eggs', 'Soy', 'Shellfish', 'Sesame'];
-const SPICE: Array<{ id: NonNullable<CookProfile['spiceLevel']>; emoji: string; label: string }> = [
+const SPICE: { id: NonNullable<CookProfile['spiceLevel']>; emoji: string; label: string }[] = [
   { id: 'mild', emoji: '🙂', label: 'Mild' },
   { id: 'medium', emoji: '🌶️', label: 'Medium' },
   { id: 'hot', emoji: '🔥', label: 'Hot' },
 ];
-const EQUIPMENT: Array<{ id: string; emoji: string }> = [
+const EQUIPMENT: { id: string; emoji: string }[] = [
   { id: 'Gas stove', emoji: '🔥' },
   { id: 'Induction', emoji: '⚡' },
   { id: 'Microwave', emoji: '📟' },
@@ -44,19 +44,19 @@ const EQUIPMENT: Array<{ id: string; emoji: string }> = [
   { id: 'Toaster', emoji: '🍞' },
 ];
 const TIMES = [10, 20, 30, 45];
-const SKILLS: Array<{ id: NonNullable<CookProfile['skill']>; emoji: string; title: string; body: string }> = [
+const SKILLS: { id: NonNullable<CookProfile['skill']>; emoji: string; title: string; body: string }[] = [
   { id: 'new', emoji: '🐣', title: 'New to cooking', body: 'Explain everything, please' },
   { id: 'basic', emoji: '🙂', title: 'I know the basics', body: 'Dal, eggs, pasta — that level' },
   { id: 'confident', emoji: '😎', title: 'Confident cook', body: 'Skip the hand-holding' },
 ];
-const GOALS: Array<{ id: NonNullable<CookProfile['goal']>; emoji: string; label: string; protein: number }> = [
+const GOALS: { id: NonNullable<CookProfile['goal']>; emoji: string; label: string; protein: number }[] = [
   { id: 'build_muscle', emoji: '💪', label: 'Build muscle', protein: 120 },
   { id: 'lose_fat', emoji: '🔥', label: 'Lose fat', protein: 110 },
   { id: 'maintain', emoji: '⚖️', label: 'Maintain', protein: 80 },
   { id: 'eat_healthy', emoji: '🥗', label: 'Eat healthier', protein: 70 },
   { id: 'none', emoji: '🙂', label: 'No goal', protein: 0 },
 ];
-const BUDGETS: Array<{ id: NonNullable<CookProfile['budget']>; emoji: string; label: string }> = [
+const BUDGETS: { id: NonNullable<CookProfile['budget']>; emoji: string; label: string }[] = [
   { id: 'tight', emoji: '💸', label: 'Tight' },
   { id: 'moderate', emoji: '👛', label: 'Moderate' },
   { id: 'flexible', emoji: '✨', label: 'Flexible' },

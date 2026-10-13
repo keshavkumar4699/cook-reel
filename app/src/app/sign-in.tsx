@@ -8,7 +8,7 @@ import { TopBar } from '@/components/ui/TopBar';
 import { Txt } from '@/components/ui/Text';
 import { GUTTER, radius, useTheme } from '@/theme';
 
-const PERKS: Array<{ icon: IconName; title: string; body: string; tone: 'ai' | 'youtube' | 'accent' }> = [
+const PERKS: { icon: IconName; title: string; body: string; tone: 'ai' | 'youtube' | 'accent' }[] = [
   { icon: 'sparkles', title: 'Chef, your AI cook', body: 'Describe a craving — get a recipe for your kitchen and goals.', tone: 'ai' },
   { icon: 'logo-youtube', title: 'YouTube → step reels', body: 'Any recipe video becomes short clips you can follow by voice.', tone: 'youtube' },
   { icon: 'flash', title: 'Free credits to start', body: 'Try every AI feature on us. Your saved recipes stay on your phone.', tone: 'accent' },

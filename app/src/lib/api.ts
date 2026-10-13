@@ -50,7 +50,7 @@ export interface ApiUser {
   name: string | null;
   avatarUrl: string | null;
   sharingOptIn: boolean;
-  providers: Array<'google' | 'apple' | 'dev'>;
+  providers: ('google' | 'apple' | 'dev')[];
   createdAt: string;
 }
 
@@ -78,7 +78,7 @@ export interface Pricing {
   starterCredits: number;
   costs: { recipe: number; experiment: number; youtube: number; youtubeShort: number };
   plans: Plan[];
-  topups: Array<{ productId: string; credits: number; displayPrice: string }>;
+  topups: { productId: string; credits: number; displayPrice: string }[];
   entitlementId: string;
 }
 
@@ -128,8 +128,8 @@ export interface ExperimentRecipeInput {
   difficulty?: 'easy' | 'medium' | 'hard';
   equipment?: string[];
   tags?: string[];
-  ingredients: Array<{ name: string; quantity: number | null; unit: string; note: string | null }>;
-  steps: Array<{ title: string; instruction: string }>;
+  ingredients: { name: string; quantity: number | null; unit: string; note: string | null }[];
+  steps: { title: string; instruction: string }[];
   nutrition?: { perServing: { kcal: number; proteinG: number; carbsG: number; fatG: number; fiberG: number } };
 }
 

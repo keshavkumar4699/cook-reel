@@ -222,7 +222,7 @@ export default function RecipeDetail() {
               <Txt variant="title3" style={styles.blockTitle}>
                 You’ll need
               </Txt>
-              <View style={styles.badges}>
+              <View style={[styles.badges, { marginTop: 0 }]}>
                 {recipe.equipment.map((e) => (
                   <Badge key={e} label={e} icon="construct-outline" />
                 ))}

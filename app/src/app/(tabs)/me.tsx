@@ -82,6 +82,8 @@ export default function Me() {
     trackColor: { true: colors.primary, false: colors.borderStrong },
     thumbColor: '#FFFFFF',
     ios_backgroundColor: colors.borderStrong,
+    // react-native-web reads these instead of thumbColor/trackColor.
+    ...({ activeThumbColor: '#FFFFFF', activeTrackColor: colors.primary } as object),
   });
 
   const toggleSharing = async (sharingOptIn: boolean) => {
@@ -127,7 +129,8 @@ export default function Me() {
     profile.equipment?.length ? `${profile.equipment.length} appliances` : null,
   ]
     .filter(Boolean)
-    .join(' · ');
+    .join(' · ')
+    .replace(/^./, (c) => c.toUpperCase());
 
   return (
     <Screen>

@@ -1,4 +1,4 @@
-const FRACTIONS: Array<[number, string]> = [
+const FRACTIONS: [number, string][] = [
   [1 / 8, '⅛'],
   [1 / 4, '¼'],
   [1 / 3, '⅓'],
@@ -94,7 +94,8 @@ export function formatCurrency(amount: number, currency: string): string {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
       currency,
-      maximumFractionDigits: amount >= 100 ? 0 : 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: amount >= 10 ? 0 : 2,
     }).format(amount);
   } catch {
     return `${currency} ${Math.round(amount * 100) / 100}`;

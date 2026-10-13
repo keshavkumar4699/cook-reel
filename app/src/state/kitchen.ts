@@ -12,7 +12,7 @@ interface KitchenState {
   hydrate(): Promise<void>;
   addToPlan(entry: Omit<PlanEntry, 'id'>): void;
   removeFromPlan(id: string): void;
-  addRecipesToShopping(items: Array<{ recipe: Recipe; servings: number }>): number;
+  addRecipesToShopping(items: { recipe: Recipe; servings: number }[]): number;
   addManualItem(name: string): void;
   toggleItem(id: string): void;
   removeItem(id: string): void;
@@ -98,7 +98,7 @@ export const useKitchen = create<KitchenState>()((set, get) => ({
   },
 }));
 
-export const MEAL_SLOTS: Array<{ slot: MealSlot; label: string; emoji: string }> = [
+export const MEAL_SLOTS: { slot: MealSlot; label: string; emoji: string }[] = [
   { slot: 'breakfast', label: 'Breakfast', emoji: '🌅' },
   { slot: 'lunch', label: 'Lunch', emoji: '☀️' },
   { slot: 'dinner', label: 'Dinner', emoji: '🌙' },

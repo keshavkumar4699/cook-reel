@@ -125,6 +125,9 @@ export const type = {
 } satisfies Record<string, TextStyle>;
 export type TypeVariant = keyof typeof type;
 
+/** Removes the browser focus ring on web text inputs (our fields draw their own frame). */
+export const inputReset: TextStyle = Platform.OS === 'web' ? ({ outlineStyle: 'none' } as unknown as TextStyle) : {};
+
 export function shadow(colors: Colors, level: 1 | 2 | 3 = 1): ViewStyle {
   const presets = {
     1: { opacity: 0.06, radius: 10, y: 4, elevation: 2 },

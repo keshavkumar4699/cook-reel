@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,7 +21,7 @@ import { GUTTER, radius, useTheme } from '@/theme';
 
 type Filter = 'all' | 'cookLater' | 'youtube' | 'ai' | 'mine' | 'variations' | 'quick' | 'protein' | 'light' | 'mealprep';
 
-const FILTERS: Array<{ id: Filter; label: string; emoji?: string; test: (r: Recipe) => boolean }> = [
+const FILTERS: { id: Filter; label: string; emoji?: string; test: (r: Recipe) => boolean }[] = [
   { id: 'all', label: 'All', test: () => true },
   { id: 'cookLater', label: 'Cook later', emoji: '🔖', test: (r) => r.cookLater },
   { id: 'youtube', label: 'YouTube', emoji: '▶️', test: (r) => r.source === 'youtube' },
@@ -50,16 +50,19 @@ export default function Library() {
   const removeCollection = useLibrary((s) => s.removeCollection);
 
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<Filter>('all');
+  const [filter, setFilter] = useState<Filter>(() => (params.filter ? FROM_HOME[params.filter] : undefined) ?? 'all');
+  const [filterParam, setFilterParam] = useState(params.filter);
   const [collection, setCollection] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState('📁');
 
-  useEffect(() => {
+  if (params.filter !== filterParam) {
+    // The tab stays mounted, so a later "See all" from Home arrives as a new param.
+    setFilterParam(params.filter);
     const mapped = params.filter ? FROM_HOME[params.filter] : undefined;
     if (mapped) setFilter(mapped);
-  }, [params.filter]);
+  }
 
   const recipes = useMemo(() => Object.values(recipesMap).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), [recipesMap]);
   const collections = useMemo(() => Object.values(collectionsMap).sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [collectionsMap]);
