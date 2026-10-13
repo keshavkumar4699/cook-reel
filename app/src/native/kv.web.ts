@@ -21,4 +21,18 @@ export const kv = {
       // ignore
     }
   },
+  getItemSync: (key: string): string | null => {
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  setItemSync: (key: string, value: string) => {
+    try {
+      globalThis.localStorage?.setItem(key, value);
+    } catch {
+      // ignore
+    }
+  },
 };

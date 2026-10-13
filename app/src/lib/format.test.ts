@@ -3,7 +3,7 @@ import { formatClock, formatMinutes, formatQuantity } from './format';
 describe('formatQuantity', () => {
   it('uses fractions for spoons, cups and counted items', () => {
     expect(formatQuantity(0.5, 'tsp')).toBe('½ tsp');
-    expect(formatQuantity(1.5, 'cup')).toBe('1½ cup');
+    expect(formatQuantity(1.5, 'cup')).toBe('1½ cups');
     expect(formatQuantity(0.33, 'cup')).toBe('⅓ cup');
     expect(formatQuantity(2, '')).toBe('2');
     expect(formatQuantity(2.75, 'tbsp')).toBe('2¾ tbsp');

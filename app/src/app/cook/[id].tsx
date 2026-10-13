@@ -18,6 +18,8 @@ import { useNarrator } from '@/features/cook/useNarrator';
 import { useStepTimer, type StepTimer } from '@/features/cook/useStepTimer';
 import { useVoiceCommands, type VoiceState } from '@/features/cook/useVoiceCommands';
 import { YouTubeStage } from '@/features/cook/YouTubeStage';
+import { t } from '@/i18n';
+import { joinList } from '@/i18n/format';
 import { formatClock, formatQuantity } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { VOICE_HELP, type VoiceCommand } from '@/lib/voice';
@@ -27,16 +29,16 @@ import { toast } from '@/state/toast';
 import { GUTTER, radius, stage } from '@/theme';
 
 const VOICE_LABEL: Record<VoiceState, string> = {
-  off: 'Voice off',
-  starting: 'Starting…',
-  listening: 'Listening',
-  paused: 'Paused',
-  denied: 'Mic blocked',
-  unavailable: 'No voice',
+  off: t('cook.voiceState.off'),
+  starting: t('cook.voiceState.starting'),
+  listening: t('cook.voiceState.listening'),
+  paused: t('cook.voiceState.paused'),
+  denied: t('cook.voiceState.denied'),
+  unavailable: t('cook.voiceState.unavailable'),
 };
 
 function narrationFor(step: Step) {
-  return step.narration ?? `${step.title}. ${step.instruction}`;
+  return step.narration ?? t('speech.titleAndInstruction', { title: step.title, instruction: step.instruction });
 }
 
 function PulseDot({ active }: { active: boolean }) {
@@ -102,10 +104,10 @@ export default function Cook() {
 
   const narrator = useNarrator(settings.speechRate);
   const onTimerDone = useCallback(
-    (t: StepTimer) => {
+    (timer: StepTimer) => {
       haptics.warning();
-      narrator.speak(`Timer done. ${t.label}.`);
-      toast(`⏰ Timer done — ${t.label}`, { tone: 'success', durationMs: 5000 });
+      narrator.speak(t('speech.timerDone', { label: timer.label }));
+      toast(t('cook.timer.doneToast', { label: timer.label }), { tone: 'success', durationMs: 5000 });
     },
     [narrator],
   );
@@ -143,11 +145,15 @@ export default function Cook() {
 
   const readIngredients = useCallback(() => {
     if (!recipe) return;
-    const list = recipe.ingredients
-      .filter((i) => !i.optional)
-      .map((i) => [formatQuantity(i.quantity === null ? null : i.quantity * factor, i.unit), i.name].filter(Boolean).join(' '))
-      .join(', ');
-    narrator.speak(`You'll need: ${list}.`);
+    const list = joinList(
+      recipe.ingredients
+        .filter((i) => !i.optional)
+        .map((i) => {
+          const amount = formatQuantity(i.quantity === null ? null : i.quantity * factor, i.unit);
+          return amount ? t('speech.ingredientAmount', { amount, name: i.name }) : i.name;
+        }),
+    );
+    narrator.speak(t('speech.youNeed', { list }));
     setShowIngredients(true);
   }, [recipe, factor, narrator]);
 
@@ -161,7 +167,7 @@ export default function Cook() {
       }
       haptics.press();
       timers.start(s.id, s.title, s.durationSec);
-      toast(`Timer started · ${formatClock(s.durationSec)}`);
+      toast(t('cook.timer.started', { time: formatClock(s.durationSec) }));
     },
     [timers],
   );
@@ -188,14 +194,14 @@ export default function Cook() {
           if (step && autoNarrate) narrator.speak(narrationFor(step));
           break;
         case 'read':
-          if (step) narrator.speak(`${step.instruction}${step.tip ? ` Tip: ${step.tip}` : ''}`);
+          if (step) narrator.speak(step.tip ? t('speech.instructionWithTip', { instruction: step.instruction, tip: step.tip }) : step.instruction);
           break;
         case 'ingredients':
           readIngredients();
           break;
         case 'timer':
           if (step?.durationSec) startTimer(step);
-          else toast('This step has no timer');
+          else toast(t('cook.timer.noTimer'));
           break;
         case 'stopTimer':
           timers.cancel();
@@ -223,9 +229,9 @@ export default function Cook() {
     return (
       <View style={[styles.root, { paddingTop: insets.top + 80, alignItems: 'center' }]}>
         <Txt variant="title2" color={stage.text}>
-          Recipe not found
+          {t('cook.notFound')}
         </Txt>
-        <Button label="Close" variant="secondary" style={{ marginTop: 20 }} onPress={() => router.back()} />
+        <Button label={t('common.actions.close')} variant="secondary" style={{ marginTop: 20 }} onPress={() => router.back()} />
       </View>
     );
   }
@@ -237,7 +243,7 @@ export default function Cook() {
     markCooked(recipe.id);
     if (rating !== null) update(recipe.id, { rating });
     haptics.success();
-    toast('Nice work, chef! 🎉', { tone: 'success' });
+    toast(t('cook.done.toast'), { tone: 'success' });
     router.back();
   };
 
@@ -245,8 +251,8 @@ export default function Cook() {
     <View style={styles.root}>
       <StatusBar style="light" />
       <View style={[styles.top, { paddingTop: insets.top + 6 }]}>
-        <IconButton icon="close" label="Close cooking mode" variant="stage" onPress={() => router.back()} />
-        <View style={styles.segments} accessibilityLabel={`Step ${Math.min(index + 1, total)} of ${total}`}>
+        <IconButton icon="close" label={t('cook.top.close')} variant="stage" onPress={() => router.back()} />
+        <View style={styles.segments} accessibilityLabel={t('cook.top.stepOf', { current: Math.min(index + 1, total), total })}>
           {steps.map((s, i) => {
             const fill = i < index ? 1 : i === index ? (yt && s.clip ? clipProgress : 1) : 0;
             return (
@@ -260,7 +266,7 @@ export default function Cook() {
           onPress={() => (voice.state === 'off' || voice.state === 'denied' ? setVoiceOn(true) : setVoiceOn(false))}
           onLongPress={() => setShowHelp(true)}
           style={styles.voicePill}
-          accessibilityLabel={`Voice control: ${VOICE_LABEL[voice.state]}. Tap to toggle, long-press for commands.`}
+          accessibilityLabel={t('cook.top.voiceControl', { state: VOICE_LABEL[voice.state] })}
         >
           {voice.state === 'off' || voice.state === 'denied' || voice.state === 'unavailable' ? (
             <Icon name="mic-off-outline" size={15} color={stage.textMuted} />
@@ -271,14 +277,14 @@ export default function Cook() {
             {VOICE_LABEL[voice.state]}
           </Txt>
         </PressableScale>
-        <IconButton icon="list" label="Ingredients" variant="stage" onPress={() => setShowIngredients(true)} />
+        <IconButton icon="list" label={t('cook.top.ingredients')} variant="stage" onPress={() => setShowIngredients(true)} />
       </View>
 
       {voice.heard ? (
         <Animated.View key={voice.heard.at} entering={FadeIn.duration(120)} exiting={FadeOut.duration(300)} style={styles.heard}>
           <Icon name="mic" size={13} color={stage.accent} />
           <Txt variant="caption" color={stage.text}>
-            “{voice.heard.text.trim()}”
+            {t('cook.heard', { text: voice.heard.text.trim() })}
           </Txt>
         </Animated.View>
       ) : null}
@@ -302,20 +308,20 @@ export default function Cook() {
               <Image source={{ uri: yt.thumbnailUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />
               <View style={[StyleSheet.absoluteFill, styles.posterShade]}>
                 <Txt variant="footnote" color={stage.text} align="center">
-                  {videoError ?? (finished ? 'All steps done' : 'No clip for this step — follow the text below')}
+                  {videoError ?? (finished ? t('cook.video.allDone') : t('cook.video.noClip'))}
                 </Txt>
               </View>
             </View>
           )}
           <View style={styles.clipRow}>
             <Txt variant="caption" color={stage.textFaint}>
-              {step?.clip ? `▶ Looping ${formatClock(step.clip.startSec)}–${formatClock(step.clip.endSec)}` : yt.channel ?? 'YouTube'}
+              {step?.clip ? t('cook.video.looping', { start: formatClock(step.clip.startSec), end: formatClock(step.clip.endSec) }) : yt.channel ?? 'YouTube'}
             </Txt>
             {isShort ? (
               <View style={styles.narrationTag}>
                 <Icon name="volume-high" size={12} color={stage.ai} />
                 <Txt variant="caption" color={stage.ai}>
-                  AI narration
+                  {t('cook.video.aiNarration')}
                 </Txt>
               </View>
             ) : null}
@@ -341,19 +347,19 @@ export default function Cook() {
                   <Animated.View entering={FadeInDown.springify().damping(16)} style={{ alignItems: 'center' }}>
                     <Txt style={{ fontSize: 64, lineHeight: 76 }}>🎉</Txt>
                     <Txt variant="title1" color={stage.text} align="center">
-                      You did it!
+                      {t('cook.done.title')}
                     </Txt>
                     <Txt variant="body" color={stage.textMuted} align="center" style={{ marginTop: 6, maxWidth: 300 }}>
-                      {recipe.title} is ready. How did it turn out?
+                      {t('cook.done.subtitle', { title: recipe.title })}
                     </Txt>
                     <View style={styles.stars}>
                       {[1, 2, 3, 4, 5].map((n) => (
-                        <PressableScale key={n} haptic="select" scaleTo={0.85} onPress={() => setRating(rating === n ? null : n)} accessibilityLabel={`${n} stars`}>
+                        <PressableScale key={n} haptic="select" scaleTo={0.85} onPress={() => setRating(rating === n ? null : n)} accessibilityLabel={t('cook.done.stars', { count: n })}>
                           <Icon name={(rating ?? 0) >= n ? 'star' : 'star-outline'} size={36} color={(rating ?? 0) >= n ? stage.saffron : stage.textFaint} />
                         </PressableScale>
                       ))}
                     </View>
-                    <Button label="Finish cooking" icon="checkmark" onPress={finish} style={{ marginTop: 26, minWidth: 220 }} />
+                    <Button label={t('cook.done.finish')} icon="checkmark" onPress={finish} style={{ marginTop: 26, minWidth: 220 }} />
                   </Animated.View>
                 </View>
               ) : (
@@ -378,7 +384,7 @@ export default function Cook() {
           <Icon name={timers.timer.done ? 'alarm' : 'timer-outline'} size={18} color={timers.timer.done ? stage.primary : stage.saffron} />
           <View style={{ flex: 1 }}>
             <Txt variant="headline" color={stage.text}>
-              {timers.timer.done ? 'Time’s up!' : formatClock(timers.timer.remaining)}
+              {timers.timer.done ? t('cook.timer.timesUp') : formatClock(timers.timer.remaining)}
             </Txt>
             <Txt variant="caption" color={stage.textMuted} numberOfLines={1}>
               {timers.timer.label}
@@ -387,22 +393,22 @@ export default function Cook() {
           {!timers.timer.done ? (
             <IconButton
               icon={timers.timer.running ? 'pause' : 'play'}
-              label={timers.timer.running ? 'Pause timer' : 'Resume timer'}
+              label={timers.timer.running ? t('cook.timer.pause') : t('cook.timer.resume')}
               variant="stage"
               size={36}
               onPress={timers.timer.running ? timers.pause : timers.resume}
             />
           ) : null}
-          <IconButton icon="close" label="Cancel timer" variant="stage" size={36} onPress={timers.cancel} />
+          <IconButton icon="close" label={t('cook.timer.cancel')} variant="stage" size={36} onPress={timers.cancel} />
         </Animated.View>
       ) : null}
 
       <View style={[styles.controls, { paddingBottom: insets.bottom + 12 }]}>
-        <Control icon="chevron-up" label="Previous step" onPress={() => go(index - 1)} />
-        <Control icon="refresh" label="Replay this step" onPress={() => onCommand('repeat')} />
+        <Control icon="chevron-up" label={t('cook.controls.previous')} onPress={() => go(index - 1)} />
+        <Control icon="refresh" label={t('cook.controls.replay')} onPress={() => onCommand('repeat')} />
         <Control
           icon={playing ? 'pause' : 'play'}
-          label={playing ? 'Pause' : 'Play'}
+          label={playing ? t('cook.controls.pause') : t('cook.controls.play')}
           size={68}
           primary
           onPress={() => {
@@ -411,14 +417,18 @@ export default function Cook() {
           }}
         />
         {yt ? (
-          <Control icon={userMuted ? 'volume-mute' : 'volume-high'} label={userMuted ? 'Unmute video' : 'Mute video'} onPress={() => setUserMuted(!userMuted)} />
+          <Control icon={userMuted ? 'volume-mute' : 'volume-high'} label={userMuted ? t('cook.controls.unmute') : t('cook.controls.mute')} onPress={() => setUserMuted(!userMuted)} />
         ) : (
-          <Control icon={narrator.speaking ? 'stop' : 'volume-high'} label={narrator.speaking ? 'Stop reading' : 'Read step aloud'} onPress={() => (narrator.speaking ? narrator.stop() : onCommand('read'))} />
+          <Control
+            icon={narrator.speaking ? 'stop' : 'volume-high'}
+            label={narrator.speaking ? t('cook.controls.stopReading') : t('cook.controls.readAloud')}
+            onPress={() => (narrator.speaking ? narrator.stop() : onCommand('read'))}
+          />
         )}
-        <Control icon="chevron-down" label="Next step" onPress={() => go(index + 1)} />
+        <Control icon="chevron-down" label={t('cook.controls.next')} onPress={() => go(index + 1)} />
       </View>
 
-      <Sheet visible={showIngredients} onClose={() => setShowIngredients(false)} title="Ingredients" subtitle={`For ${servings} ${servings === 1 ? 'serving' : 'servings'}`}>
+      <Sheet visible={showIngredients} onClose={() => setShowIngredients(false)} title={t('cook.ingredients.title')} subtitle={t('cook.ingredients.forServings', { count: servings })}>
         <ScrollView contentContainerStyle={{ paddingHorizontal: GUTTER, paddingBottom: 12 }} style={{ maxHeight: 460 }}>
           {recipe.ingredients.map((ing) => (
             <View key={ing.id} style={styles.ingRow}>
@@ -431,11 +441,11 @@ export default function Cook() {
               </Txt>
             </View>
           ))}
-          <Button label="Read them to me" icon="volume-high-outline" variant="secondary" size="md" style={{ marginTop: 14 }} onPress={readIngredients} />
+          <Button label={t('cook.ingredients.readAloud')} icon="volume-high-outline" variant="secondary" size="md" style={{ marginTop: 14 }} onPress={readIngredients} />
         </ScrollView>
       </Sheet>
 
-      <Sheet visible={showHelp} onClose={() => setShowHelp(false)} title="Voice commands" subtitle="Speak normally — short phrases work best">
+      <Sheet visible={showHelp} onClose={() => setShowHelp(false)} title={t('cook.help.title')} subtitle={t('cook.help.subtitle')}>
         <View style={{ paddingHorizontal: GUTTER, gap: 12 }}>
           {VOICE_HELP.map((h) => (
             <View key={h.say} style={styles.helpRow}>
@@ -449,7 +459,7 @@ export default function Cook() {
           ))}
           {voice.state === 'denied' ? (
             <Txt variant="footnote" color="danger">
-              Microphone access is off. Enable it in Settings to use voice control.
+              {t('cook.help.micBlocked')}
             </Txt>
           ) : null}
         </View>

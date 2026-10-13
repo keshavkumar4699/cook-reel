@@ -5,6 +5,7 @@ import { radius, useTheme } from '@/theme';
 import { Icon } from './ui/Icon';
 import { PressableScale } from './ui/PressableScale';
 import { Txt } from './ui/Text';
+import { t } from '@/i18n';
 
 /** Credit balance for signed-in cooks; a sign-in prompt for guests. */
 export function CreditsPill() {
@@ -13,10 +14,10 @@ export function CreditsPill() {
   const balance = useSession((s) => s.balance);
   if (status !== 'signedIn') {
     return (
-      <PressableScale onPress={() => router.push('/sign-in')} style={[styles.pill, { backgroundColor: colors.ink }]} accessibilityLabel="Sign in">
+      <PressableScale onPress={() => router.push('/sign-in')} style={[styles.pill, { backgroundColor: colors.ink }]} accessibilityLabel={t('common.actions.signIn')}>
         <Icon name="person-circle-outline" size={16} color={colors.onInk} />
         <Txt variant="subheadStrong" color={colors.onInk}>
-          Sign in
+          {t('common.actions.signIn')}
         </Txt>
       </PressableScale>
     );
@@ -26,7 +27,7 @@ export function CreditsPill() {
     <PressableScale
       onPress={() => router.push('/pricing')}
       style={[styles.pill, { backgroundColor: low ? colors.primarySoft : colors.saffronSoft }]}
-      accessibilityLabel={`${balance?.total ?? 0} credits. Get more`}
+      accessibilityLabel={t('ui.creditsPill.a11y', { count: balance?.total ?? 0 })}
     >
       <Icon name="flash" size={14} color={low ? colors.primary : colors.saffron} />
       <Txt variant="subheadStrong" color={low ? colors.primary : colors.text}>

@@ -1,38 +1,41 @@
 import type { Ingredient, IngredientCategory, ShoppingItem } from '@/data/types';
+import { getLanguage, t } from '@/i18n';
+import { canonicalUnitCode, type UnitCode } from './units';
 
 type Dimension = 'mass' | 'volume' | 'other';
 
-const UNIT_ALIASES: Record<string, { unit: string; factor: number; dimension: Dimension }> = {
+const CONVERSIONS: Partial<Record<UnitCode, { unit: UnitCode; factor: number; dimension: Dimension }>> = {
   g: { unit: 'g', factor: 1, dimension: 'mass' },
-  gram: { unit: 'g', factor: 1, dimension: 'mass' },
-  grams: { unit: 'g', factor: 1, dimension: 'mass' },
   kg: { unit: 'g', factor: 1000, dimension: 'mass' },
   ml: { unit: 'ml', factor: 1, dimension: 'volume' },
   l: { unit: 'ml', factor: 1000, dimension: 'volume' },
-  litre: { unit: 'ml', factor: 1000, dimension: 'volume' },
-  liter: { unit: 'ml', factor: 1000, dimension: 'volume' },
 };
 
 function canonicalUnit(unit: string) {
-  const key = unit.trim().toLowerCase().replace(/\.$/, '');
-  const alias = UNIT_ALIASES[key];
-  if (alias) return alias;
-  // Singularise simple plurals so "cloves" and "clove" merge.
-  return { unit: singularize(key), factor: 1, dimension: 'other' as Dimension };
+  const code = canonicalUnitCode(unit);
+  if (code === 'count') return { unit: '', factor: 1, dimension: 'other' as Dimension };
+  if (code) return CONVERSIONS[code] ?? { unit: code, factor: 1, dimension: 'other' as Dimension };
+  // Unknown unit: merge simple plural spellings ("sachets" / "sachet") in English.
+  return { unit: singularize(unit.trim().toLowerCase()), factor: 1, dimension: 'other' as Dimension };
 }
 
-/** Light-touch English singular: "tomatoes" → "tomato", "cloves" → "clove", "glass" stays. */
+/** Light-touch English singular: "tomatoes" → "tomato", "cloves" → "clove", "glass" stays. Other languages are left alone. */
 function singularize(word: string): string {
+  if (getLanguage() !== 'en' || !/^[a-z ]+$/.test(word)) return word;
   if (word.length > 4 && word.endsWith('oes')) return word.slice(0, -2);
   if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
   return word;
 }
 
+/**
+ * Comparable form of an ingredient name in any script: lower-case, no bracketed notes or
+ * punctuation (ASCII, CJK and Arabic marks), single spaces. Letters of every language are kept.
+ */
 export function normalizeName(name: string): string {
   const cleaned = name
     .toLowerCase()
-    .replace(/\(.*?\)/g, '')
-    .replace(/[^a-z0-9\u00c0-\u024f\u0900-\u097f\s]/g, ' ')
+    .replace(/\(.*?\)|（.*?）/g, '')
+    .replace(/[!-/:-@[-`{-~\u00a1-\u00bf\u2010-\u2027\u3000-\u303f\u30fb\uff01-\uff0f\uff1a-\uff20\u060c\u061b\u061f\u066a-\u066d]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   return singularize(cleaned);
@@ -117,16 +120,20 @@ export function mergeIntoList(
   return next;
 }
 
-export const CATEGORY_LABELS: Record<IngredientCategory, { label: string; emoji: string }> = {
-  produce: { label: 'Fruit & veg', emoji: '🥬' },
-  protein: { label: 'Meat, fish & eggs', emoji: '🥚' },
-  dairy: { label: 'Dairy', emoji: '🧀' },
-  grains: { label: 'Rice, pasta & grains', emoji: '🌾' },
-  spices: { label: 'Spices & herbs', emoji: '🌶️' },
-  pantry: { label: 'Pantry', emoji: '🫙' },
-  frozen: { label: 'Frozen', emoji: '🧊' },
-  bakery: { label: 'Bakery', emoji: '🥖' },
-  other: { label: 'Other', emoji: '🛒' },
+const CATEGORY_EMOJI: Record<IngredientCategory, string> = {
+  produce: '🥬',
+  protein: '🥚',
+  dairy: '🧀',
+  grains: '🌾',
+  spices: '🌶️',
+  pantry: '🫙',
+  frozen: '🧊',
+  bakery: '🥖',
+  other: '🛒',
 };
+
+export const CATEGORY_LABELS: Record<IngredientCategory, { label: string; emoji: string }> = Object.fromEntries(
+  (Object.keys(CATEGORY_EMOJI) as IngredientCategory[]).map((category) => [category, { label: t(`common.categories.${category}`), emoji: CATEGORY_EMOJI[category] }]),
+) as Record<IngredientCategory, { label: string; emoji: string }>;
 
 export const CATEGORY_ORDER: IngredientCategory[] = ['produce', 'protein', 'dairy', 'grains', 'bakery', 'pantry', 'spices', 'frozen', 'other'];

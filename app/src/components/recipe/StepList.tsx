@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import type { Step } from '@/data/types';
+import { t } from '@/i18n';
 import { formatClock, formatDuration } from '@/lib/format';
 import { radius, useTheme } from '@/theme';
 import { Badge } from '../ui/Badge';
@@ -28,7 +29,9 @@ export function StepList({ steps }: { steps: Step[] }) {
             {step.durationSec || step.clip ? (
               <View style={styles.badges}>
                 {step.durationSec ? <Badge label={formatDuration(step.durationSec)} icon="timer-outline" tone="saffron" /> : null}
-                {step.clip ? <Badge label={`${formatClock(step.clip.startSec)}–${formatClock(step.clip.endSec)}`} icon="play" tone="primary" /> : null}
+                {step.clip ? (
+                  <Badge label={t('recipe.steps.clipRange', { start: formatClock(step.clip.startSec), end: formatClock(step.clip.endSec) })} icon="play" tone="primary" />
+                ) : null}
               </View>
             ) : null}
             {step.tip ? (
@@ -44,16 +47,16 @@ export function StepList({ steps }: { steps: Step[] }) {
                 <Icon name="checkmark-circle-outline" size={16} color={colors.accent} />
                 <Txt variant="footnote" style={{ flex: 1 }}>
                   <Txt variant="footnote" color="accent" style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
-                    Done when{' '}
+                    {t('recipe.steps.doneWhen')}{' '}
                   </Txt>
-                  {step.doneCue.charAt(0).toLowerCase() + step.doneCue.slice(1)}
+                  {step.doneCue}
                 </Txt>
               </View>
             ) : null}
             {step.glossary.map((g) => (
               <Txt key={g.term} variant="footnote" color="textMuted" style={{ marginTop: 6 }}>
                 <Txt variant="footnote" color="ai" style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
-                  {g.term}:{' '}
+                  {t('recipe.steps.glossaryTerm', { term: g.term })}{' '}
                 </Txt>
                 {g.meaning}
               </Txt>

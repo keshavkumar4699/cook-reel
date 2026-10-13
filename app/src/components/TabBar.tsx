@@ -7,12 +7,13 @@ import { CreateSheet } from './CreateSheet';
 import { Icon, type IconName } from './ui/Icon';
 import { PressableScale } from './ui/PressableScale';
 import { Txt } from './ui/Text';
+import { t } from '@/i18n';
 
 const ICONS: Record<string, { on: IconName; off: IconName; label: string }> = {
-  home: { on: 'home', off: 'home-outline', label: 'Home' },
-  library: { on: 'bookmarks', off: 'bookmarks-outline', label: 'Library' },
-  plan: { on: 'calendar', off: 'calendar-outline', label: 'Plan' },
-  me: { on: 'person-circle', off: 'person-circle-outline', label: 'Me' },
+  home: { on: 'home', off: 'home-outline', label: t('common.tabs.home') },
+  library: { on: 'bookmarks', off: 'bookmarks-outline', label: t('common.tabs.library') },
+  plan: { on: 'calendar', off: 'calendar-outline', label: t('common.tabs.plan') },
+  me: { on: 'person-circle', off: 'person-circle-outline', label: t('common.tabs.me') },
 };
 
 /** Space screens should leave at the bottom so content clears the floating bar. */
@@ -66,7 +67,7 @@ export function TabBar({ state, navigation, insets }: BottomTabBarProps) {
             <PressableScale
               haptic="press"
               scaleTo={0.9}
-              accessibilityLabel="Add a recipe"
+              accessibilityLabel={t('common.tabs.addRecipe')}
               onPress={() => setCreating(true)}
               style={[styles.fab, { backgroundColor: colors.primary }, shadow(colors, 2)]}
             >

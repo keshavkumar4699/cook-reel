@@ -9,12 +9,22 @@ const logger = createLogger(config);
 
 if (config.usingDevJwtSecret) logger.warn('JWT_SECRET not set — using an insecure development secret');
 if (!config.claude) logger.warn('ANTHROPIC_API_KEY not set — AI recipe features are disabled');
-if (!config.gemini) logger.warn('GEMINI_API_KEY not set — YouTube breakdowns and recipe memory are disabled');
+if (!config.gemini) logger.warn('GEMINI_API_KEY not set — YouTube breakdowns, recipe memory and natural voice are disabled');
+else if (!config.speech.enabled) logger.warn('TTS_ENABLED=false — natural voice is off; the app uses on-device voices');
 if (config.database.kind === 'pglite') logger.info({ dir: config.database.dir }, 'using embedded Postgres (PGlite) for development');
 
 const database = await openDatabase(config.database);
 const deps = createDeps(config, database.db, logger);
 await deps.imports.recoverInterrupted();
+
+// Drop narration clips nobody has played in 90 days: at boot, then daily.
+const pruneSpeech = () =>
+  deps.speech
+    ?.prune()
+    .then(({ clips }) => clips && logger.info({ clips }, 'pruned unused narration clips'))
+    .catch((err) => logger.warn({ err }, 'narration prune failed'));
+void pruneSpeech();
+setInterval(() => void pruneSpeech(), 24 * 60 * 60 * 1000).unref();
 
 const server = createApp(deps).listen(config.port, config.host, () => {
   logger.info({ port: config.port, model: config.claude?.model, videoModel: config.gemini?.model }, 'CookReel API ready');

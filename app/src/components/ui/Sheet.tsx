@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GUTTER, radius, useTheme } from '@/theme';
 import { IconButton } from './IconButton';
 import { Txt } from './Text';
+import { t } from '@/i18n';
 
 export interface SheetProps {
   visible: boolean;
@@ -25,7 +26,7 @@ export function Sheet({ visible, onClose, title, subtitle, children, maxHeight =
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {visible ? (
           <Animated.View entering={FadeIn.duration(180)} style={[StyleSheet.absoluteFill, { backgroundColor: colors.overlay }]}>
-            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
+            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.actions.close')} />
           </Animated.View>
         ) : null}
         {visible ? (
@@ -44,7 +45,7 @@ export function Sheet({ visible, onClose, title, subtitle, children, maxHeight =
                     </Txt>
                   ) : null}
                 </View>
-                <IconButton icon="close" label="Close" variant="soft" size={34} onPress={onClose} />
+                <IconButton icon="close" label={t('common.actions.close')} variant="soft" size={34} onPress={onClose} />
               </View>
             ) : null}
             {children}

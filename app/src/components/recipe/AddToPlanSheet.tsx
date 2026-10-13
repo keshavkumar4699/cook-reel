@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import type { MealSlot, Recipe } from '@/data/types';
+import { t } from '@/i18n';
 import { isSameDay, toDateKey, weekdayShort, addDays } from '@/lib/dates';
 import { MEAL_SLOTS, useKitchen } from '@/state/kitchen';
 import { toast } from '@/state/toast';
@@ -22,7 +23,7 @@ export function AddToPlanSheet({ recipe, visible, onClose }: { recipe: Recipe; v
   const [servings, setServings] = useState(recipe.servings);
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Add to meal plan" subtitle={recipe.title}>
+    <Sheet visible={visible} onClose={onClose} title={t('plan.addSheet.title')} subtitle={recipe.title}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.days}>
         {days.map((d) => {
           const active = isSameDay(d, day);
@@ -34,7 +35,7 @@ export function AddToPlanSheet({ recipe, visible, onClose }: { recipe: Recipe; v
               style={[styles.day, { backgroundColor: active ? colors.ink : colors.surface, borderColor: active ? colors.ink : colors.border }]}
             >
               <Txt variant="caption" color={active ? colors.onInk : 'textMuted'}>
-                {isSameDay(d, today) ? 'Today' : weekdayShort(d)}
+                {isSameDay(d, today) ? t('common.dates.today') : weekdayShort(d)}
               </Txt>
               <Txt variant="title3" color={active ? colors.onInk : 'text'}>
                 {d.getDate()}
@@ -50,15 +51,17 @@ export function AddToPlanSheet({ recipe, visible, onClose }: { recipe: Recipe; v
           ))}
         </View>
         <View style={styles.servings}>
-          <Txt variant="bodyStrong">Servings</Txt>
+          <Txt variant="bodyStrong">{t('plan.addSheet.servings')}</Txt>
           <Stepper value={servings} onChange={setServings} min={1} max={20} />
         </View>
         <Button
-          label="Add to plan"
+          label={t('plan.addSheet.add')}
           icon="calendar"
           onPress={() => {
             addToPlan({ date: toDateKey(day), slot, recipeId: recipe.id, servings });
-            toast(`Planned for ${isSameDay(day, today) ? 'today' : weekdayShort(day)} · ${slot}`, { tone: 'success' });
+            const slotLabel = MEAL_SLOTS.find((m) => m.slot === slot)?.label ?? '';
+            const message = isSameDay(day, today) ? t('plan.addSheet.plannedToday', { slot: slotLabel }) : t('plan.addSheet.plannedOn', { day: weekdayShort(day), slot: slotLabel });
+            toast(message, { tone: 'success' });
             onClose();
           }}
         />

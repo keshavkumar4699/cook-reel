@@ -23,13 +23,17 @@ import { Stepper } from '@/components/ui/Stepper';
 import { TextField } from '@/components/ui/TextField';
 import { Txt } from '@/components/ui/Text';
 import { confirm } from '@/lib/confirm';
-import { formatCurrency, formatMinutes, plural } from '@/lib/format';
+import { t } from '@/i18n';
+import { formatDecimal, joinFacts } from '@/i18n/format';
+import { Trans } from '@/i18n/Trans';
+import { formatCurrency, formatGrams, formatMinutes } from '@/lib/format';
 import { withAccount } from '@/lib/gates';
 import { haptics } from '@/lib/haptics';
 import { recipeToText, sourceLabel } from '@/lib/recipes';
 import { nutritionFor } from '@/lib/scale';
 import { useKitchen } from '@/state/kitchen';
 import { useLibrary, useRecipe } from '@/state/library';
+import { useProfile } from '@/state/profile';
 import { toast } from '@/state/toast';
 import { GUTTER, radius, shadow, useTheme } from '@/theme';
 
@@ -67,6 +71,7 @@ function MenuItem({ icon, label, onPress, danger }: { icon: IconName; label: str
 export default function RecipeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const recipe = useRecipe(id);
+  const cookCurrency = useProfile((s) => s.profile.currency);
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
   const recipesMap = useLibrary((s) => s.recipes);
@@ -103,7 +108,13 @@ export default function RecipeDetail() {
     return (
       <Screen>
         <View style={{ paddingTop: insets.top + 60 }}>
-          <EmptyState emoji="🍽️" title="Recipe not found" body="It may have been deleted." action="Back to library" onAction={() => router.replace('/library')} />
+          <EmptyState
+            emoji="🍽️"
+            title={t('recipe.notFound.title')}
+            body={t('recipe.notFound.body')}
+            action={t('recipe.notFound.action')}
+            onAction={() => router.replace('/library')}
+          />
         </View>
       </Screen>
     );
@@ -120,17 +131,22 @@ export default function RecipeDetail() {
   const addToShopping = () => {
     const added = addRecipesToShopping([{ recipe, servings }]);
     haptics.success();
-    toast(added > 0 ? `${plural(added, 'item')} added to your shopping list` : 'Shopping list updated', {
+    toast(added > 0 ? t('recipe.toasts.addedToShopping', { count: added }) : t('recipe.toasts.shoppingUpdated'), {
       tone: 'success',
-      action: { label: 'View', onPress: () => router.push({ pathname: '/plan', params: { tab: 'shopping' } }) },
+      action: { label: t('recipe.toasts.view'), onPress: () => router.push({ pathname: '/plan', params: { tab: 'shopping' } }) },
     });
   };
   const share = () => void Share.share({ message: recipeToText(recipe), title: recipe.title }).catch(() => undefined);
   const del = async () => {
-    const ok = await confirm({ title: 'Delete this recipe?', message: 'It will be removed from this phone.', confirmLabel: 'Delete', destructive: true });
+    const ok = await confirm({
+      title: t('recipe.deleteConfirm.title'),
+      message: t('recipe.deleteConfirm.message'),
+      confirmLabel: t('common.actions.delete'),
+      destructive: true,
+    });
     if (!ok) return;
     remove(recipe.id);
-    toast('Recipe deleted');
+    toast(t('recipe.toasts.deleted'));
     router.back();
   };
 
@@ -149,8 +165,7 @@ export default function RecipeDetail() {
               color={recipe.source === 'youtube' ? colors.youtube : recipe.source === 'ai' ? colors.ai : colors.textMuted}
             />
             <Txt variant="footnote" color="textMuted" numberOfLines={1}>
-              {sourceLabel(recipe)}
-              {recipe.youtube?.isShort ? ' · Short' : ''}
+              {joinFacts([sourceLabel(recipe), recipe.youtube?.isShort ? t('recipe.youtubeShort') : null])}
             </Txt>
           </View>
           <Txt variant="title1">{recipe.title}</Txt>
@@ -161,30 +176,36 @@ export default function RecipeDetail() {
           ) : null}
 
           <View style={styles.stats}>
-            <Stat icon="time-outline" value={formatMinutes(recipe.totalMinutes)} label="Total time" tint={colors.saffron} />
-            <Stat icon="flame-outline" value={per ? `${per.kcal}` : '—'} label="kcal / serving" tint={colors.primary} />
-            <Stat icon="mci:arm-flex-outline" value={per ? `${Math.round(per.proteinG)} g` : '—'} label="Protein" tint={colors.protein} />
+            <Stat icon="time-outline" value={formatMinutes(recipe.totalMinutes)} label={t('recipe.stats.totalTime')} tint={colors.saffron} />
+            <Stat icon="flame-outline" value={per ? `${per.kcal}` : '—'} label={t('recipe.stats.kcalPerServing')} tint={colors.primary} />
+            <Stat icon="mci:arm-flex-outline" value={per ? formatGrams(per.proteinG >= 10 ? Math.round(per.proteinG) : per.proteinG) : '—'} label={t('recipe.stats.protein')} tint={colors.protein} />
           </View>
 
           <View style={styles.badges}>
-            <Badge label={recipe.difficulty[0]!.toUpperCase() + recipe.difficulty.slice(1)} icon="speedometer-outline" />
+            <Badge label={t(`common.difficulty.${recipe.difficulty}`)} icon="speedometer-outline" />
             {recipe.cuisine ? <Badge label={recipe.cuisine} icon="globe-outline" /> : null}
-            {recipe.mealPrepFriendly ? <Badge label="Meal prep" icon="cube-outline" tone="accent" /> : null}
-            {recipe.estCost ? <Badge label={`${formatCurrency(recipe.estCost.perServing, recipe.estCost.currency)} / serving`} icon="wallet-outline" tone="saffron" /> : null}
-            {recipe.tags.slice(0, 3).map((t) => (
-              <Badge key={t} label={`#${t}`} />
+            {recipe.mealPrepFriendly ? <Badge label={t('recipe.badges.mealPrep')} icon="cube-outline" tone="accent" /> : null}
+            {recipe.estCost && (!cookCurrency || cookCurrency === recipe.estCost.currency) ? (
+              <Badge
+                label={t('recipe.badges.costPerServing', { price: formatCurrency(recipe.estCost.perServing, recipe.estCost.currency) })}
+                icon="wallet-outline"
+                tone="saffron"
+              />
+            ) : null}
+            {recipe.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} label={`#${tag}`} />
             ))}
           </View>
 
           {recipe.changes.length ? (
             <Card tone="ai" style={{ marginTop: 20 }}>
               <Txt variant="overline" color="ai">
-                What changed
+                {t('recipe.changes.title')}
               </Txt>
               {parent ? (
                 <PressableScale onPress={() => router.push(`/recipe/${parent.id}`)} style={{ marginTop: 4 }}>
                   <Txt variant="footnote" color="textMuted">
-                    Variation of <Txt variant="footnote" color="ai">{parent.title}</Txt>
+                    <Trans k="recipe.variationOf" values={{ title: <Txt variant="footnote" color="ai">{parent.title}</Txt> }} />
                   </Txt>
                 </PressableScale>
               ) : null}
@@ -203,9 +224,9 @@ export default function RecipeDetail() {
 
           <View style={[styles.servings, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={{ flex: 1 }}>
-              <Txt variant="headline">Servings</Txt>
+              <Txt variant="headline">{t('recipe.servings.title')}</Txt>
               <Txt variant="footnote" color="textMuted">
-                {factor === 1 ? 'As written' : `Quantities scaled ×${Math.round(factor * 100) / 100}`}
+                {factor === 1 ? t('recipe.servings.asWritten') : t('recipe.servings.scaled', { factor: formatDecimal(factor, 2) })}
               </Txt>
             </View>
             <Stepper value={servings} onChange={setServings} min={1} max={24} />
@@ -232,8 +253,8 @@ export default function RecipeDetail() {
 
           <View style={styles.block}>
             <View style={styles.blockHead}>
-              <Txt variant="title3">Ingredients</Txt>
-              <Button label="Add to list" icon="cart-outline" variant="soft" size="sm" onPress={addToShopping} />
+              <Txt variant="title3">{t('recipe.sections.ingredients')}</Txt>
+              <Button label={t('recipe.sections.addToList')} icon="cart-outline" variant="soft" size="sm" onPress={addToShopping} />
             </View>
             <Txt variant="footnote" color="textMuted" style={{ marginBottom: 10 }}>
               Tap to tick off what you already have.
@@ -243,7 +264,7 @@ export default function RecipeDetail() {
 
           <View style={styles.block}>
             <Txt variant="title3" style={styles.blockTitle}>
-              Method
+              {t('recipe.sections.method')}
             </Txt>
             <StepList steps={recipe.steps} />
           </View>
@@ -252,7 +273,7 @@ export default function RecipeDetail() {
             <Card tone="muted" style={styles.storage}>
               <Txt style={{ fontSize: 24, lineHeight: 30 }}>🧊</Txt>
               <View style={{ flex: 1 }}>
-                <Txt variant="headline">Storing leftovers</Txt>
+                <Txt variant="headline">{t('recipe.sections.storage')}</Txt>
                 <Txt variant="subhead" color="textMuted">
                   {recipe.storage}
                 </Txt>
@@ -262,21 +283,21 @@ export default function RecipeDetail() {
 
           <View style={styles.block}>
             <View style={styles.blockHead}>
-              <Txt variant="title3">Experiment</Txt>
+              <Txt variant="title3">{t('recipe.experiment.title')}</Txt>
               {variations.length ? (
                 <Txt variant="footnote" color="textMuted">
-                  {plural(variations.length, 'variation')}
+                  {t('recipe.experiment.variations', { count: variations.length })}
                 </Txt>
               ) : null}
             </View>
-            <Card tone="ai" onPress={() => withAccount(`/experiment/${recipe.id}`)} style={styles.experiment} accessibilityLabel="Create a variation">
+            <Card tone="ai" onPress={() => withAccount(`/experiment/${recipe.id}`)} style={styles.experiment} accessibilityLabel={t('recipe.experiment.create')}>
               <View style={[styles.flask, { backgroundColor: colors.ai }]}>
                 <Icon name="flask" size={20} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1 }}>
-                <Txt variant="headline">Make it your own</Txt>
+                <Txt variant="headline">{t('recipe.experiment.headline')}</Txt>
                 <Txt variant="footnote" color="textMuted">
-                  Vegan, more protein, air fryer, cheaper… Chef rewrites it.
+                  {t('recipe.experiment.body')}
                 </Txt>
               </View>
               <Icon name="chevron-forward" size={18} color="textFaint" />
@@ -284,7 +305,7 @@ export default function RecipeDetail() {
             {variations.length ? (
               <View style={{ gap: 10, marginTop: 12 }}>
                 {variations.map((v) => (
-                  <RecipeRow key={v.id} recipe={v} subtitle={v.changes[0] ?? 'Variation'} />
+                  <RecipeRow key={v.id} recipe={v} subtitle={v.changes[0] ?? t('recipe.experiment.variation')} />
                 ))}
               </View>
             ) : null}
@@ -292,11 +313,11 @@ export default function RecipeDetail() {
 
           <View style={styles.block}>
             <Txt variant="title3" style={styles.blockTitle}>
-              Your notes
+              {t('recipe.notes.title')}
             </Txt>
             <TextField
               multiline
-              placeholder="Less chilli next time, add a squeeze of lime…"
+              placeholder={t('recipe.notes.placeholder')}
               value={notes}
               onChangeText={setNotes}
               onBlur={() => notes !== recipe.notes && update(recipe.id, { notes })}
@@ -305,7 +326,7 @@ export default function RecipeDetail() {
 
           <View style={styles.block}>
             <Txt variant="title3" style={styles.blockTitle}>
-              How was it?
+              {t('recipe.rating.title')}
             </Txt>
             <View style={styles.stars}>
               {[1, 2, 3, 4, 5].map((n) => (
@@ -314,7 +335,7 @@ export default function RecipeDetail() {
                   haptic="select"
                   scaleTo={0.85}
                   onPress={() => update(recipe.id, { rating: recipe.rating === n ? null : n })}
-                  accessibilityLabel={`Rate ${n} out of 5`}
+                  accessibilityLabel={t('recipe.rating.rate', { count: n })}
                 >
                   <Icon name={(recipe.rating ?? 0) >= n ? 'star' : 'star-outline'} size={32} color={(recipe.rating ?? 0) >= n ? colors.saffron : colors.borderStrong} />
                 </PressableScale>
@@ -322,7 +343,7 @@ export default function RecipeDetail() {
             </View>
             {recipe.timesCooked ? (
               <Txt variant="footnote" color="textMuted" style={{ marginTop: 6 }}>
-                Cooked {plural(recipe.timesCooked, 'time')}
+                {t('recipe.rating.timesCooked', { count: recipe.timesCooked })}
               </Txt>
             ) : null}
           </View>
@@ -335,40 +356,40 @@ export default function RecipeDetail() {
         </Txt>
       </Animated.View>
       <View style={[styles.topBar, { paddingTop: insets.top + 6 }]}>
-        <IconButton icon="chevron-back" label="Back" variant="surface" onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} />
+        <IconButton icon="chevron-back" label={t('common.actions.back')} variant="surface" onPress={() => (router.canGoBack() ? router.back() : router.replace('/home'))} />
         <View style={styles.topRight}>
           <IconButton
             icon={recipe.cookLater ? 'bookmark' : 'bookmark-outline'}
-            label={recipe.cookLater ? 'Remove from cook later' : 'Save to cook later'}
+            label={recipe.cookLater ? t('recipe.cookLater.remove') : t('recipe.cookLater.save')}
             color={recipe.cookLater ? colors.primary : undefined}
             onPress={() => {
               const saved = toggleCookLater(recipe.id);
-              toast(saved ? 'Saved to Cook later' : 'Removed from Cook later');
+              toast(saved ? t('recipe.cookLater.saved') : t('recipe.cookLater.removed'));
             }}
           />
-          <IconButton icon="ellipsis-horizontal" label="More" onPress={() => setMenu(true)} />
+          <IconButton icon="ellipsis-horizontal" label={t('recipe.menu.more')} onPress={() => setMenu(true)} />
         </View>
       </View>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 10, backgroundColor: colors.bg, borderColor: colors.border }, !isDark ? shadow(colors, 3) : null]}>
-        <IconButton icon="flask-outline" label="Experiment" size={56} iconSize={24} variant="surface" onPress={() => withAccount(`/experiment/${recipe.id}`)} />
+        <IconButton icon="flask-outline" label={t('recipe.cta.experiment')} size={56} iconSize={24} variant="surface" onPress={() => withAccount(`/experiment/${recipe.id}`)} />
         <Button
-          label="Start cooking"
+          label={t('recipe.cta.startCooking')}
           icon="play"
           style={{ flex: 1 }}
           onPress={() => router.push({ pathname: '/cook/[id]', params: { id: recipe.id, servings: String(servings) } })}
-          meta={recipe.youtube ? (recipe.youtube.isShort ? 'Narrated clips' : 'Video clips') : 'Voice guided'}
+          meta={recipe.youtube ? (recipe.youtube.isShort ? t('recipe.cta.narratedClips') : t('recipe.cta.videoClips')) : t('recipe.cta.voiceGuided')}
         />
       </View>
 
       <Sheet visible={menu} onClose={() => setMenu(false)} title={recipe.title}>
         <View style={styles.menu}>
-          <MenuItem icon="create-outline" label="Edit recipe" onPress={closeMenu(() => router.push({ pathname: '/edit-recipe', params: { id: recipe.id } }))} />
-          <MenuItem icon="folder-open-outline" label="Add to collection" onPress={closeMenu(() => setCollecting(true))} />
-          <MenuItem icon="calendar-outline" label="Add to meal plan" onPress={closeMenu(() => setPlanning(true))} />
-          <MenuItem icon="cart-outline" label="Add ingredients to shopping list" onPress={closeMenu(addToShopping)} />
-          <MenuItem icon="share-outline" label="Share recipe" onPress={closeMenu(share)} />
-          <MenuItem icon="trash-outline" label="Delete recipe" danger onPress={closeMenu(() => void del())} />
+          <MenuItem icon="create-outline" label={t('recipe.menu.edit')} onPress={closeMenu(() => router.push({ pathname: '/edit-recipe', params: { id: recipe.id } }))} />
+          <MenuItem icon="folder-open-outline" label={t('recipe.menu.addToCollection')} onPress={closeMenu(() => setCollecting(true))} />
+          <MenuItem icon="calendar-outline" label={t('recipe.menu.addToPlan')} onPress={closeMenu(() => setPlanning(true))} />
+          <MenuItem icon="cart-outline" label={t('recipe.menu.addToShopping')} onPress={closeMenu(addToShopping)} />
+          <MenuItem icon="share-outline" label={t('recipe.menu.share')} onPress={closeMenu(share)} />
+          <MenuItem icon="trash-outline" label={t('recipe.menu.delete')} danger onPress={closeMenu(() => void del())} />
         </View>
       </Sheet>
       <AddToPlanSheet recipe={recipe} visible={planning} onClose={() => setPlanning(false)} />

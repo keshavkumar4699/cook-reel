@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GUTTER, useTheme } from '@/theme';
 import { IconButton } from './IconButton';
 import { Txt } from './Text';
+import { t } from '@/i18n';
 
 export interface TopBarProps {
   title?: string;
@@ -27,7 +28,7 @@ export function TopBar({ title, subtitle, left, right, leading = 'back', onLeadi
       <View style={styles.side}>
         {left ??
           (leading ? (
-            <IconButton icon={leading === 'close' ? 'close' : 'chevron-back'} label={leading === 'close' ? 'Close' : 'Back'} onPress={goBack} />
+            <IconButton icon={leading === 'close' ? 'close' : 'chevron-back'} label={leading === 'close' ? t('common.actions.close') : t('common.actions.back')} onPress={goBack} />
           ) : null)}
       </View>
       <View style={styles.center}>

@@ -13,7 +13,10 @@ export function healthRoutes(deps: AppDeps) {
         google: deps.config.google.clientIds.length > 0,
         apple: deps.config.apple.bundleIds.length > 0,
         billing: !!deps.revenueCat,
+        naturalVoice: !!deps.speech,
       },
+      // Clients include this in their local clip cache key, so a model or style change refreshes audio.
+      naturalVoice: deps.speech ? { version: deps.speech.version, voices: deps.speech.voiceIds, defaultVoice: deps.speech.defaultVoice } : null,
     });
   });
   return router;

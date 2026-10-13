@@ -16,10 +16,13 @@ import { Screen } from '@/components/ui/Screen';
 import { TopBar } from '@/components/ui/TopBar';
 import { Txt } from '@/components/ui/Text';
 import type { ApiRecipe } from '@/data/types';
+import { t } from '@/i18n';
+import { joinFacts, joinList } from '@/i18n/format';
 import { api, type ChatMessage } from '@/lib/api';
 import { handleApiError } from '@/lib/gates';
 import { haptics } from '@/lib/haptics';
 import { newId } from '@/lib/id';
+import { usePricing } from '@/lib/pricing';
 import { fromApiRecipe, profileForAI } from '@/lib/recipes';
 import { useLibrary } from '@/state/library';
 import { useProfile } from '@/state/profile';
@@ -37,20 +40,68 @@ interface Message {
 }
 
 const IDEAS = [
-  { emoji: '💪', text: 'Something high-protein for dinner in 20 minutes' },
-  { emoji: '🍲', text: 'A cosy dal for a rainy evening' },
-  { emoji: '💸', text: 'Cheap, filling lunches I can meal prep for the week' },
-  { emoji: '🕯️', text: 'Something impressive but easy for a date night' },
+  { emoji: '💪', text: t('builder.ideas.quickProtein') },
+  { emoji: '🍲', text: t('builder.ideas.cosyDal') },
+  { emoji: '💸', text: t('builder.ideas.mealPrep') },
+  { emoji: '🕯️', text: t('builder.ideas.dateNight') },
 ];
 
 const PANTRY_GROUPS: { label: string; items: string[] }[] = [
-  { label: 'Protein', items: ['Eggs', 'Paneer', 'Chicken', 'Tofu', 'Chickpeas', 'Dal', 'Tuna', 'Soya chunks'] },
-  { label: 'Veg', items: ['Onion', 'Tomato', 'Potato', 'Spinach', 'Capsicum', 'Carrot', 'Peas', 'Mushroom'] },
-  { label: 'Carbs', items: ['Rice', 'Bread', 'Pasta', 'Oats', 'Noodles', 'Roti / tortilla', 'Poha'] },
-  { label: 'Dairy & more', items: ['Milk', 'Curd / yogurt', 'Cheese', 'Butter', 'Peanut butter', 'Coconut milk'] },
+  {
+    label: t('builder.fridge.groups.protein'),
+    items: [
+      t('builder.fridge.items.eggs'),
+      t('builder.fridge.items.paneer'),
+      t('builder.fridge.items.chicken'),
+      t('builder.fridge.items.tofu'),
+      t('builder.fridge.items.chickpeas'),
+      t('builder.fridge.items.dal'),
+      t('builder.fridge.items.tuna'),
+      t('builder.fridge.items.soyaChunks'),
+    ],
+  },
+  {
+    label: t('builder.fridge.groups.veg'),
+    items: [
+      t('builder.fridge.items.onion'),
+      t('builder.fridge.items.tomato'),
+      t('builder.fridge.items.potato'),
+      t('builder.fridge.items.spinach'),
+      t('builder.fridge.items.capsicum'),
+      t('builder.fridge.items.carrot'),
+      t('builder.fridge.items.peas'),
+      t('builder.fridge.items.mushroom'),
+    ],
+  },
+  {
+    label: t('builder.fridge.groups.carbs'),
+    items: [
+      t('builder.fridge.items.rice'),
+      t('builder.fridge.items.bread'),
+      t('builder.fridge.items.pasta'),
+      t('builder.fridge.items.oats'),
+      t('builder.fridge.items.noodles'),
+      t('builder.fridge.items.roti'),
+      t('builder.fridge.items.poha'),
+    ],
+  },
+  {
+    label: t('builder.fridge.groups.dairy'),
+    items: [
+      t('builder.fridge.items.milk'),
+      t('builder.fridge.items.curd'),
+      t('builder.fridge.items.cheese'),
+      t('builder.fridge.items.butter'),
+      t('builder.fridge.items.peanutButter'),
+      t('builder.fridge.items.coconutMilk'),
+    ],
+  },
 ];
 
-const THINKING = ['Chef is thinking…', 'Balancing flavours and macros…', 'Checking it fits your kitchen…', 'Writing it up step by step…', 'Almost ready…'];
+const THINKING = [t('builder.thinking.start'), t('builder.thinking.balancing'), t('builder.thinking.checking'), t('builder.thinking.writing'), t('builder.thinking.almostReady')];
+
+/** Fewest pantry items fridge mode will send to Chef. */
+const MIN_PANTRY_ITEMS = 2;
 
 /** Keeps the request small: the first message plus the most recent turns. */
 function toApiMessages(messages: Message[]): ChatMessage[] {
@@ -75,6 +126,7 @@ export default function Builder() {
   const recipes = useLibrary((s) => s.recipes);
   const save = useLibrary((s) => s.save);
   const setBalance = useSession((s) => s.setBalance);
+  const pricing = usePricing();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -136,7 +188,7 @@ export default function Builder() {
     const saved = save(fromApiRecipe(message.recipe));
     setMessages((m) => m.map((x) => (x.id === message.id ? { ...x, savedId: saved.id } : x)));
     haptics.success();
-    toast('Saved to your library', { tone: 'success', action: { label: 'Open', onPress: () => router.push(`/recipe/${saved.id}`) } });
+    toast(t('builder.recipe.saved'), { tone: 'success', action: { label: t('builder.recipe.open'), onPress: () => router.push(`/recipe/${saved.id}`) } });
   };
 
   const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
@@ -144,10 +196,10 @@ export default function Builder() {
   return (
     <Screen>
       <TopBar
-        left={<IconButton icon="chevron-back" label="Back" onPress={() => router.back()} />}
+        left={<IconButton icon="chevron-back" label={t('common.actions.back')} onPress={() => router.back()} />}
         right={<CreditsPill />}
-        title={mode === 'fridge' ? 'Cook from my fridge' : 'Chef'}
-        subtitle="Free questions · 1 credit per recipe"
+        title={mode === 'fridge' ? t('builder.fridge.screenTitle') : t('common.chefName')}
+        subtitle={joinFacts([t('builder.subtitle.freeQuestions'), t('builder.subtitle.creditsPerRecipe', { count: pricing.costs.recipe })])}
       />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
         <ScrollView ref={scrollRef} contentContainerStyle={styles.thread} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -156,10 +208,10 @@ export default function Builder() {
               <View style={styles.hero}>
                 <ChefAvatar size={64} />
                 <Txt variant="title1" align="center" style={{ marginTop: 16 }}>
-                  What are you in the{'\n'}mood for?
+                  {t('builder.describe.heading')}
                 </Txt>
                 <Txt variant="body" color="textMuted" align="center" style={{ marginTop: 8 }}>
-                  Describe a dish, a craving or a situation. I’ll ask a couple of questions, then write a recipe for your kitchen.
+                  {t('builder.describe.intro')}
                 </Txt>
               </View>
               <View style={styles.ideas}>
@@ -184,10 +236,10 @@ export default function Builder() {
           {!started && mode === 'fridge' ? (
             <Animated.View entering={FadeInDown.springify().damping(18)}>
               <Txt variant="title1" style={{ marginTop: 8 }}>
-                What’s in your kitchen?
+                {t('builder.fridge.heading')}
               </Txt>
               <Txt variant="body" color="textMuted" style={{ marginTop: 6 }}>
-                Tap what you have. Salt, oil and basic spices are assumed.
+                {t('builder.fridge.intro')}
               </Txt>
               <View style={[styles.pantryBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 {pantry.length ? (
@@ -198,14 +250,14 @@ export default function Builder() {
                   </View>
                 ) : (
                   <Txt variant="subhead" color="textFaint">
-                    Nothing yet — add items below
+                    {t('builder.fridge.empty')}
                   </Txt>
                 )}
                 <View style={[styles.pantryInput, { backgroundColor: colors.surfaceMuted }]}>
                   <TextInput
                     value={pantryInput}
                     onChangeText={setPantryInput}
-                    placeholder="Add something else…"
+                    placeholder={t('builder.fridge.addPlaceholder')}
                     placeholderTextColor={colors.textFaint}
                     style={[styles.inputText, inputReset, { color: colors.text, fontFamily: fonts.medium }]}
                     onSubmitEditing={() => {
@@ -237,12 +289,16 @@ export default function Builder() {
                 </View>
               ))}
               <Button
-                label={pantry.length < 2 ? 'Pick at least 2 things' : `Find a recipe with ${pantry.length} items`}
+                label={
+                  pantry.length < MIN_PANTRY_ITEMS
+                    ? t('builder.fridge.pickAtLeast', { count: MIN_PANTRY_ITEMS })
+                    : t('builder.fridge.findRecipe', { count: pantry.length })
+                }
                 icon="sparkles"
                 variant="ai"
-                disabled={pantry.length < 2}
+                disabled={pantry.length < MIN_PANTRY_ITEMS}
                 style={{ marginTop: 26 }}
-                onPress={() => void send(`Here’s what I have: ${pantry.join(', ')}. What can I make?`)}
+                onPress={() => void send(t('builder.fridge.prompt', { list: joinList(pantry) }))}
               />
             </Animated.View>
           ) : null}
@@ -267,11 +323,11 @@ export default function Builder() {
                       actions={
                         m.savedId ? (
                           <>
-                            <Button label="Open" variant="secondary" size="md" style={{ flex: 1 }} onPress={() => router.push(`/recipe/${m.savedId}`)} />
-                            <Button label="Cook now" icon="play" size="md" style={{ flex: 1 }} onPress={() => router.push(`/cook/${m.savedId}`)} />
+                            <Button label={t('builder.recipe.open')} variant="secondary" size="md" style={{ flex: 1 }} onPress={() => router.push(`/recipe/${m.savedId}`)} />
+                            <Button label={t('builder.recipe.cookNow')} icon="play" size="md" style={{ flex: 1 }} onPress={() => router.push(`/cook/${m.savedId}`)} />
                           </>
                         ) : (
-                          <Button label="Save to library" icon="bookmark" size="md" style={{ flex: 1 }} onPress={() => saveRecipe(m)} />
+                          <Button label={t('builder.recipe.save')} icon="bookmark" size="md" style={{ flex: 1 }} onPress={() => saveRecipe(m)} />
                         )
                       }
                     />
@@ -298,7 +354,7 @@ export default function Builder() {
           ) : null}
 
           {failed && !loading ? (
-            <Button label="Try again" variant="secondary" icon="refresh" size="md" style={{ alignSelf: 'center' }} onPress={() => void request(messages)} />
+            <Button label={t('common.actions.retry')} variant="secondary" icon="refresh" size="md" style={{ alignSelf: 'center' }} onPress={() => void request(messages)} />
           ) : null}
         </ScrollView>
 
@@ -308,15 +364,15 @@ export default function Builder() {
               <TextInput
                 value={input}
                 onChangeText={setInput}
-                placeholder={started ? 'Reply to Chef…' : 'e.g. paneer, spicy, 20 minutes'}
+                placeholder={started ? t('builder.composer.replyPlaceholder') : t('builder.composer.startPlaceholder')}
                 placeholderTextColor={colors.textFaint}
                 multiline
                 numberOfLines={Platform.OS === 'web' ? 1 : undefined}
                 style={[styles.inputText, inputReset, { color: colors.text, fontFamily: fonts.medium, maxHeight: 110 }]}
                 editable={!loading}
-                accessibilityLabel="Message Chef"
+                accessibilityLabel={t('builder.composer.label')}
               />
-              <IconButton icon="arrow-up" label="Send" variant="primary" size={38} iconSize={19} disabled={!input.trim() || loading} onPress={() => void send(input)} />
+              <IconButton icon="arrow-up" label={t('builder.composer.send')} variant="primary" size={38} iconSize={19} disabled={!input.trim() || loading} onPress={() => void send(input)} />
             </View>
           </View>
         ) : null}

@@ -14,6 +14,7 @@ import type { BuilderTurn, BuilderTurnInput, ExperimentResult, RecipeAI, VideoRe
 import type { Embedder, VideoAnalyzer, VideoBreakdown } from '../src/services/gemini.js';
 import { createImportService } from '../src/services/imports.js';
 import { createKnowledgeBase } from '../src/services/knowledge.js';
+import { createSpeechService, type SpeechSettings, type SpeechSynthesizer } from '../src/services/speech.js';
 
 export const GOOGLE_CLIENT_ID = 'test-web-client.apps.googleusercontent.com';
 export const APPLE_BUNDLE_ID = 'com.cookreel.app';
@@ -194,6 +195,51 @@ export class FakeRevenueCat implements RevenueCatClient {
   }
 }
 
+/**
+ * A WAV file of speech-like tone, shaped like Gemini 3.8 TTS output: 16-bit mono PCM followed by a
+ * trailing metadata chunk that must never be played.
+ */
+export function fakeWav(ms: number, options: { sampleRate?: number; trailing?: boolean } = {}): Buffer {
+  const sampleRate = options.sampleRate ?? 24_000;
+  const frames = Math.round((ms / 1000) * sampleRate);
+  const pcm = Buffer.alloc(frames * 2);
+  for (let i = 0; i < frames; i++) pcm.writeInt16LE(Math.round(Math.sin((i / sampleRate) * 2 * Math.PI * 220) * 6000), i * 2);
+  const fmt = Buffer.alloc(24);
+  fmt.write('fmt ', 0, 'ascii');
+  fmt.writeUInt32LE(16, 4);
+  fmt.writeUInt16LE(1, 8); // PCM
+  fmt.writeUInt16LE(1, 10); // mono
+  fmt.writeUInt32LE(sampleRate, 12);
+  fmt.writeUInt32LE(sampleRate * 2, 16);
+  fmt.writeUInt16LE(2, 20);
+  fmt.writeUInt16LE(16, 22);
+  const dataHeader = Buffer.alloc(8);
+  dataHeader.write('data', 0, 'ascii');
+  dataHeader.writeUInt32LE(pcm.length, 4);
+  const trailer = options.trailing === false ? Buffer.alloc(0) : Buffer.concat([Buffer.from('c2pa', 'ascii'), Buffer.from([16, 0, 0, 0]), Buffer.alloc(16, 0x7f)]);
+  const body = Buffer.concat([Buffer.from('WAVE', 'ascii'), fmt, dataHeader, pcm, trailer]);
+  const riff = Buffer.alloc(8);
+  riff.write('RIFF', 0, 'ascii');
+  riff.writeUInt32LE(body.length, 4);
+  return Buffer.concat([riff, body]);
+}
+
+/** Stand-in for Gemini TTS: records every call; returns audio sized to the text unless a queued result says otherwise. */
+export class FakeSpeech implements SpeechSynthesizer {
+  readonly model = 'fake-tts';
+  calls: { text: string; language: string; voice: string; style: string | null }[] = [];
+  queue: Array<{ data: Buffer; mimeType: string } | Error> = [];
+  delayMs = 0;
+  async synthesize(input: { text: string; language: string; voice: string; style: string | null }) {
+    this.calls.push(input);
+    if (this.delayMs) await new Promise((resolve) => setTimeout(resolve, this.delayMs));
+    const next = this.queue.shift();
+    if (next instanceof Error) throw next;
+    if (next) return next;
+    return { data: fakeWav(Math.max(900, input.text.length * 70)), mimeType: 'audio/wav' };
+  }
+}
+
 async function keyPair(alg: 'RS256' | 'ES256', kid: string) {
   const { publicKey, privateKey } = await generateKeyPair(alg);
   const jwk: JWK = { ...(await exportJWK(publicKey)), kid, alg, use: 'sig' };
@@ -207,13 +253,16 @@ export interface TestContext {
   ai: FakeRecipeAI;
   analyzer: FakeAnalyzer;
   revenueCat: FakeRevenueCat;
+  speech: FakeSpeech;
   oembed: { result: OEmbedResult };
   googleToken(claims?: Record<string, unknown>, options?: { audience?: string; expiresIn?: string }): Promise<string>;
   appleToken(claims?: Record<string, unknown>): Promise<string>;
   close(): Promise<void>;
 }
 
-export async function createTestContext(options: { pricing?: Pricing; allowDevLogin?: boolean } = {}): Promise<TestContext> {
+export async function createTestContext(
+  options: { pricing?: Pricing; allowDevLogin?: boolean; speech?: Partial<SpeechSettings> | false } = {},
+): Promise<TestContext> {
   const config = loadConfig({
     NODE_ENV: 'test',
     GOOGLE_CLIENT_IDS: GOOGLE_CLIENT_ID,
@@ -231,6 +280,7 @@ export async function createTestContext(options: { pricing?: Pricing; allowDevLo
   const ai = new FakeRecipeAI();
   const analyzer = new FakeAnalyzer();
   const revenueCat = new FakeRevenueCat();
+  const speech = new FakeSpeech();
   const oembed: { result: OEmbedResult } = {
     result: { ok: true, meta: { title: 'Egg Bhurji in 60s #shorts', channel: 'Chef Test', thumbnailUrl: 'https://i.ytimg.com/vi/x/hqdefault.jpg' } },
   };
@@ -265,6 +315,22 @@ export async function createTestContext(options: { pricing?: Pricing; allowDevLo
       concurrency: 2,
     }),
     revenueCat,
+    speech:
+      options.speech === false
+        ? null
+        : createSpeechService({
+            db: database.db,
+            synthesizer: speech,
+            settings: {
+              voices: { warm: 'Sulafat', friendly: 'Achird' },
+              userDailySeconds: 900,
+              globalDailySeconds: 50_000,
+              cacheVersion: '1',
+              style: true,
+              ...options.speech,
+            },
+            logger,
+          }),
   };
 
   return {
@@ -274,6 +340,7 @@ export async function createTestContext(options: { pricing?: Pricing; allowDevLo
     ai,
     analyzer,
     revenueCat,
+    speech,
     oembed,
     async googleToken(claims = {}, opts = {}) {
       return new SignJWT({ email: 'cook@example.com', email_verified: true, name: 'Test Cook', ...claims })

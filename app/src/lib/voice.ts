@@ -1,3 +1,5 @@
+import { t } from '@/i18n';
+
 export type VoiceCommand =
   | 'next'
   | 'previous'
@@ -59,13 +61,13 @@ export function parseCommand(transcript: string): VoiceCommand | null {
 }
 
 export const VOICE_HELP: { say: string; does: string }[] = [
-  { say: '“Next” · “Back”', does: 'Move between steps' },
-  { say: '“Stop” · “Play”', does: 'Pause or resume the clip' },
-  { say: '“Repeat”', does: 'Replay this step from the start' },
-  { say: '“Read”', does: 'Read the step out loud' },
-  { say: '“Start timer”', does: 'Start this step’s timer' },
-  { say: '“Ingredients”', does: 'Hear what you need' },
-  { say: '“Hey Chef, …”', does: 'Use for longer phrases' },
+  { say: t('voice.help.move.say'), does: t('voice.help.move.does') },
+  { say: t('voice.help.playPause.say'), does: t('voice.help.playPause.does') },
+  { say: t('voice.help.repeat.say'), does: t('voice.help.repeat.does') },
+  { say: t('voice.help.read.say'), does: t('voice.help.read.does') },
+  { say: t('voice.help.timer.say'), does: t('voice.help.timer.does') },
+  { say: t('voice.help.ingredients.say'), does: t('voice.help.ingredients.does') },
+  { say: t('voice.help.wake.say'), does: t('voice.help.wake.does') },
 ];
 
 /**

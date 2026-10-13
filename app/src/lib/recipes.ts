@@ -1,5 +1,8 @@
 import type { ApiRecipe, CookProfile, Recipe } from '@/data/types';
+import { stripBidi, t } from '@/i18n';
+import { joinFacts } from '@/i18n/format';
 import type { ExperimentRecipeInput } from '@/lib/api';
+import { formatMinutes, formatQuantity } from '@/lib/format';
 import { newId } from '@/lib/id';
 
 /** Turns an API recipe into a library entry with its own local ID. */
@@ -88,10 +91,10 @@ export function hashIndex(seed: string, modulo: number): number {
 }
 
 export function sourceLabel(recipe: Recipe): string {
-  if (recipe.starter) return 'CookReel Kitchen';
-  if (recipe.source === 'youtube') return recipe.youtube?.channel ? recipe.youtube.channel : 'YouTube';
-  if (recipe.source === 'ai') return recipe.parentId ? 'Your variation' : 'Made with Chef';
-  return 'Your recipe';
+  if (recipe.starter) return t('common.sources.kitchen');
+  if (recipe.source === 'youtube') return recipe.youtube?.channel ? recipe.youtube.channel : t('common.sources.youtube');
+  if (recipe.source === 'ai') return recipe.parentId ? t('common.sources.variation') : t('common.sources.chef');
+  return t('common.sources.own');
 }
 
 /**
@@ -122,19 +125,24 @@ export function profileForAI(profile: CookProfile, recipes: Recipe[]): CookProfi
 
 /** Plain-text version for the share sheet. */
 export function recipeToText(recipe: Recipe): string {
+  const facts = joinFacts([
+    t('common.share.serves', { count: recipe.servings }),
+    formatMinutes(recipe.totalMinutes),
+    recipe.nutrition ? t('common.share.kcalPerServing', { kcal: recipe.nutrition.perServing.kcal }) : null,
+  ]);
   const lines = [
     `${recipe.emoji} ${recipe.title}`,
     recipe.description,
     '',
-    `Serves ${recipe.servings} · ${recipe.totalMinutes} min${recipe.nutrition ? ` · ${recipe.nutrition.perServing.kcal} kcal per serving` : ''}`,
+    facts,
     '',
-    'Ingredients',
-    ...recipe.ingredients.map((i) => `• ${[i.quantity ?? '', i.unit, i.name].filter((p) => p !== '').join(' ')}${i.note ? ` (${i.note})` : ''}`),
+    t('common.share.ingredients'),
+    ...recipe.ingredients.map((i) => `• ${[formatQuantity(i.quantity, i.unit), i.name].filter(Boolean).join(' ')}${i.note ? ` (${i.note})` : ''}`),
     '',
-    'Steps',
+    t('common.share.steps'),
     ...recipe.steps.map((s, n) => `${n + 1}. ${s.instruction}`),
   ];
-  if (recipe.youtube) lines.push('', `Video: ${recipe.youtube.url}`);
-  lines.push('', 'Shared from CookReel');
-  return lines.filter((l, i, all) => !(l === '' && all[i - 1] === '')).join('\n');
+  if (recipe.youtube) lines.push('', t('common.share.video', { url: recipe.youtube.url }));
+  lines.push('', t('common.share.sharedFrom'));
+  return stripBidi(lines.filter((l, i, all) => !(l === '' && all[i - 1] === '')).join('\n'));
 }

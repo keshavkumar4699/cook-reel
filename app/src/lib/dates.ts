@@ -1,3 +1,5 @@
+import { t, type MessageKey } from '@/i18n';
+
 /** Local calendar helpers for the meal planner (dates are YYYY-MM-DD in the device's time zone). */
 
 export function toDateKey(date: Date): string {
@@ -30,16 +32,31 @@ export function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+const MONTH_KEYS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
 
-export const weekdayShort = (date: Date) => WEEKDAYS[date.getDay()]!;
-export const monthShort = (date: Date) => MONTHS[date.getMonth()]!;
+export const weekdayShort = (date: Date) => t(`common.dates.weekdaysShort.${WEEKDAY_KEYS[date.getDay()]!}` as MessageKey);
+export const monthShort = (date: Date) => t(`common.dates.monthsShort.${MONTH_KEYS[date.getMonth()]!}` as MessageKey);
+
+/** "Tue 13" for the planner's day strip. */
+export const weekdayDay = (date: Date) => t('common.dates.weekdayDay', { weekday: weekdayShort(date), day: String(date.getDate()) });
+
+/** "12 Oct" */
+export const formatDayMonth = (date: Date) => t('common.dates.dayMonth', { day: String(date.getDate()), month: monthShort(date) });
+
+/** "12 Oct 2026" */
+export const formatDate = (date: Date) =>
+  t('common.dates.dayMonthYear', { day: String(date.getDate()), month: monthShort(date), year: String(date.getFullYear()) });
 
 export function weekLabel(days: Date[]): string {
   const first = days[0]!;
   const last = days[days.length - 1]!;
   return first.getMonth() === last.getMonth()
-    ? `${first.getDate()}–${last.getDate()} ${monthShort(last)}`
-    : `${first.getDate()} ${monthShort(first)} – ${last.getDate()} ${monthShort(last)}`;
+    ? t('common.dates.weekRangeSameMonth', { start: String(first.getDate()), end: String(last.getDate()), month: monthShort(last) })
+    : t('common.dates.weekRangeCrossMonth', {
+        start: String(first.getDate()),
+        startMonth: monthShort(first),
+        end: String(last.getDate()),
+        endMonth: monthShort(last),
+      });
 }

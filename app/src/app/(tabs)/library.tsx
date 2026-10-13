@@ -13,7 +13,9 @@ import { Sheet } from '@/components/ui/Sheet';
 import { TextField } from '@/components/ui/TextField';
 import { Txt } from '@/components/ui/Text';
 import type { Recipe } from '@/data/types';
-import { plural } from '@/lib/format';
+import { t } from '@/i18n';
+import { formatInteger } from '@/i18n/format';
+import { formatMinutes } from '@/lib/format';
 import { isHighProtein, isLight, isQuick } from '@/lib/recipes';
 import { useTabBarSpace } from '@/lib/useBottomSpace';
 import { useLibrary } from '@/state/library';
@@ -22,16 +24,16 @@ import { GUTTER, radius, useTheme } from '@/theme';
 type Filter = 'all' | 'cookLater' | 'youtube' | 'ai' | 'mine' | 'variations' | 'quick' | 'protein' | 'light' | 'mealprep';
 
 const FILTERS: { id: Filter; label: string; emoji?: string; test: (r: Recipe) => boolean }[] = [
-  { id: 'all', label: 'All', test: () => true },
-  { id: 'cookLater', label: 'Cook later', emoji: '🔖', test: (r) => r.cookLater },
-  { id: 'youtube', label: 'YouTube', emoji: '▶️', test: (r) => r.source === 'youtube' },
-  { id: 'ai', label: 'Chef', emoji: '✨', test: (r) => r.source === 'ai' },
-  { id: 'mine', label: 'Mine', emoji: '✍️', test: (r) => r.source === 'manual' && !r.starter },
-  { id: 'variations', label: 'Variations', emoji: '🧪', test: (r) => !!r.parentId },
-  { id: 'quick', label: '≤ 20 min', emoji: '⚡', test: isQuick },
-  { id: 'protein', label: 'High protein', emoji: '💪', test: isHighProtein },
-  { id: 'light', label: 'Under 500 kcal', emoji: '🥗', test: isLight },
-  { id: 'mealprep', label: 'Meal prep', emoji: '🥡', test: (r) => r.mealPrepFriendly },
+  { id: 'all', label: t('library.filters.all'), test: () => true },
+  { id: 'cookLater', label: t('library.filters.cookLater'), emoji: '🔖', test: (r) => r.cookLater },
+  { id: 'youtube', label: t('common.sources.youtube'), emoji: '▶️', test: (r) => r.source === 'youtube' },
+  { id: 'ai', label: t('common.chefName'), emoji: '✨', test: (r) => r.source === 'ai' },
+  { id: 'mine', label: t('library.filters.mine'), emoji: '✍️', test: (r) => r.source === 'manual' && !r.starter },
+  { id: 'variations', label: t('library.filters.variations'), emoji: '🧪', test: (r) => !!r.parentId },
+  { id: 'quick', label: t('library.filters.quick', { duration: formatMinutes(20) }), emoji: '⚡', test: isQuick },
+  { id: 'protein', label: t('library.filters.protein'), emoji: '💪', test: isHighProtein },
+  { id: 'light', label: t('library.filters.light', { kcal: formatInteger(500) }), emoji: '🥗', test: isLight },
+  { id: 'mealprep', label: t('library.filters.mealPrep'), emoji: '🥡', test: (r) => r.mealPrepFriendly },
 ];
 
 const COLLECTION_EMOJI = ['📁', '🌶️', '🥗', '🍰', '🎉', '🍱', '🌙', '☀️', '👨‍👩‍👧', '💪'];
@@ -75,7 +77,7 @@ export default function Library() {
         (!collection || r.collections.includes(collection)) &&
         (!q ||
           r.title.toLowerCase().includes(q) ||
-          r.tags.some((t) => t.includes(q)) ||
+          r.tags.some((tag) => tag.includes(q)) ||
           (r.cuisine ?? '').toLowerCase().includes(q) ||
           r.ingredients.some((i) => i.name.toLowerCase().includes(q))),
     );
@@ -87,22 +89,22 @@ export default function Library() {
     <View>
       <View style={[styles.titleRow, { paddingTop: insets.top + 8 }]}>
         <View style={{ flex: 1 }}>
-          <Txt variant="title1">Library</Txt>
+          <Txt variant="title1">{t('common.tabs.library')}</Txt>
           <Txt variant="subhead" color="textMuted">
-            {plural(recipes.length, 'recipe')} saved on this phone
+            {t('library.subtitle', { count: recipes.length })}
           </Txt>
         </View>
-        <IconButton icon="add" label="New recipe" onPress={() => router.push('/edit-recipe')} />
+        <IconButton icon="add" label={t('library.newRecipe')} onPress={() => router.push('/edit-recipe')} />
       </View>
       <View style={styles.gutter}>
         <TextField
           icon="search"
-          placeholder="Search recipes, ingredients, tags"
+          placeholder={t('library.search.placeholder')}
           value={query}
           onChangeText={setQuery}
           returnKeyType="search"
           autoCorrect={false}
-          trailing={query ? <IconButton icon="close-circle" label="Clear search" variant="ghost" size={28} onPress={() => setQuery('')} /> : null}
+          trailing={query ? <IconButton icon="close-circle" label={t('library.search.clear')} variant="ghost" size={28} onPress={() => setQuery('')} /> : null}
         />
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
@@ -111,7 +113,7 @@ export default function Library() {
         ))}
       </ScrollView>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.chips, { paddingTop: 0 }]}>
-        <Chip label="New collection" icon="add" size="sm" tone="primary" onPress={() => setCreating(true)} />
+        <Chip label={t('library.collections.new')} icon="add" size="sm" tone="primary" onPress={() => setCreating(true)} />
         {collections.map((c) => (
           <Chip
             key={c.id}
@@ -131,7 +133,7 @@ export default function Library() {
             {collectionsMap[collection]?.emoji} {collectionsMap[collection]?.name}
           </Txt>
           <Button
-            label="Delete collection"
+            label={t('library.collections.delete')}
             variant="ghost"
             size="sm"
             icon="trash-outline"
@@ -160,29 +162,29 @@ export default function Library() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           query || filter !== 'all' || collection ? (
-            <EmptyState emoji="🔍" title="Nothing matches" body="Try another search or filter." />
+            <EmptyState emoji="🔍" title={t('library.noResults.title')} body={t('library.noResults.body')} />
           ) : (
             <EmptyState
               emoji="📚"
-              title="Your cookbook starts here"
-              body="Save recipes from YouTube, create them with Chef, or write your own."
-              action="Add a recipe"
+              title={t('library.emptyLibrary.title')}
+              body={t('library.emptyLibrary.body')}
+              action={t('library.emptyLibrary.action')}
               onAction={() => router.push('/edit-recipe')}
             />
           )
         }
       />
 
-      <Sheet visible={creating} onClose={() => setCreating(false)} title="New collection" subtitle="Group recipes your way — “Weekend”, “Kids”, “Festive”…">
+      <Sheet visible={creating} onClose={() => setCreating(false)} title={t('library.newCollection.title')} subtitle={t('library.newCollection.subtitle')}>
         <View style={[styles.gutter, { gap: 16 }]}>
-          <TextField placeholder="Collection name" value={newName} onChangeText={setNewName} autoFocus maxLength={40} />
+          <TextField placeholder={t('library.newCollection.namePlaceholder')} value={newName} onChangeText={setNewName} autoFocus maxLength={40} />
           <View style={styles.emojiRow}>
             {COLLECTION_EMOJI.map((e) => (
               <Chip key={e} label={e} selected={newEmoji === e} onPress={() => setNewEmoji(e)} style={{ paddingHorizontal: 10 }} />
             ))}
           </View>
           <Button
-            label="Create collection"
+            label={t('library.newCollection.create')}
             disabled={!newName.trim()}
             onPress={() => {
               const created = addCollection(newName, newEmoji);
@@ -194,7 +196,7 @@ export default function Library() {
           <View style={[styles.hint, { backgroundColor: colors.surfaceMuted }]}>
             <Icon name="information-circle-outline" size={16} color="textMuted" />
             <Txt variant="footnote" color="textMuted" style={{ flex: 1 }}>
-              Add recipes to it from any recipe’s ••• menu.
+              {t('library.newCollection.hint')}
             </Txt>
           </View>
         </View>

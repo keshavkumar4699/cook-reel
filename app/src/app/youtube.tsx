@@ -17,8 +17,10 @@ import { TextField } from '@/components/ui/TextField';
 import { TopBar } from '@/components/ui/TopBar';
 import { Txt } from '@/components/ui/Text';
 import type { ApiRecipe } from '@/data/types';
+import { t } from '@/i18n';
 import { api, ApiError, type ImportStatus } from '@/lib/api';
-import { formatClock, plural } from '@/lib/format';
+import { importErrorMessage, LocalizedError } from '@/lib/errors';
+import { formatClock } from '@/lib/format';
 import { handleApiError } from '@/lib/gates';
 import { haptics } from '@/lib/haptics';
 import { usePricing } from '@/lib/pricing';
@@ -34,9 +36,9 @@ import { GUTTER, radius, useTheme } from '@/theme';
 type Phase = { kind: 'idle' } | { kind: 'working'; status: ImportStatus } | { kind: 'done'; recipe: ApiRecipe; cached: boolean } | { kind: 'failed'; message: string };
 
 const STAGES: { status: ImportStatus[]; icon: IconName; title: string; body: string }[] = [
-  { status: ['queued', 'watching'], icon: 'eye-outline', title: 'Watching the video', body: 'Spotting every ingredient and action' },
-  { status: ['writing'], icon: 'create-outline', title: 'Writing your steps', body: 'Timing a clip for each step, adding beginner tips' },
-  { status: ['done'], icon: 'checkmark-done', title: 'Nutrition & narration', body: 'Calories, macros and read-aloud lines' },
+  { status: ['queued', 'watching'], icon: 'eye-outline', title: t('youtube.stages.watching.title'), body: t('youtube.stages.watching.body') },
+  { status: ['writing'], icon: 'create-outline', title: t('youtube.stages.writing.title'), body: t('youtube.stages.writing.body') },
+  { status: ['done'], icon: 'checkmark-done', title: t('youtube.stages.nutrition.title'), body: t('youtube.stages.nutrition.body') },
 ];
 
 const stageIndex = (status: ImportStatus) => (status === 'done' ? 3 : status === 'writing' ? 1 : 0);
@@ -112,7 +114,7 @@ export default function YouTubeImport() {
         if (job.status === 'failed') {
           haptics.error();
           setActive(null);
-          setPhase({ kind: 'failed', message: job.error ?? 'We couldn’t break this video down.' });
+          setPhase({ kind: 'failed', message: importErrorMessage(job.errorCode) });
           return;
         }
         setPhase({ kind: 'working', status: job.status });
@@ -120,7 +122,7 @@ export default function YouTubeImport() {
       } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
           setActive(null);
-          setPhase({ kind: 'failed', message: 'This import expired. Please start it again.' });
+          setPhase({ kind: 'failed', message: t('youtube.errors.expired') });
           return;
         }
         // Transient network trouble: back off and keep trying.
@@ -140,7 +142,7 @@ export default function YouTubeImport() {
         setPhase({ kind: 'done', recipe: res.recipe, cached: res.cached });
         return;
       }
-      if (!res.id) throw new Error('The import did not start. Please try again.');
+      if (!res.id) throw new LocalizedError(t('youtube.errors.notStarted'));
       void useSession.getState().refresh();
       setActive({ jobId: res.id, url: video.url, isShort: video.isShort, startedAt: Date.now() });
       setPhase({ kind: 'working', status: res.status });
@@ -155,7 +157,7 @@ export default function YouTubeImport() {
   const keep = (recipe: ApiRecipe, cookNow: boolean) => {
     const saved = save(fromApiRecipe(recipe, { cookLater: !cookNow }));
     haptics.success();
-    toast(cookNow ? 'Saved — let’s cook!' : 'Saved to Cook later', { tone: 'success' });
+    toast(cookNow ? t('youtube.done.savedCookNow') : t('youtube.done.savedForLater'), { tone: 'success' });
     if (cookNow) router.replace(`/cook/${saved.id}`);
     else router.replace(`/recipe/${saved.id}`);
   };
@@ -164,25 +166,25 @@ export default function YouTubeImport() {
     const text = await Clipboard.getStringAsync().catch(() => '');
     const found = findYouTubeUrl(text);
     if (found) setUrl(found.isShort ? `https://youtube.com/shorts/${found.videoId}` : found.url);
-    else toast('No YouTube link on your clipboard');
+    else toast(t('youtube.intro.noLinkOnClipboard'));
   };
 
   return (
     <Screen>
-      <TopBar title="From YouTube" right={<CreditsPill />} leading="close" />
+      <TopBar title={t('youtube.title')} right={<CreditsPill />} leading="close" />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
           {phase.kind === 'idle' ? (
             <Animated.View entering={FadeInDown.springify().damping(18)}>
-              <Txt variant="title1">Turn a video into{'\n'}step-by-step reels</Txt>
+              <Txt variant="title1">{t('youtube.intro.title')}</Txt>
               <Txt variant="body" color="textMuted" style={{ marginTop: 8 }}>
-                Paste any recipe video or Short. Chef watches it, writes the steps and loops the exact clip for each one — Shorts get a voice that explains every step.
+                {t('youtube.intro.body')}
               </Txt>
 
               <TextField
                 containerStyle={{ marginTop: 22 }}
                 icon="link"
-                placeholder="YouTube or Shorts link"
+                placeholder={t('youtube.intro.placeholder')}
                 value={url}
                 onChangeText={setUrl}
                 autoCapitalize="none"
@@ -190,8 +192,8 @@ export default function YouTubeImport() {
                 keyboardType="url"
                 returnKeyType="go"
                 onSubmitEditing={() => void start()}
-                error={url.trim() && !video ? 'That doesn’t look like a YouTube link' : null}
-                trailing={!url ? <Button label="Paste" size="sm" variant="soft" onPress={() => void paste()} /> : null}
+                error={url.trim() && !video ? t('youtube.intro.invalidLink') : null}
+                trailing={!url ? <Button label={t('youtube.intro.paste')} size="sm" variant="soft" onPress={() => void paste()} /> : null}
               />
 
               {video ? (
@@ -205,11 +207,11 @@ export default function YouTubeImport() {
                     />
                     <View style={{ padding: 14, gap: 6 }}>
                       <View style={{ flexDirection: 'row', gap: 6 }}>
-                        <Badge label={video.isShort ? 'Short' : 'Video'} icon="logo-youtube" tone="youtube" />
-                        <Badge label={`Uses ${plural(cost, 'credit')}`} icon="flash" tone="saffron" />
+                        <Badge label={video.isShort ? t('youtube.preview.short') : t('youtube.preview.video')} icon="logo-youtube" tone="youtube" />
+                        <Badge label={t('youtube.preview.usesCredits', { count: cost })} icon="flash" tone="saffron" />
                       </View>
                       <Txt variant="headline" numberOfLines={2}>
-                        {preview?.title ?? 'Loading video details…'}
+                        {preview?.title ?? t('youtube.preview.loading')}
                       </Txt>
                       {preview?.channel ? (
                         <Txt variant="footnote" color="textMuted">
@@ -218,17 +220,25 @@ export default function YouTubeImport() {
                       ) : null}
                     </View>
                   </Card>
-                  <Button label="Break it down" icon="sparkles" variant="ai" loading={starting} style={{ marginTop: 16 }} onPress={() => void start()} meta={plural(cost, 'credit')} />
+                  <Button
+                    label={t('youtube.preview.breakItDown')}
+                    icon="sparkles"
+                    variant="ai"
+                    loading={starting}
+                    style={{ marginTop: 16 }}
+                    onPress={() => void start()}
+                    meta={t('common.counts.credits', { count: cost })}
+                  />
                   <Txt variant="caption" color="textFaint" align="center" style={{ marginTop: 10 }}>
-                    Not a recipe video? You won’t be charged.
+                    {t('youtube.preview.notCharged')}
                   </Txt>
                 </Animated.View>
               ) : (
                 <View style={styles.how}>
                   {[
-                    { icon: 'link-outline' as IconName, text: 'Copy the link from the YouTube app (Share → Copy link)' },
-                    { icon: 'sparkles-outline' as IconName, text: 'Chef breaks it into steps with clips, tips and nutrition' },
-                    { icon: 'mic-outline' as IconName, text: 'Cook along hands-free: say “next”, “back”, “stop”' },
+                    { icon: 'link-outline' as IconName, text: t('youtube.how.copyLink') },
+                    { icon: 'sparkles-outline' as IconName, text: t('youtube.how.chefBreaksItDown') },
+                    { icon: 'mic-outline' as IconName, text: t('youtube.how.handsFree') },
                   ].map((s, i) => (
                     <View key={s.text} style={styles.howRow}>
                       <View style={[styles.howNum, { backgroundColor: colors.primarySoft }]}>
@@ -249,9 +259,9 @@ export default function YouTubeImport() {
 
           {phase.kind === 'working' ? (
             <Animated.View entering={FadeInDown.springify().damping(18)}>
-              <Txt variant="title1">Breaking it down…</Txt>
+              <Txt variant="title1">{t('youtube.working.title')}</Txt>
               <Txt variant="body" color="textMuted" style={{ marginTop: 6 }}>
-                This usually takes under a minute. You can leave this screen — we’ll keep going.
+                {t('youtube.working.body')}
               </Txt>
               <View style={{ marginTop: 22 }}>
                 <ProgressBar status={phase.status} />
@@ -278,9 +288,7 @@ export default function YouTubeImport() {
                 })}
               </View>
               <Card tone="saffron" style={{ marginTop: 22 }}>
-                <Txt variant="footnote">
-                  💡 While you wait: in cooking mode, say “repeat” to replay a step’s clip, or “start timer” for timed steps.
-                </Txt>
+                <Txt variant="footnote">{t('youtube.working.tip')}</Txt>
               </Card>
             </Animated.View>
           ) : null}
@@ -288,15 +296,15 @@ export default function YouTubeImport() {
           {phase.kind === 'done' ? (
             <Animated.View entering={FadeInDown.springify().damping(18)} style={{ gap: 16 }}>
               <View>
-                <Txt variant="title1">Ready to cook 🎉</Txt>
+                <Txt variant="title1">{t('youtube.done.title')}</Txt>
                 <Txt variant="body" color="textMuted" style={{ marginTop: 6 }}>
-                  {phase.cached ? 'Someone already broke this video down — no credits used.' : `${plural(phase.recipe.steps.length, 'step')}, each with its own clip.`}
+                  {phase.cached ? t('youtube.done.cached') : t('youtube.done.stepsWithClips', { count: phase.recipe.steps.length })}
                 </Txt>
               </View>
               <RecipePreviewCard recipe={phase.recipe} />
               <Card>
                 <Txt variant="overline" color="textMuted" style={{ marginBottom: 8 }}>
-                  Steps & clips
+                  {t('youtube.done.stepsAndClips')}
                 </Txt>
                 {phase.recipe.steps.map((s, i) => (
                   <View key={s.id} style={styles.stepLine}>
@@ -314,8 +322,8 @@ export default function YouTubeImport() {
                   </View>
                 ))}
               </Card>
-              <Button label="Save & start cooking" icon="play" onPress={() => keep(phase.recipe, true)} />
-              <Button label="Save for later" icon="bookmark-outline" variant="secondary" onPress={() => keep(phase.recipe, false)} />
+              <Button label={t('youtube.done.cookNow')} icon="play" onPress={() => keep(phase.recipe, true)} />
+              <Button label={t('youtube.done.saveForLater')} icon="bookmark-outline" variant="secondary" onPress={() => keep(phase.recipe, false)} />
             </Animated.View>
           ) : null}
 
@@ -324,16 +332,16 @@ export default function YouTubeImport() {
               <Card tone="primary">
                 <Txt style={{ fontSize: 30, lineHeight: 38 }}>😕</Txt>
                 <Txt variant="title3" style={{ marginTop: 6 }}>
-                  That didn’t work
+                  {t('youtube.failed.title')}
                 </Txt>
                 <Txt variant="subhead" color="textMuted" style={{ marginTop: 4 }}>
                   {phase.message}
                 </Txt>
                 <Txt variant="footnote" color="accent" style={{ marginTop: 10 }}>
-                  ✓ Your credits were refunded.
+                  {t('youtube.failed.refunded')}
                 </Txt>
               </Card>
-              <Button label="Try another video" icon="refresh" onPress={() => setPhase({ kind: 'idle' })} />
+              <Button label={t('youtube.failed.tryAnother')} icon="refresh" onPress={() => setPhase({ kind: 'idle' })} />
             </Animated.View>
           ) : null}
         </ScrollView>

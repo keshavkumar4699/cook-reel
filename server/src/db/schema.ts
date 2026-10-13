@@ -1,5 +1,6 @@
 import {
   boolean,
+  customType,
   index,
   integer,
   jsonb,
@@ -137,6 +138,44 @@ export const webhookEvents = pgTable('webhook_events', {
   appUserId: text('app_user_id'),
   createdAt: createdAt(),
 });
+
+/** Raw bytes. PGlite returns Uint8Array, node-postgres returns Buffer; both come back as Buffer. */
+const bytea = customType<{ data: Buffer; driverData: Buffer | Uint8Array }>({
+  dataType: () => 'bytea',
+  fromDriver: (value) => (Buffer.isBuffer(value) ? value : Buffer.from(value)),
+  toDriver: (value) => value,
+});
+
+/**
+ * Global cache of synthesized narration (MP3). The key hashes everything that shapes the audio
+ * (cache version, model, voice, language, style and normalized text), so clips are shared by every cook.
+ */
+export const speechClips = pgTable(
+  'speech_clips',
+  {
+    key: text('key').primaryKey(),
+    language: text('language').notNull(),
+    voice: text('voice').notNull(),
+    model: text('model').notNull(),
+    audio: bytea('audio').notNull(),
+    chars: integer('chars').notNull(),
+    durationMs: integer('duration_ms').notNull(),
+    createdAt: createdAt(),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('speech_clips_last_used_idx').on(t.lastUsedAt)],
+);
+
+/** Milliseconds of new speech reserved per scope (a user id, or "global") per UTC day, for fair-use caps. */
+export const speechUsage = pgTable(
+  'speech_usage',
+  {
+    scope: text('scope').notNull(),
+    day: text('day').notNull(),
+    reservedMs: integer('reserved_ms').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.scope, t.day] })],
+);
 
 export type UserRow = typeof users.$inferSelect;
 export type ImportJobRow = typeof importJobs.$inferSelect;

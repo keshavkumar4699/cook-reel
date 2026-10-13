@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import type { ApiRecipe, CookProfile } from '@/data/types';
+import { t } from '@/i18n';
 
 const DEFAULT_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8787' : 'http://localhost:8787';
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_URL).replace(/\/$/, '');
@@ -17,8 +18,10 @@ export type ErrorCode =
   | 'ai_failed'
   | 'billing_unavailable'
   | 'not_configured'
+  | 'speech_limit'
   | 'network'
   | 'timeout'
+  | 'cancelled'
   | 'internal';
 
 export class ApiError extends Error {
@@ -113,6 +116,8 @@ export interface ImportJob {
   isShort?: boolean;
   creditsCharged: number;
   error?: string | null;
+  /** Stable code for a failed job (e.g. not_a_recipe_video, import_interrupted); the app shows its own text. */
+  errorCode?: string | null;
   recipe: ApiRecipe | null;
   cached: boolean;
   balance?: Balance;
@@ -168,11 +173,11 @@ async function request<T>(
       signal: controller.signal,
     });
   } catch {
-    if (options.signal?.aborted) throw new ApiError(0, 'network', 'Cancelled.');
+    if (options.signal?.aborted) throw new ApiError(0, 'cancelled', t('common.errors.cancelled'));
     if (controller.signal.aborted) {
-      throw new ApiError(0, 'timeout', 'This is taking longer than usual. Check your connection and try again.');
+      throw new ApiError(0, 'timeout', t('common.errors.timeout'));
     }
-    throw new ApiError(0, 'network', "Can't reach CookReel right now. Check your internet connection.");
+    throw new ApiError(0, 'network', t('common.errors.network'));
   } finally {
     clearTimeout(timeout);
   }
@@ -184,7 +189,7 @@ async function request<T>(
   if (!res.ok) {
     const error = payload?.error;
     if (res.status === 401 && options.auth !== false && getToken()) onUnauthorized();
-    throw new ApiError(res.status, error?.code ?? 'internal', error?.message ?? 'Something went wrong. Please try again.', error?.details);
+    throw new ApiError(res.status, error?.code ?? 'internal', error?.message ?? t('common.errors.generic'), error?.details);
   }
   return payload as T;
 }

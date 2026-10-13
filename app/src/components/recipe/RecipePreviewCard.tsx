@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { ApiRecipe } from '@/data/types';
-import { formatMinutes, plural } from '@/lib/format';
+import { t } from '@/i18n';
+import { formatMinutes } from '@/lib/format';
 import { radius, shadow, useTheme } from '@/theme';
 import { Badge } from '../ui/Badge';
 import { Txt } from '../ui/Text';
@@ -23,10 +24,10 @@ export function RecipePreviewCard({ recipe, actions, footer }: { recipe: ApiReci
         ) : null}
         <View style={styles.stats}>
           <Badge label={formatMinutes(recipe.totalMinutes)} icon="time-outline" />
-          <Badge label={plural(recipe.servings, 'serving')} icon="people-outline" />
-          {n ? <Badge label={`${n.kcal} kcal`} icon="flame-outline" tone="primary" /> : null}
-          {n ? <Badge label={`${Math.round(n.proteinG)} g protein`} icon="barbell-outline" tone="accent" /> : null}
-          <Badge label={plural(recipe.steps.length, 'step')} icon="list-outline" />
+          <Badge label={t('common.counts.servings', { count: recipe.servings })} icon="people-outline" />
+          {n ? <Badge label={t('recipe.facts.kcal', { n: String(n.kcal) })} icon="flame-outline" tone="primary" /> : null}
+          {n ? <Badge label={t('recipe.facts.protein', { n: String(Math.round(n.proteinG)) })} icon="barbell-outline" tone="accent" /> : null}
+          <Badge label={t('common.counts.steps', { count: recipe.steps.length })} icon="list-outline" />
         </View>
         {footer}
         {actions ? <View style={styles.actions}>{actions}</View> : null}

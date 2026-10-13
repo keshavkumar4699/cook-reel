@@ -2,6 +2,7 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { ApiRecipe } from '@/data/types';
+import { t } from '@/i18n';
 import { hashIndex } from '@/lib/recipes';
 import { coverGradients, useTheme } from '@/theme';
 import { Badge } from '../ui/Badge';
@@ -56,12 +57,12 @@ export function RecipeCover({ recipe, style, emojiSize = 56, badges = true, roun
       )}
       {badges ? (
         <View style={styles.badges}>
-          {yt ? <Badge label={yt.isShort ? 'Short' : 'YouTube'} icon="logo-youtube" tone="youtube" /> : null}
-          {recipe.source === 'ai' ? <Badge label="Chef" icon="sparkles" tone="ai" /> : null}
+          {yt ? <Badge label={yt.isShort ? t('recipe.youtubeShort') : 'YouTube'} icon="logo-youtube" tone="youtube" /> : null}
+          {recipe.source === 'ai' ? <Badge label={t('common.chefName')} icon="sparkles" tone="ai" /> : null}
         </View>
       ) : null}
       {proteinPill && recipe.nutrition ? (
-        <Badge label={`${Math.round(recipe.nutrition.perServing.proteinG)} g protein`} icon="barbell-outline" tone="dark" style={styles.pill} />
+        <Badge label={t('recipe.facts.protein', { n: String(Math.round(recipe.nutrition.perServing.proteinG)) })} icon="barbell-outline" tone="dark" style={styles.pill} />
       ) : null}
     </View>
   );

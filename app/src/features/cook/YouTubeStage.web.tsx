@@ -1,5 +1,6 @@
 import { createElement, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { t } from '@/i18n';
 import type { YouTubeStageProps } from './YouTubeStage';
 
 export type { YouTubeStageProps };
@@ -24,7 +25,7 @@ export function YouTubeStage({ videoId, clip, playing, muted, width, height, res
         src,
         width,
         height,
-        title: 'Recipe video',
+        title: t('cook.video.playerTitle'),
         allow: 'autoplay; encrypted-media; picture-in-picture',
         style: { border: 0, width: '100%', height: '100%' },
       })}

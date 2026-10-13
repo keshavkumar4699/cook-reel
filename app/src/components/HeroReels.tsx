@@ -14,6 +14,7 @@ import Animated, {
 import { radius, stage } from '@/theme';
 import { Icon } from './ui/Icon';
 import { Txt } from './ui/Text';
+import { t } from '@/i18n';
 
 function useFloat(delay: number, distance = 6) {
   const y = useSharedValue(0);
@@ -65,8 +66,8 @@ export function HeroReels() {
   const float = useFloat(0, 7);
   return (
     <View style={styles.stage} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <SideCard side="left" emoji="🍳" colors={['#FFE3D5', '#FFC5A6']} step="STEP 2" rotate="-10deg" />
-      <SideCard side="right" emoji="🥗" colors={['#E3F2E8', '#BFE3CD']} step="STEP 4" rotate="10deg" />
+      <SideCard side="left" emoji="🍳" colors={['#FFE3D5', '#FFC5A6']} step={t('ui.hero.sideStep', { n: '2' })} rotate="-10deg" />
+      <SideCard side="right" emoji="🥗" colors={['#E3F2E8', '#BFE3CD']} step={t('ui.hero.sideStep', { n: '4' })} rotate="10deg" />
       <Animated.View entering={FadeInDown.springify().damping(14)} style={styles.mainWrap}>
         <Animated.View style={[styles.main, float]}>
           <View style={styles.segments}>
@@ -83,15 +84,15 @@ export function HeroReels() {
             </View>
           </LinearGradient>
           <Txt variant="caption" color={stage.textFaint} style={{ marginTop: 10 }}>
-            STEP 3 OF 5 · 0:42–0:58
+            {t('ui.hero.stepOf', { current: '3', total: '5', range: '0:42–0:58' })}
           </Txt>
           <Txt variant="title3" color="#FFFFFF" style={{ marginTop: 2 }}>
-            Toss the noodles
+            {t('ui.hero.stepTitle')}
           </Txt>
           <View style={styles.voice}>
             <View style={styles.liveDot} />
             <Txt variant="caption" color="#FFFFFF">
-              Say “next”
+              {t('ui.hero.sayNext')}
             </Txt>
           </View>
         </Animated.View>

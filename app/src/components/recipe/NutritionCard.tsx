@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Macros } from '@/data/types';
+import { t } from '@/i18n';
 import { formatGrams } from '@/lib/format';
 import { macroSplit } from '@/lib/scale';
 import { radius, useTheme } from '@/theme';
@@ -14,22 +15,22 @@ export function NutritionCard({ perServing, total, servings }: { perServing: Mac
   const m = mode === 'serving' ? perServing : total;
   const split = macroSplit(m);
   const items = [
-    { label: 'Protein', value: m.proteinG, color: colors.protein },
-    { label: 'Carbs', value: m.carbsG, color: colors.carbs },
-    { label: 'Fat', value: m.fatG, color: colors.fat },
-    { label: 'Fibre', value: m.fiberG, color: colors.fiber },
+    { label: t('recipe.nutrition.protein'), value: m.proteinG, color: colors.protein },
+    { label: t('recipe.nutrition.carbs'), value: m.carbsG, color: colors.carbs },
+    { label: t('recipe.nutrition.fat'), value: m.fatG, color: colors.fat },
+    { label: t('recipe.nutrition.fibre'), value: m.fiberG, color: colors.fiber },
   ];
   return (
     <Card>
       <View style={styles.head}>
         <View>
           <Txt variant="overline" color="textMuted">
-            Nutrition
+            {t('recipe.nutrition.title')}
           </Txt>
           <View style={styles.kcalRow}>
             <Txt variant="title1">{Math.round(m.kcal)}</Txt>
             <Txt variant="subheadStrong" color="textMuted">
-              kcal
+              {t('recipe.nutrition.kcalUnit')}
             </Txt>
           </View>
         </View>
@@ -38,13 +39,13 @@ export function NutritionCard({ perServing, total, servings }: { perServing: Mac
             value={mode}
             onChange={setMode}
             options={[
-              { value: 'serving', label: 'Serving' },
-              { value: 'total', label: `All ${servings}` },
+              { value: 'serving', label: t('recipe.nutrition.serving') },
+              { value: 'total', label: t('recipe.nutrition.allServings', { count: servings }) },
             ]}
           />
         </View>
       </View>
-      <View style={[styles.bar, { backgroundColor: colors.surfaceMuted }]} accessibilityLabel="Calories by macronutrient">
+      <View style={[styles.bar, { backgroundColor: colors.surfaceMuted }]} accessibilityLabel={t('recipe.nutrition.barLabel')}>
         <View style={{ flex: split.protein || 0.001, backgroundColor: colors.protein }} />
         <View style={{ flex: split.carbs || 0.001, backgroundColor: colors.carbs }} />
         <View style={{ flex: split.fat || 0.001, backgroundColor: colors.fat }} />
@@ -63,7 +64,7 @@ export function NutritionCard({ perServing, total, servings }: { perServing: Mac
         ))}
       </View>
       <Txt variant="caption" color="textFaint" style={{ marginTop: 12 }}>
-        Estimated from standard food data. Values vary with brands and portion sizes.
+        {t('recipe.nutrition.disclaimer')}
       </Txt>
     </Card>
   );

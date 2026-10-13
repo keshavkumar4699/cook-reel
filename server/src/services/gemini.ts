@@ -1,9 +1,10 @@
-import { GoogleGenAI, MediaResolution } from '@google/genai';
+import { ApiError, GoogleGenAI, MediaResolution, Modality } from '@google/genai';
 import type { Logger } from 'pino';
 import { z } from 'zod';
 import { EMBEDDING_DIMENSIONS } from '../db/schema.js';
 import type { ParsedYouTubeUrl } from '../domain/youtube.js';
 import { AIError } from '../lib/errors.js';
+import type { SpeechSynthesizer } from './speech.js';
 import { VIDEO_ANALYSIS_PROMPT } from './prompts.js';
 
 export const VideoBreakdownSchema = z.object({
@@ -71,7 +72,21 @@ function unitLength(values: number[]): number[] {
   return norm > 0 ? values.map((v) => v / norm) : values;
 }
 
-export function createGemini(config: { apiKey: string; model: string; embeddingModel: string }, logger: Logger) {
+export interface GeminiConfig {
+  apiKey: string;
+  model: string;
+  embeddingModel: string;
+  /** Text-to-speech model for natural narration. */
+  ttsModel: string;
+  /** Send the ISO 639-1 language with TTS requests (the model also auto-detects). */
+  ttsLanguageCode: boolean;
+}
+
+function isInvalidArgument(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 400;
+}
+
+export function createGemini(config: GeminiConfig, logger: Logger) {
   const ai = new GoogleGenAI({ apiKey: config.apiKey });
 
   const analyzer: VideoAnalyzer = {
@@ -145,5 +160,65 @@ export function createGemini(config: { apiKey: string; model: string; embeddingM
     },
   };
 
-  return { analyzer, embedder };
+  const synthesizer: SpeechSynthesizer = {
+    model: config.ttsModel,
+    async synthesize({ text, language, voice, style }) {
+      const started = Date.now();
+      const request = (withLanguage: boolean) =>
+        ai.models.generateContent({
+          model: config.ttsModel,
+          contents: [
+            {
+              role: 'user',
+              // The text part is a verbatim transcript; delivery direction goes in speech metadata so it is
+              // never read aloud.
+              parts: [{ text, ...(style ? { speechMetadata: { style } } : {}) }],
+            },
+          ],
+          config: {
+            responseModalities: [Modality.AUDIO],
+            speechConfig: {
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } },
+              ...(withLanguage ? { languageCode: language } : {}),
+            },
+            abortSignal: AbortSignal.timeout(45_000),
+          },
+        });
+
+      let response: Awaited<ReturnType<typeof request>>;
+      try {
+        try {
+          response = await request(config.ttsLanguageCode);
+        } catch (error) {
+          if (!config.ttsLanguageCode || !isInvalidArgument(error)) throw error;
+          logger.warn({ err: error, language }, 'gemini tts rejected languageCode; retrying without it');
+          response = await request(false);
+        }
+      } catch (error) {
+        logger.warn({ err: error, language, chars: text.length }, 'gemini speech failed');
+        throw new AIError('upstream', 'Speech synthesis failed', { cause: error });
+      }
+      if (response.promptFeedback?.blockReason) {
+        throw new AIError('refused', `speech blocked: ${response.promptFeedback.blockReason}`);
+      }
+      const part = response.candidates?.[0]?.content?.parts?.find((candidate) => candidate.inlineData?.data);
+      const data = part?.inlineData?.data;
+      if (!data) throw new AIError('invalid_output', 'Speech model returned no audio');
+      const mimeType = part.inlineData?.mimeType ?? 'audio/L16;codec=pcm;rate=24000';
+      logger.info(
+        {
+          label: 'speech',
+          model: config.ttsModel,
+          ms: Date.now() - started,
+          mimeType,
+          promptTokens: response.usageMetadata?.promptTokenCount,
+          outputTokens: response.usageMetadata?.candidatesTokenCount,
+        },
+        'gemini call',
+      );
+      return { data: Buffer.from(data, 'base64'), mimeType };
+    },
+  };
+
+  return { analyzer, embedder, synthesizer };
 }

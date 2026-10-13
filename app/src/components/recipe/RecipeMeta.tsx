@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import type { Recipe } from '@/data/types';
+import { t } from '@/i18n';
 import { formatMinutes } from '@/lib/format';
 import { Icon } from '../ui/Icon';
 import { Txt } from '../ui/Text';
@@ -21,7 +22,7 @@ export function RecipeMeta({ recipe, compact }: { recipe: Pick<Recipe, 'totalMin
         <View style={styles.item}>
           <Icon name="flame-outline" size={13} color="textMuted" />
           <Txt variant="caption" color="textMuted">
-            {n.kcal} kcal
+            {t('recipe.facts.kcal', { n: String(n.kcal) })}
           </Txt>
         </View>
       ) : null}
@@ -29,7 +30,7 @@ export function RecipeMeta({ recipe, compact }: { recipe: Pick<Recipe, 'totalMin
         <View style={styles.item}>
           <Icon name="mci:arm-flex-outline" size={13} color="protein" />
           <Txt variant="caption" color="protein">
-            {Math.round(n.proteinG)} g
+            {t('common.units.g', { n: String(Math.round(n.proteinG)) })}
           </Txt>
         </View>
       ) : null}

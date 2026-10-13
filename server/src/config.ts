@@ -38,6 +38,22 @@ const EnvSchema = z.object({
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default('gemini-3.5-flash'),
   GEMINI_EMBEDDING_MODEL: z.string().default('gemini-embedding-001'),
+  /** Natural narration voices (text-to-speech). */
+  GEMINI_TTS_MODEL: z.string().default('gemini-3.8-flash-tts'),
+  /** Send the ISO 639-1 language code with TTS requests. */
+  GEMINI_TTS_LANGUAGE_CODE: bool(true),
+  /** Send a warm delivery direction as speech metadata (never read aloud). */
+  GEMINI_TTS_STYLE: bool(true),
+  /** Kill switch for natural voice; the app falls back to on-device voices. */
+  TTS_ENABLED: bool(true),
+  /** App voice id → Gemini voice name. The first one is the default. */
+  TTS_VOICES: z.string().default('warm:Sulafat,friendly:Achird,gentle:Vindemiatrix,easygoing:Callirrhoe'),
+  /** Seconds of new (uncached) narration each cook can generate per day. */
+  TTS_USER_DAILY_SECONDS: z.coerce.number().int().min(0).default(900),
+  /** Seconds of new narration the whole service may generate per day (cost circuit-breaker). */
+  TTS_GLOBAL_DAILY_SECONDS: z.coerce.number().int().min(0).default(50_000),
+  /** Bump to discard every cached clip. */
+  TTS_CACHE_VERSION: z.string().default('1'),
 
   /** OAuth client IDs whose Google ID tokens we accept (web, iOS and Android client IDs). */
   GOOGLE_CLIENT_IDS: csv,
@@ -58,6 +74,17 @@ const EnvSchema = z.object({
 });
 
 export type Config = ReturnType<typeof loadConfig>;
+
+/** "warm:Sulafat,friendly:Achird" → { warm: 'Sulafat', friendly: 'Achird' } */
+function parseVoices(value: string): Record<string, string> {
+  const voices: Record<string, string> = {};
+  for (const pair of value.split(',')) {
+    const [id, name] = pair.split(':').map((part) => part.trim());
+    if (id && name) voices[id] = name;
+  }
+  if (!Object.keys(voices).length) throw new Error('TTS_VOICES must list at least one "id:VoiceName" pair');
+  return voices;
+}
 
 const DEV_JWT_SECRET = 'cookreel-dev-secret-change-me-0123456789abcdef';
 
@@ -102,8 +129,22 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
       ? { apiKey: e.ANTHROPIC_API_KEY, model: e.CLAUDE_MODEL, effort: e.CLAUDE_EFFORT, fallbacks: e.CLAUDE_FALLBACKS }
       : null,
     gemini: e.GEMINI_API_KEY
-      ? { apiKey: e.GEMINI_API_KEY, model: e.GEMINI_MODEL, embeddingModel: e.GEMINI_EMBEDDING_MODEL }
+      ? {
+          apiKey: e.GEMINI_API_KEY,
+          model: e.GEMINI_MODEL,
+          embeddingModel: e.GEMINI_EMBEDDING_MODEL,
+          ttsModel: e.GEMINI_TTS_MODEL,
+          ttsLanguageCode: e.GEMINI_TTS_LANGUAGE_CODE,
+        }
       : null,
+    speech: {
+      enabled: e.TTS_ENABLED,
+      voices: parseVoices(e.TTS_VOICES),
+      userDailySeconds: e.TTS_USER_DAILY_SECONDS,
+      globalDailySeconds: e.TTS_GLOBAL_DAILY_SECONDS,
+      cacheVersion: e.TTS_CACHE_VERSION,
+      style: e.GEMINI_TTS_STYLE,
+    },
     google: { clientIds: e.GOOGLE_CLIENT_IDS },
     apple: { bundleIds: e.APPLE_BUNDLE_IDS, revocation: appleRevocation },
     revenueCat: {

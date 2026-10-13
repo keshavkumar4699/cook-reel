@@ -13,6 +13,7 @@ export type ErrorCode =
   | 'ai_failed'
   | 'billing_unavailable'
   | 'not_configured'
+  | 'speech_limit'
   | 'internal';
 
 /** An error that is safe to show to API clients. Anything else is reported as a generic 500. */

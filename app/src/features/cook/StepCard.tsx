@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { PressableScale } from '@/components/ui/PressableScale';
 import { Txt } from '@/components/ui/Text';
 import type { Step } from '@/data/types';
+import { t } from '@/i18n';
 import { formatClock } from '@/lib/format';
 import { radius, stage } from '@/theme';
 import type { StepTimer } from './useStepTimer';
@@ -54,12 +55,16 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
             <PressableScale
               onPress={() => onStartTimer(step)}
               haptic="press"
-              accessibilityLabel={`Start a ${Math.round(step.durationSec / 60)} minute timer`}
+              accessibilityLabel={t('cook.step.startTimerLabel', { count: Math.round(step.durationSec / 60) })}
               style={[styles.chip, { backgroundColor: 'rgba(245,181,79,0.18)', borderColor: 'rgba(245,181,79,0.5)' }]}
             >
               <Icon name="timer-outline" size={16} color={stage.saffron} />
               <Txt variant="subheadStrong" color={stage.saffron}>
-                {timerHere ? (timer!.done ? 'Timer done' : `${formatClock(timer!.remaining)} left`) : `Start ${formatClock(step.durationSec)} timer`}
+                {timerHere
+                  ? timer!.done
+                    ? t('cook.step.timerDone')
+                    : t('cook.step.timeLeft', { time: formatClock(timer!.remaining) })
+                  : t('cook.step.startTimer', { time: formatClock(step.durationSec) })}
               </Txt>
             </PressableScale>
           ) : null}
@@ -68,7 +73,7 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
               key={g.term}
               onPress={() => setTerm(term === g.term ? null : g.term)}
               style={[styles.chip, { backgroundColor: term === g.term ? 'rgba(155,140,255,0.25)' : stage.surface, borderColor: 'rgba(155,140,255,0.45)' }]}
-              accessibilityLabel={`What does ${g.term} mean?`}
+              accessibilityLabel={t('cook.step.whatDoesTermMean', { term: g.term })}
             >
               <Icon name="help-circle-outline" size={16} color={stage.ai} />
               <Txt variant="subheadStrong" color={stage.text}>
@@ -81,7 +86,7 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
           <Animated.View entering={FadeIn} style={[styles.box, { backgroundColor: 'rgba(155,140,255,0.14)' }]}>
             <Txt variant="callout" color={stage.text}>
               <Txt variant="callout" color={stage.ai} style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
-                {term}:{' '}
+                {t('cook.step.glossaryTerm', { term: term ?? '' })}{' '}
               </Txt>
               {meaning}
             </Txt>
@@ -101,9 +106,9 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
             <Icon name="checkmark-circle-outline" size={18} color={stage.accent} />
             <Txt variant="callout" color={stage.textMuted} style={{ flex: 1 }}>
               <Txt variant="callout" color={stage.accent} style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
-                Done when{' '}
+                {t('cook.step.doneWhen')}{' '}
               </Txt>
-              {step.doneCue.charAt(0).toLowerCase() + step.doneCue.slice(1)}
+              {step.doneCue}
             </Txt>
           </View>
         ) : null}

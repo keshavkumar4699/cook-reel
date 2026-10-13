@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import type { Recipe } from '@/data/types';
+import { t } from '@/i18n';
 import { useLibrary } from '@/state/library';
 import { radius, shadow, useTheme } from '@/theme';
 import { haptics } from '@/lib/haptics';
@@ -24,7 +25,7 @@ export function RecipeCard({ recipe, width, coverHeight }: { recipe: Recipe; wid
         <RecipeCover recipe={recipe} style={{ height: coverHeight ?? width * 0.86 }} emojiSize={Math.round(width * 0.26)} proteinPill />
         <IconButton
           icon={recipe.cookLater ? 'bookmark' : 'bookmark-outline'}
-          label={recipe.cookLater ? 'Remove from cook later' : 'Cook later'}
+          label={recipe.cookLater ? t('recipe.cookLater.remove') : t('recipe.cookLater.add')}
           variant="glass"
           size={34}
           iconSize={16}

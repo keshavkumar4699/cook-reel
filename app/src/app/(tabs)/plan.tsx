@@ -17,8 +17,9 @@ import { Sheet } from '@/components/ui/Sheet';
 import { TextField } from '@/components/ui/TextField';
 import { Txt } from '@/components/ui/Text';
 import type { MealSlot, PlanEntry, Recipe, ShoppingItem } from '@/data/types';
-import { addDays, isSameDay, toDateKey, weekDays, weekdayShort, weekLabel } from '@/lib/dates';
-import { formatQuantity, plural } from '@/lib/format';
+import { intlLocale, t } from '@/i18n';
+import { addDays, isSameDay, toDateKey, weekDays, weekdayDay, weekdayShort, weekLabel } from '@/lib/dates';
+import { formatGrams, formatQuantity } from '@/lib/format';
 import { CATEGORY_LABELS, CATEGORY_ORDER } from '@/lib/shopping';
 import { useTabBarSpace } from '@/lib/useBottomSpace';
 import { MEAL_SLOTS, useKitchen } from '@/state/kitchen';
@@ -38,15 +39,15 @@ function RecipePicker({ visible, onClose, onPick }: { visible: boolean; onClose:
     [recipesMap, q],
   );
   return (
-    <Sheet visible={visible} onClose={onClose} title="Pick a recipe">
+    <Sheet visible={visible} onClose={onClose} title={t('plan.picker.title')}>
       <View style={{ paddingHorizontal: GUTTER, paddingBottom: 12 }}>
-        <TextField icon="search" placeholder="Search your library" value={q} onChangeText={setQ} />
+        <TextField icon="search" placeholder={t('plan.picker.searchPlaceholder')} value={q} onChangeText={setQ} />
       </View>
       <FlatList
         data={list}
         keyExtractor={(r) => r.id}
         contentContainerStyle={{ paddingHorizontal: GUTTER, gap: 10, paddingBottom: 12 }}
-        renderItem={({ item }) => <RecipeRow recipe={item} onPress={() => onPick(item)} subtitle={item.cookLater ? 'Cook later' : undefined} />}
+        renderItem={({ item }) => <RecipeRow recipe={item} onPress={() => onPick(item)} subtitle={item.cookLater ? t('plan.picker.cookLater') : undefined} />}
         style={{ maxHeight: 420 }}
         keyboardShouldPersistTaps="handled"
       />
@@ -87,19 +88,19 @@ function MealPlan() {
     const keys = new Set(days.map(toDateKey));
     const weekEntries = entries.filter((e) => keys.has(e.date) && recipes[e.recipeId]);
     if (!weekEntries.length) {
-      toast('Plan a few meals first, then shop for them in one tap.');
+      toast(t('plan.shopWeek.empty'));
       return;
     }
     const added = addRecipesToShopping(weekEntries.map((e) => ({ recipe: recipes[e.recipeId]!, servings: e.servings })));
-    toast(`${plural(added, 'new item')} added for this week`, { tone: 'success' });
+    toast(t('plan.shopWeek.added', { count: added }), { tone: 'success' });
   };
 
   return (
     <ScrollView contentContainerStyle={{ paddingBottom: bottom }} showsVerticalScrollIndicator={false}>
       <View style={styles.weekNav}>
-        <IconButton icon="chevron-back" label="Previous week" variant="soft" size={34} onPress={() => setAnchor(addDays(anchor, -7))} />
+        <IconButton icon="chevron-back" label={t('plan.week.previous')} variant="soft" size={34} onPress={() => setAnchor(addDays(anchor, -7))} />
         <Txt variant="headline">{weekLabel(days)}</Txt>
-        <IconButton icon="chevron-forward" label="Next week" variant="soft" size={34} onPress={() => setAnchor(addDays(anchor, 7))} />
+        <IconButton icon="chevron-forward" label={t('plan.week.next')} variant="soft" size={34} onPress={() => setAnchor(addDays(anchor, 7))} />
       </View>
       <View style={styles.days}>
         {days.map((d) => {
@@ -111,7 +112,7 @@ function MealPlan() {
               key={d.toISOString()}
               haptic="select"
               onPress={() => setSelected(d)}
-              accessibilityLabel={`${weekdayShort(d)} ${d.getDate()}`}
+              accessibilityLabel={weekdayDay(d)}
               style={[styles.day, { backgroundColor: active ? colors.ink : colors.surface, borderColor: active ? colors.ink : isToday ? colors.primary : colors.border }]}
             >
               <Txt variant="caption" color={active ? colors.onInk : 'textMuted'}>
@@ -133,13 +134,13 @@ function MealPlan() {
           </ProgressRing>
           <View style={{ flex: 1 }}>
             <Txt variant="overline" color="textMuted">
-              {isSameDay(selected, today) ? 'Today' : `${weekdayShort(selected)} ${selected.getDate()}`}
+              {isSameDay(selected, today) ? t('common.dates.today') : weekdayDay(selected)}
             </Txt>
             <Txt variant="headline">
-              {Math.round(totals.kcal)} <Txt variant="footnote" color="textMuted">/ {kcalTarget} kcal</Txt>
+              {Math.round(totals.kcal)} <Txt variant="footnote" color="textMuted">{t('plan.summary.kcalGoal', { target: String(kcalTarget) })}</Txt>
             </Txt>
             <Txt variant="headline" color="protein">
-              {Math.round(totals.protein)} g <Txt variant="footnote" color="textMuted">/ {proteinTarget} g protein</Txt>
+              {formatGrams(Math.round(totals.protein))} <Txt variant="footnote" color="textMuted">{t('plan.summary.proteinGoal', { target: formatGrams(proteinTarget) })}</Txt>
             </Txt>
           </View>
           <ProgressRing size={58} progress={totals.protein / proteinTarget} color={colors.protein} track={colors.surfaceMuted}>
@@ -149,6 +150,7 @@ function MealPlan() {
 
         {MEAL_SLOTS.map(({ slot, label, emoji }) => {
           const items = dayEntries.filter((e) => e.slot === slot);
+          const addLabel = t(`plan.addToSlot.${slot}`);
           return (
             <View key={slot} style={styles.slot}>
               <Txt variant="overline" color="textMuted" style={{ marginBottom: 8 }}>
@@ -159,15 +161,15 @@ function MealPlan() {
                   <Animated.View key={entry.id} entering={FadeIn}>
                     <RecipeRow
                       recipe={recipes[entry.recipeId]!}
-                      subtitle={`${plural(entry.servings, 'serving')}`}
-                      trailing={<IconButton icon="close" label="Remove from plan" variant="ghost" size={30} iconSize={16} onPress={() => removeFromPlan(entry.id)} />}
+                      subtitle={t('common.counts.servings', { count: entry.servings })}
+                      trailing={<IconButton icon="close" label={t('plan.removeFromPlan')} variant="ghost" size={30} iconSize={16} onPress={() => removeFromPlan(entry.id)} />}
                     />
                   </Animated.View>
                 ))}
-                <PressableScale onPress={() => setPicking(slot)} style={[styles.add, { borderColor: colors.borderStrong }]} accessibilityLabel={`Add ${label}`}>
+                <PressableScale onPress={() => setPicking(slot)} style={[styles.add, { borderColor: colors.borderStrong }]} accessibilityLabel={addLabel}>
                   <Icon name="add" size={18} color="textMuted" />
                   <Txt variant="subheadStrong" color="textMuted">
-                    Add {label.toLowerCase()}
+                    {addLabel}
                   </Txt>
                 </PressableScale>
               </Animated.View>
@@ -175,7 +177,7 @@ function MealPlan() {
           );
         })}
 
-        <Button label="Shop for this week" icon="cart-outline" variant="secondary" style={{ marginTop: 24 }} onPress={shopWeek} />
+        <Button label={t('plan.shopWeek.button')} icon="cart-outline" variant="secondary" style={{ marginTop: 24 }} onPress={shopWeek} />
       </View>
 
       <RecipePicker
@@ -206,7 +208,7 @@ function ShoppingList() {
     () =>
       CATEGORY_ORDER.map((category) => ({
         category,
-        items: items.filter((i) => i.category === category).sort((a, b) => Number(a.checked) - Number(b.checked) || a.name.localeCompare(b.name)),
+        items: items.filter((i) => i.category === category).sort((a, b) => Number(a.checked) - Number(b.checked) || a.name.localeCompare(b.name, intlLocale())),
       })).filter((g) => g.items.length),
     [items],
   );
@@ -219,15 +221,15 @@ function ShoppingList() {
   return (
     <ScrollView contentContainerStyle={[styles.gutter, { paddingBottom: bottom }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       <View style={styles.addRow}>
-        <TextField placeholder="Add an item…" value={text} onChangeText={setText} onSubmitEditing={add} returnKeyType="done" containerStyle={{ flex: 1 }} icon="add" />
+        <TextField placeholder={t('plan.shopping.addPlaceholder')} value={text} onChangeText={setText} onSubmitEditing={add} returnKeyType="done" containerStyle={{ flex: 1 }} icon="add" />
       </View>
       {items.length ? (
         <>
           <View style={styles.progressRow}>
             <Txt variant="subheadStrong" color="textMuted">
-              {done} of {plural(items.length, 'item')}
+              {t('plan.shopping.progress', { done, count: items.length })}
             </Txt>
-            {done ? <Button label="Clear ticked" variant="ghost" size="sm" icon="trash-outline" onPress={clearChecked} /> : null}
+            {done ? <Button label={t('plan.shopping.clearTicked')} variant="ghost" size="sm" icon="trash-outline" onPress={clearChecked} /> : null}
           </View>
           <View style={[styles.progress, { backgroundColor: colors.surfaceMuted }]}>
             <View style={{ width: `${(done / items.length) * 100}%`, backgroundColor: colors.accent, borderRadius: radius.pill }} />
@@ -251,7 +253,7 @@ function ShoppingList() {
                       <Txt variant="subheadStrong" color="textMuted">
                         {formatQuantity(item.quantity, item.unit)}
                       </Txt>
-                      <IconButton icon="close" label={`Remove ${item.name}`} variant="ghost" size={28} iconSize={15} color={colors.textFaint} onPress={() => removeItem(item.id)} />
+                      <IconButton icon="close" label={t('plan.shopping.removeItem', { name: item.name })} variant="ghost" size={28} iconSize={15} color={colors.textFaint} onPress={() => removeItem(item.id)} />
                     </PressableScale>
                   </View>
                 ))}
@@ -260,7 +262,7 @@ function ShoppingList() {
           ))}
         </>
       ) : (
-        <EmptyState emoji="🛒" title="Your list is empty" body="Add ingredients from any recipe, or plan your week and shop for it in one tap." />
+        <EmptyState emoji="🛒" title={t('plan.shopping.emptyTitle')} body={t('plan.shopping.emptyBody')} />
       )}
     </ScrollView>
   );
@@ -280,17 +282,17 @@ export default function Plan() {
   return (
     <Screen>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Txt variant="title1">Plan</Txt>
+        <Txt variant="title1">{t('common.tabs.plan')}</Txt>
         <Txt variant="subhead" color="textMuted">
-          {tab === 'plan' ? 'Your week of meals' : pending ? `${plural(pending, 'item')} to buy` : 'All set for now'}
+          {tab === 'plan' ? t('plan.header.planSubtitle') : pending ? t('plan.header.toBuy', { count: pending }) : t('plan.header.allSet')}
         </Txt>
         <View style={{ marginTop: 14 }}>
           <Segmented
             value={tab}
             onChange={setTab}
             options={[
-              { value: 'plan', label: 'Meal plan' },
-              { value: 'shopping', label: pending ? `Shopping · ${pending}` : 'Shopping' },
+              { value: 'plan', label: t('plan.header.mealPlanTab') },
+              { value: 'shopping', label: pending ? t('plan.header.shoppingTabCount', { count: pending }) : t('plan.header.shoppingTab') },
             ]}
           />
         </View>

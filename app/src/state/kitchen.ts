@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import { create } from 'zustand';
 import type { MealSlot, PlanEntry, Recipe, ShoppingItem } from '@/data/types';
 import { docstore } from '@/native/docstore';
@@ -99,8 +100,8 @@ export const useKitchen = create<KitchenState>()((set, get) => ({
 }));
 
 export const MEAL_SLOTS: { slot: MealSlot; label: string; emoji: string }[] = [
-  { slot: 'breakfast', label: 'Breakfast', emoji: '🌅' },
-  { slot: 'lunch', label: 'Lunch', emoji: '☀️' },
-  { slot: 'dinner', label: 'Dinner', emoji: '🌙' },
-  { slot: 'snack', label: 'Snack', emoji: '🍎' },
+  { slot: 'breakfast', label: t('common.mealTypes.breakfast'), emoji: '🌅' },
+  { slot: 'lunch', label: t('common.mealTypes.lunch'), emoji: '☀️' },
+  { slot: 'dinner', label: t('common.mealTypes.dinner'), emoji: '🌙' },
+  { slot: 'snack', label: t('common.mealTypes.snack'), emoji: '🍎' },
 ];

@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
 const HOSTS = new Set([
   'youtube.com',
@@ -69,7 +70,7 @@ export async function fetchVideoPreview(video: ParsedVideo, signal?: AbortSignal
     const res = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(video.url)}`, { signal });
     if (!res.ok) return null;
     const body = (await res.json()) as { title?: string; author_name?: string };
-    return { title: body.title ?? 'YouTube video', channel: body.author_name ?? null };
+    return { title: body.title ?? t('common.sources.youtubeVideo'), channel: body.author_name ?? null };
   } catch {
     return null;
   }

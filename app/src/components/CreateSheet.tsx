@@ -8,6 +8,7 @@ import { Icon, type IconName } from './ui/Icon';
 import { PressableScale } from './ui/PressableScale';
 import { Sheet } from './ui/Sheet';
 import { Txt } from './ui/Text';
+import { t } from '@/i18n';
 
 interface Option {
   key: string;
@@ -30,8 +31,8 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
   const options: Option[] = [
     {
       key: 'youtube',
-      title: 'From a YouTube video',
-      body: 'Paste a link — get step-by-step clips',
+      title: t('ui.createSheet.youtubeTitle'),
+      body: t('ui.createSheet.youtubeBody'),
       icon: 'logo-youtube',
       tint: colors.youtube,
       bg: colors.primarySoft,
@@ -40,8 +41,8 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
     },
     {
       key: 'builder',
-      title: 'Create with Chef',
-      body: 'Describe a craving, answer a few questions',
+      title: t('ui.createSheet.chefTitle'),
+      body: t('ui.createSheet.chefBody'),
       icon: 'sparkles',
       tint: colors.ai,
       bg: colors.aiSoft,
@@ -50,8 +51,8 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
     },
     {
       key: 'fridge',
-      title: 'Cook from my fridge',
-      body: 'Tell Chef what you have, get a recipe',
+      title: t('ui.createSheet.fridgeTitle'),
+      body: t('ui.createSheet.fridgeBody'),
       icon: 'mci:fridge-outline',
       tint: colors.accent,
       bg: colors.accentSoft,
@@ -60,8 +61,8 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
     },
     {
       key: 'manual',
-      title: 'Write my own',
-      body: 'Save a family recipe or your own creation',
+      title: t('ui.createSheet.manualTitle'),
+      body: t('ui.createSheet.manualBody'),
       icon: 'create-outline',
       tint: colors.saffron,
       bg: colors.saffronSoft,
@@ -71,7 +72,12 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
   ];
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Add a recipe" subtitle={signedIn ? 'AI options use credits' : 'AI options need a free account'}>
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title={t('ui.createSheet.title')}
+      subtitle={signedIn ? t('ui.createSheet.subtitleSignedIn') : t('ui.createSheet.subtitleGuest')}
+    >
       <View style={styles.list}>
         {options.map((o) => (
           <PressableScale
@@ -87,7 +93,7 @@ export function CreateSheet({ visible, onClose }: { visible: boolean; onClose: (
             <View style={{ flex: 1, gap: 2 }}>
               <View style={styles.titleRow}>
                 <Txt variant="headline">{o.title}</Txt>
-                {o.ai ? <Badge label="AI" tone="ai" /> : null}
+                {o.ai ? <Badge label={t('ui.createSheet.aiBadge')} tone="ai" /> : null}
               </View>
               <Txt variant="footnote" color="textMuted">
                 {o.body}

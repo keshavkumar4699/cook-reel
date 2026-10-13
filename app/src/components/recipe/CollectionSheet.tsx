@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Recipe } from '@/data/types';
+import { t } from '@/i18n';
 import { useLibrary } from '@/state/library';
 import { GUTTER } from '@/theme';
 import { Button } from '../ui/Button';
@@ -17,7 +18,7 @@ export function CollectionSheet({ recipe, visible, onClose }: { recipe: Recipe; 
   const collections = useMemo(() => Object.values(collectionsMap).sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [collectionsMap]);
 
   return (
-    <Sheet visible={visible} onClose={onClose} title="Collections" subtitle="Tap to add or remove">
+    <Sheet visible={visible} onClose={onClose} title={t('library.collectionSheet.title')} subtitle={t('library.collectionSheet.subtitle')}>
       <View style={styles.body}>
         {collections.length ? (
           <View style={styles.wrap}>
@@ -27,13 +28,13 @@ export function CollectionSheet({ recipe, visible, onClose }: { recipe: Recipe; 
           </View>
         ) : (
           <Txt variant="subhead" color="textMuted">
-            No collections yet — create your first one.
+            {t('library.collectionSheet.empty')}
           </Txt>
         )}
         <View style={styles.newRow}>
-          <TextField placeholder="New collection" value={name} onChangeText={setName} containerStyle={{ flex: 1 }} maxLength={40} />
+          <TextField placeholder={t('library.collectionSheet.newPlaceholder')} value={name} onChangeText={setName} containerStyle={{ flex: 1 }} maxLength={40} />
           <Button
-            label="Add"
+            label={t('common.actions.add')}
             size="md"
             disabled={!name.trim()}
             onPress={() => {
@@ -43,7 +44,7 @@ export function CollectionSheet({ recipe, visible, onClose }: { recipe: Recipe; 
             }}
           />
         </View>
-        <Button label="Done" variant="secondary" onPress={onClose} />
+        <Button label={t('common.actions.done')} variant="secondary" onPress={onClose} />
       </View>
     </Sheet>
   );

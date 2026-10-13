@@ -10,6 +10,7 @@ import { createClaudeRecipeAI } from './services/claude.js';
 import { createGemini } from './services/gemini.js';
 import { createImportService } from './services/imports.js';
 import { createKnowledgeBase } from './services/knowledge.js';
+import { createSpeechService } from './services/speech.js';
 
 /** Wires real implementations together. Tests build AppDeps by hand with fakes instead. */
 export function createDeps(config: Config, db: Db, logger: Logger): AppDeps {
@@ -41,5 +42,9 @@ export function createDeps(config: Config, db: Db, logger: Logger): AppDeps {
       concurrency: config.importConcurrency,
     }),
     revenueCat: config.revenueCat.secretKey ? createRevenueCatClient(config.revenueCat.secretKey) : null,
+    speech:
+      gemini && config.speech.enabled
+        ? createSpeechService({ db, synthesizer: gemini.synthesizer, settings: config.speech, logger })
+        : null,
   };
 }

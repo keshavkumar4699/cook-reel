@@ -13,11 +13,13 @@ import { billingRoutes, revenueCatWebhookRoute } from './http/routes/billing.js'
 import { healthRoutes } from './http/routes/health.js';
 import { meRoutes } from './http/routes/me.js';
 import { pricingRoutes } from './http/routes/pricing.js';
+import { speechRoutes } from './http/routes/speech.js';
 import type { AppleTokenService, IdentityVerifier, SecretBox, SessionSigner } from './services/auth.js';
 import type { RevenueCatClient } from './services/billing.js';
 import type { RecipeAI } from './services/claude.js';
 import type { ImportService } from './services/imports.js';
 import type { KnowledgeBase } from './services/knowledge.js';
+import type { SpeechService } from './services/speech.js';
 
 export interface AppDeps {
   config: Config;
@@ -33,6 +35,8 @@ export interface AppDeps {
   knowledge: KnowledgeBase;
   imports: ImportService;
   revenueCat: RevenueCatClient | null;
+  /** Natural narration; null when TTS is disabled or Gemini isn't configured. */
+  speech: SpeechService | null;
 }
 
 export function createApp(deps: AppDeps) {
@@ -42,7 +46,12 @@ export function createApp(deps: AppDeps) {
   app.set('trust proxy', deps.config.isProduction ? 1 : false);
 
   app.use(helmet());
-  app.use(cors(deps.config.corsOrigins.length ? { origin: deps.config.corsOrigins } : undefined));
+  app.use(
+    cors({
+      ...(deps.config.corsOrigins.length ? { origin: deps.config.corsOrigins } : {}),
+      exposedHeaders: ['X-Speech-Cached', 'X-Speech-Duration-Ms', 'X-Speech-Version'],
+    }),
+  );
   if (!deps.config.isTest) {
     app.use(
       pinoHttp({
@@ -64,6 +73,7 @@ export function createApp(deps: AppDeps) {
   authed.use('/me', meRoutes(deps));
   authed.use('/ai', aiRoutes(deps));
   authed.use('/billing', billingRoutes(deps));
+  authed.use('/speech', speechRoutes(deps));
   app.use('/api', authed);
 
   app.use(notFound());

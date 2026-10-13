@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import YoutubePlayer, { type YoutubeIframeRef } from 'react-native-youtube-iframe';
+import { t } from '@/i18n';
 
 export interface YouTubeStageProps {
   videoId: string;
@@ -33,14 +34,14 @@ export function YouTubeStage({ videoId, clip, playing, muted, width, height, res
   useEffect(() => {
     if (!ready || !clip || !playing) return;
     const id = setInterval(async () => {
-      const t = await ref.current?.getCurrentTime().catch(() => null);
-      if (typeof t !== 'number') return;
+      const time = await ref.current?.getCurrentTime().catch(() => null);
+      if (typeof time !== 'number') return;
       const span = Math.max(1, clip.endSec - clip.startSec);
-      emitProgress(Math.min(1, Math.max(0, (t - clip.startSec) / span)));
-      if (t >= clip.endSec - 0.15) {
+      emitProgress(Math.min(1, Math.max(0, (time - clip.startSec) / span)));
+      if (time >= clip.endSec - 0.15) {
         ref.current?.seekTo(clip.startSec, true);
         emitLoop();
-      } else if (t < clip.startSec - 1.5) {
+      } else if (time < clip.startSec - 1.5) {
         ref.current?.seekTo(clip.startSec, true);
       }
     }, 250);
@@ -59,7 +60,7 @@ export function YouTubeStage({ videoId, clip, playing, muted, width, height, res
         forceAndroidAutoplay
         initialPlayerParams={{ controls: false, rel: false, iv_load_policy: 3, preventFullScreen: true, start: Math.floor(clip?.startSec ?? 0) }}
         onReady={() => setReady(true)}
-        onError={(error: string) => onError?.(error === 'embed_not_allowed' ? 'The creator has turned off playback in other apps.' : 'This video can’t be played right now.')}
+        onError={(error: string) => onError?.(error === 'embed_not_allowed' ? t('cook.video.embedBlocked') : t('cook.video.unavailable'))}
         webViewProps={{ allowsInlineMediaPlayback: true, mediaPlaybackRequiresUserAction: false }}
         webViewStyle={{ backgroundColor: '#000000' }}
       />

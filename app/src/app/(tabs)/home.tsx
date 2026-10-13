@@ -16,6 +16,7 @@ import { Screen } from '@/components/ui/Screen';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Txt } from '@/components/ui/Text';
 import type { Persona, Recipe } from '@/data/types';
+import { t } from '@/i18n';
 import { firstName, greeting } from '@/lib/format';
 import { withAccount } from '@/lib/gates';
 import { isHighProtein, isQuick } from '@/lib/recipes';
@@ -27,12 +28,12 @@ import { useSettings } from '@/state/settings';
 import { fonts, GUTTER, inputReset, radius, shadow, useTheme } from '@/theme';
 
 const PROMPTS = [
-  { label: 'High-protein dinner', emoji: '💪' },
-  { label: '15-min breakfast', emoji: '⚡' },
-  { label: 'Cosy dal for one', emoji: '🍲' },
-  { label: 'Use up leftovers', emoji: '♻️' },
-  { label: 'Cheap & filling', emoji: '💸' },
-  { label: 'Impress a date', emoji: '🕯️' },
+  { label: t('home.prompts.highProteinDinner'), emoji: '💪' },
+  { label: t('home.prompts.quickBreakfast'), emoji: '⚡' },
+  { label: t('home.prompts.cosyDal'), emoji: '🍲' },
+  { label: t('home.prompts.useLeftovers'), emoji: '♻️' },
+  { label: t('home.prompts.cheapFilling'), emoji: '💸' },
+  { label: t('home.prompts.impressDate'), emoji: '🕯️' },
 ];
 
 type ActionKey = 'youtube' | 'builder' | 'fridge' | 'manual';
@@ -61,14 +62,14 @@ export default function Home() {
 
   const sections = useMemo(() => {
     const data: Record<SectionKey, { title: string; subtitle: string; items: Recipe[] }> = {
-      cookLater: { title: 'Cook later', subtitle: 'Saved for when you’re hungry', items: recipes.filter((r) => r.cookLater) },
+      cookLater: { title: t('home.sections.cookLater.title'), subtitle: t('home.sections.cookLater.subtitle'), items: recipes.filter((r) => r.cookLater) },
       quick: {
-        title: 'Quick & high-protein',
-        subtitle: 'Fast plates that keep you full',
+        title: t('home.sections.quick.title'),
+        subtitle: t('home.sections.quick.subtitle'),
         items: recipes.filter((r) => isQuick(r) || isHighProtein(r)),
       },
-      experiments: { title: 'Your experiments', subtitle: 'Twists you created with Chef', items: recipes.filter((r) => !!r.parentId) },
-      recent: { title: 'Recently added', subtitle: 'Fresh in your library', items: recipes.slice(0, 10) },
+      experiments: { title: t('home.sections.experiments.title'), subtitle: t('home.sections.experiments.subtitle'), items: recipes.filter((r) => !!r.parentId) },
+      recent: { title: t('home.sections.recent.title'), subtitle: t('home.sections.recent.subtitle'), items: recipes.slice(0, 10) },
     };
     const order = ordered<SectionKey>(['cookLater', 'quick', 'experiments', 'recent'], personas, {
       saver: 'cookLater',
@@ -82,23 +83,23 @@ export default function Home() {
   const actions = useMemo(() => {
     const all: Record<ActionKey, { title: string; body: string; icon: IconName; tint: string; bg: string; go: () => void }> = {
       youtube: {
-        title: 'From YouTube',
-        body: 'Video → step reels',
+        title: t('home.actions.youtube.title'),
+        body: t('home.actions.youtube.body'),
         icon: 'logo-youtube',
         tint: colors.youtube,
         bg: colors.primarySoft,
         go: () => withAccount('/youtube'),
       },
-      builder: { title: 'Create with Chef', body: 'Describe any dish', icon: 'sparkles', tint: colors.ai, bg: colors.aiSoft, go: () => withAccount('/builder') },
+      builder: { title: t('home.actions.builder.title'), body: t('home.actions.builder.body'), icon: 'sparkles', tint: colors.ai, bg: colors.aiSoft, go: () => withAccount('/builder') },
       fridge: {
-        title: 'From my fridge',
-        body: 'Use what you have',
+        title: t('home.actions.fridge.title'),
+        body: t('home.actions.fridge.body'),
         icon: 'mci:fridge-outline',
         tint: colors.accent,
         bg: colors.accentSoft,
         go: () => withAccount('/builder?mode=fridge'),
       },
-      manual: { title: 'Write my own', body: 'Family favourites', icon: 'create-outline', tint: colors.saffron, bg: colors.saffronSoft, go: () => router.push('/edit-recipe') },
+      manual: { title: t('home.actions.manual.title'), body: t('home.actions.manual.body'), icon: 'create-outline', tint: colors.saffron, bg: colors.saffronSoft, go: () => router.push('/edit-recipe') },
     };
     return ordered<ActionKey>(['youtube', 'builder', 'fridge', 'manual'], personas, {
       saver: 'youtube',
@@ -121,10 +122,9 @@ export default function Home() {
           <View style={{ flex: 1 }}>
             <Txt variant="subhead" color="textMuted">
               {greeting()}
-              {name && !greeting().endsWith('?') ? ',' : ''}
             </Txt>
             <Txt variant="title1" numberOfLines={1}>
-              {name ? `${name} 👋` : 'Hey there 👋'}
+              {name ? t('home.nameTitle', { name }) : t('home.guestTitle')}
             </Txt>
           </View>
           <CreditsPill />
@@ -136,20 +136,20 @@ export default function Home() {
               <View style={[styles.sparkle, { backgroundColor: colors.aiSoft }]}>
                 <Icon name="sparkles" size={16} color={colors.ai} />
               </View>
-              <Txt variant="headline">What are we cooking today?</Txt>
+              <Txt variant="headline">{t('home.composer.title')}</Txt>
             </View>
             <View style={[styles.inputRow, { backgroundColor: colors.surfaceMuted }]}>
               <TextInput
                 value={prompt}
                 onChangeText={setPrompt}
-                placeholder="e.g. spicy paneer in 20 min"
+                placeholder={t('home.composer.placeholder')}
                 placeholderTextColor={colors.textFaint}
                 style={[styles.input, inputReset, { color: colors.text, fontFamily: fonts.medium }]}
                 returnKeyType="send"
                 onSubmitEditing={() => ask(prompt)}
-                accessibilityLabel="Describe what you want to cook"
+                accessibilityLabel={t('home.composer.inputLabel')}
               />
-              <IconButton icon="arrow-up" label="Ask Chef" variant="primary" size={36} iconSize={18} onPress={() => ask(prompt)} disabled={!prompt.trim()} />
+              <IconButton icon="arrow-up" label={t('home.composer.send')} variant="primary" size={36} iconSize={18} onPress={() => ask(prompt)} disabled={!prompt.trim()} />
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.prompts} keyboardShouldPersistTaps="handled">
               {PROMPTS.map((p) => (
@@ -185,13 +185,13 @@ export default function Home() {
           <Animated.View entering={FadeInDown.delay(160).springify().damping(18)} style={styles.gutter}>
             <Card tone="ai" style={styles.unlock}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Badge label="Free credits" icon="flash" tone="ai" style={{ backgroundColor: colors.surface, marginBottom: 4 }} />
-                <Txt variant="title3">Unlock Chef & YouTube reels</Txt>
+                <Badge label={t('home.upsell.badge')} icon="flash" tone="ai" style={{ backgroundColor: colors.surface, marginBottom: 4 }} />
+                <Txt variant="title3">{t('home.upsell.title')}</Txt>
                 <Txt variant="footnote" color="textMuted">
-                  Create a free account to use AI — your first recipes are on us.
+                  {t('home.upsell.body')}
                 </Txt>
               </View>
-              <Button label="Sign up" variant="ai" size="sm" onPress={() => router.push('/sign-in')} />
+              <Button label={t('common.actions.signUp')} variant="ai" size="sm" onPress={() => router.push('/sign-in')} />
             </Card>
           </Animated.View>
         ) : null}
@@ -201,7 +201,7 @@ export default function Home() {
             <SectionHeader
               title={section.title}
               subtitle={section.subtitle}
-              action={section.items.length > 3 ? 'See all' : undefined}
+              action={section.items.length > 3 ? t('common.actions.seeAll') : undefined}
               onAction={() => router.push({ pathname: '/library', params: { filter: section.key } })}
             />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carousel} decelerationRate="fast" snapToInterval={188}>
@@ -217,12 +217,12 @@ export default function Home() {
             <Card tone="saffron" style={styles.tip}>
               <Txt style={{ fontSize: 28, lineHeight: 34 }}>🎙️</Txt>
               <View style={{ flex: 1 }}>
-                <Txt variant="headline">Cook hands-free</Txt>
+                <Txt variant="headline">{t('home.voiceTip.title')}</Txt>
                 <Txt variant="footnote" color="textMuted">
-                  In cooking mode, say “next”, “back” or “stop” — no more tapping with messy hands.
+                  {t('home.voiceTip.body')}
                 </Txt>
               </View>
-              <IconButton icon="close" label="Dismiss tip" variant="ghost" size={30} iconSize={16} onPress={() => dismissTip('voice')} />
+              <IconButton icon="close" label={t('home.voiceTip.dismiss')} variant="ghost" size={30} iconSize={16} onPress={() => dismissTip('voice')} />
             </Card>
           </View>
         ) : null}
