@@ -33,3 +33,16 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+.env
+.env.local
+.data/
+coverage/
+/app/ios/
+/app/android/
