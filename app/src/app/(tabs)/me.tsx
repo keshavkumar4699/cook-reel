@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Linking, Platform, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LanguageSheet } from '@/components/LanguageSheet';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -12,9 +13,13 @@ import { PressableScale } from '@/components/ui/PressableScale';
 import { Screen } from '@/components/ui/Screen';
 import { Segmented } from '@/components/ui/Segmented';
 import { Txt } from '@/components/ui/Text';
+import { getLanguageSetting, LANGUAGE_INFO, getLanguage, t } from '@/i18n';
+import { joinFacts } from '@/i18n/format';
 import { api } from '@/lib/api';
 import { confirm } from '@/lib/confirm';
+import { formatDate } from '@/lib/dates';
 import { handleApiError } from '@/lib/gates';
+import { planNameFor } from '@/lib/pricing';
 import { useTabBarSpace } from '@/lib/useBottomSpace';
 import { purchases } from '@/native/purchases';
 import { useLibrary } from '@/state/library';
@@ -75,6 +80,9 @@ export default function Me() {
   const recipeCount = useLibrary((s) => Object.keys(s.recipes).length);
   const signedIn = session.status === 'signedIn';
   const balance = session.balance;
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const languageSetting = getLanguageSetting();
+  const planName = planNameFor(balance?.planId ?? null, balance?.planName ?? null);
 
   const switchProps = (value: boolean, onValueChange: (v: boolean) => void) => ({
     value,
@@ -100,37 +108,34 @@ export default function Me() {
       await purchases.restore();
       const { balance: fresh } = await api.syncBilling();
       session.setBalance(fresh);
-      toast('Purchases restored', { tone: 'success' });
+      toast(t('pricing.toasts.restored'), { tone: 'success' });
     } catch (error) {
-      handleApiError(error, 'Could not restore purchases.');
+      handleApiError(error, 'pricing.errors.restoreFailed');
     }
   };
 
   const deleteAccount = async () => {
     const ok = await confirm({
-      title: 'Delete your account?',
-      message: 'Your credits, subscription link and contributions are removed permanently. Recipes on this phone stay. Cancel any subscription in your app store settings too.',
-      confirmLabel: 'Delete account',
+      title: t('me.deleteConfirm.title'),
+      message: t('me.deleteConfirm.message'),
+      confirmLabel: t('me.deleteConfirm.confirm'),
       destructive: true,
     });
     if (!ok) return;
     try {
       await api.deleteAccount();
       await session.signOut();
-      toast('Your account has been deleted');
+      toast(t('me.toasts.deleted'));
     } catch (error) {
       handleApiError(error);
     }
   };
 
-  const profileSummary = [
-    profile.diet ? profile.diet.replace('-', ' ') : null,
-    profile.householdSize ? `cooks for ${profile.householdSize}` : null,
-    profile.equipment?.length ? `${profile.equipment.length} appliances` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ')
-    .replace(/^./, (c) => c.toUpperCase());
+  const profileSummary = joinFacts([
+    profile.diet ? t(`onboarding.diets.${profile.diet}`) : null,
+    profile.householdSize ? t('me.profileSummary.household', { count: profile.householdSize }) : null,
+    profile.equipment?.length ? t('me.profileSummary.appliances', { count: profile.equipment.length }) : null,
+  ]);
 
   return (
     <Screen>
@@ -139,10 +144,10 @@ export default function Me() {
           <Avatar name={session.user?.name ?? null} uri={session.user?.avatarUrl} size={60} />
           <View style={{ flex: 1 }}>
             <Txt variant="title2" numberOfLines={1}>
-              {session.user?.name ?? (signedIn ? 'Cook' : 'Guest cook')}
+              {session.user?.name ?? (signedIn ? t('me.cook') : t('me.guest'))}
             </Txt>
             <Txt variant="subhead" color="textMuted" numberOfLines={1}>
-              {signedIn ? (session.user?.email ?? 'Signed in') : `${recipeCount} recipes on this phone`}
+              {signedIn ? (session.user?.email ?? t('me.signedIn')) : t('me.recipesOnPhone', { count: recipeCount })}
             </Txt>
           </View>
         </View>
@@ -152,7 +157,7 @@ export default function Me() {
             <View style={styles.creditsTop}>
               <View>
                 <Txt variant="overline" color="textMuted">
-                  Credits
+                  {t('me.credits.title')}
                 </Txt>
                 <View style={styles.creditsValue}>
                   <Icon name="flash" size={22} color={colors.saffron} />
@@ -161,77 +166,86 @@ export default function Me() {
                   </Txt>
                 </View>
               </View>
-              {balance?.planName ? <Badge label={balance.planName} icon="star" tone="primary" /> : <Badge label="Starter" tone="saffron" />}
+              {planName ? <Badge label={planName} icon="star" tone="primary" /> : <Badge label={t('me.credits.starter')} tone="saffron" />}
             </View>
             <Txt variant="footnote" color="textMuted">
               {balance?.planName && balance.nextRefillAt
-                ? `${balance.plan} plan credits refill to ${balance.monthlyAllowance} on ${new Date(balance.nextRefillAt).toLocaleDateString()}${balance.bonus ? ` · ${balance.bonus} extra` : ''}`
-                : 'One-time starter credits. Subscribe for a fresh batch every month.'}
+                ? joinFacts([
+                    t('me.credits.refill', { allowance: balance.monthlyAllowance ?? balance.plan, date: formatDate(new Date(balance.nextRefillAt)) }),
+                    balance.bonus ? t('me.credits.extra', { count: balance.bonus }) : null,
+                  ])
+                : t('me.credits.starterNote')}
             </Txt>
-            <Button label={balance?.planName ? 'Get more credits' : 'See plans'} icon="flash" size="md" onPress={() => router.push('/pricing')} style={{ marginTop: 14 }} />
+            <Button label={balance?.planName ? t('me.credits.more') : t('me.credits.plans')} icon="flash" size="md" onPress={() => router.push('/pricing')} style={{ marginTop: 14 }} />
           </Card>
         ) : (
           <Card tone="ai" style={styles.credits}>
-            <Txt variant="title3">Unlock Chef & YouTube reels</Txt>
+            <Txt variant="title3">{t('me.guestCard.title')}</Txt>
             <Txt variant="subhead" color="textMuted" style={{ marginTop: 4 }}>
-              Create a free account to use AI features. Your recipes stay on this phone either way.
+              {t('me.guestCard.body')}
             </Txt>
-            <Button label="Create free account" variant="ai" size="md" icon="sparkles" onPress={() => router.push('/sign-in')} style={{ marginTop: 14 }} />
+            <Button label={t('me.guestCard.cta')} variant="ai" size="md" icon="sparkles" onPress={() => router.push('/sign-in')} style={{ marginTop: 14 }} />
           </Card>
         )}
 
-        <Group title="Cooking">
-          <Row icon="person-outline" label="Cooking profile" detail={profileSummary || 'Diet, kitchen, goals'} onPress={() => router.push('/profile')} />
-          <Row icon="mic-outline" label="Voice control" detail="Say “next”, “back”, “stop” while cooking" right={<Switch {...switchProps(settings.voiceControl, (v) => settings.set({ voiceControl: v }))} />} />
-          <Row icon="volume-high-outline" label="Read steps aloud" detail="Always on for YouTube Shorts" right={<Switch {...switchProps(settings.autoNarrate, (v) => settings.set({ autoNarrate: v }))} />} />
+        <Group title={t('me.groups.cooking')}>
+          <Row icon="person-outline" label={t('me.rows.profile')} detail={profileSummary || t('me.rows.profileEmpty')} onPress={() => router.push('/profile')} />
+          <Row
+            icon="language-outline"
+            label={t('me.rows.language')}
+            detail={languageSetting === 'system' ? t('common.language.systemDetail', { language: LANGUAGE_INFO[getLanguage()].nativeName }) : LANGUAGE_INFO[languageSetting].nativeName}
+            onPress={() => setLanguageOpen(true)}
+          />
+          <Row icon="mic-outline" label={t('me.rows.voiceControl')} detail={t('me.rows.voiceControlDetail')} right={<Switch {...switchProps(settings.voiceControl, (v) => settings.set({ voiceControl: v }))} />} />
+          <Row icon="volume-high-outline" label={t('me.rows.readAloud')} detail={t('me.rows.readAloudDetail')} right={<Switch {...switchProps(settings.autoNarrate, (v) => settings.set({ autoNarrate: v }))} />} />
           <View style={styles.inlineSetting}>
             <Txt variant="footnote" color="textMuted" style={{ marginBottom: 8 }}>
-              Narration speed
+              {t('me.voice.pace')}
             </Txt>
             <Segmented
               value={String(settings.speechRate)}
               onChange={(v) => settings.set({ speechRate: Number(v) })}
               options={[
-                { value: '0.85', label: 'Relaxed' },
-                { value: '1', label: 'Normal' },
-                { value: '1.15', label: 'Brisk' },
+                { value: '0.85', label: t('me.voice.paces.relaxed') },
+                { value: '1', label: t('me.voice.paces.normal') },
+                { value: '1.15', label: t('me.voice.paces.brisk') },
               ]}
             />
           </View>
         </Group>
 
-        <Group title="Appearance">
+        <Group title={t('me.groups.appearance')}>
           <View style={styles.inlineSetting}>
             <Segmented<Appearance>
               value={settings.appearance}
               onChange={(v) => settings.set({ appearance: v })}
               options={[
-                { value: 'system', label: 'System' },
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
+                { value: 'system', label: t('me.appearance.system') },
+                { value: 'light', label: t('me.appearance.light') },
+                { value: 'dark', label: t('me.appearance.dark') },
               ]}
             />
           </View>
         </Group>
 
         {signedIn ? (
-          <Group title="Privacy">
+          <Group title={t('me.groups.privacy')}>
             <Row
               icon="people-outline"
-              label="Help Chef learn from my imports"
-              detail="Recipes from videos you import improve suggestions for everyone. Turning this off withdraws them."
+              label={t('me.rows.sharing')}
+              detail={t('me.rows.sharingDetail')}
               right={<Switch {...switchProps(session.user?.sharingOptIn ?? true, (v) => void toggleSharing(v))} />}
               last
             />
           </Group>
         ) : null}
 
-        <Group title="Purchases">
-          <Row icon="pricetags-outline" label="Plans & credits" onPress={() => router.push('/pricing')} />
-          {Platform.OS !== 'web' ? <Row icon="refresh-outline" label="Restore purchases" onPress={() => void restore()} /> : null}
+        <Group title={t('me.groups.purchases')}>
+          <Row icon="pricetags-outline" label={t('me.rows.plans')} onPress={() => router.push('/pricing')} />
+          {Platform.OS !== 'web' ? <Row icon="refresh-outline" label={t('me.rows.restore')} onPress={() => void restore()} /> : null}
           <Row
             icon="card-outline"
-            label="Manage subscription"
+            label={t('me.rows.manage')}
             last
             onPress={() =>
               void Linking.openURL(
@@ -242,16 +256,17 @@ export default function Me() {
         </Group>
 
         {signedIn ? (
-          <Group title="Account">
-            <Row icon="log-out-outline" label="Sign out" onPress={() => void session.signOut()} />
-            <Row icon="trash-outline" label="Delete account" danger last onPress={() => void deleteAccount()} />
+          <Group title={t('me.groups.account')}>
+            <Row icon="log-out-outline" label={t('me.rows.signOut')} onPress={() => void session.signOut()} />
+            <Row icon="trash-outline" label={t('me.rows.deleteAccount')} danger last onPress={() => void deleteAccount()} />
           </Group>
         ) : null}
 
         <Txt variant="caption" color="textFaint" align="center" style={{ marginTop: 28 }}>
-          CookReel {Constants.expoConfig?.version ?? ''} · Made for hungry people
+          {t('me.footer', { version: Constants.expoConfig?.version ?? '' })}
         </Txt>
       </ScrollView>
+      <LanguageSheet visible={languageOpen} onClose={() => setLanguageOpen(false)} />
     </Screen>
   );
 }

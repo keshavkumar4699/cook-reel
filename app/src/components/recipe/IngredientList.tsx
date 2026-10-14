@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Ingredient } from '@/data/types';
 import { formatQuantity } from '@/lib/format';
+import { t } from '@/i18n';
+import { Trans } from '@/i18n/Trans';
 import { radius, useTheme } from '@/theme';
 import { Icon } from '../ui/Icon';
 import { PressableScale } from '../ui/PressableScale';
@@ -27,7 +29,7 @@ export function IngredientList({ ingredients, factor }: { ingredients: Ingredien
               haptic="select"
               accessibilityRole="checkbox"
               accessibilityState={{ checked }}
-              accessibilityLabel={`${qty} ${ing.name}`}
+              accessibilityLabel={qty ? t('recipe.ingredients.line', { quantity: qty, name: ing.name }) : ing.name}
               onPress={() =>
                 setHave((prev) => {
                   const next = new Set(prev);
@@ -48,18 +50,24 @@ export function IngredientList({ ingredients, factor }: { ingredients: Ingredien
               </View>
               <View style={{ flex: 1 }}>
                 <Txt variant="body" color={checked ? 'textFaint' : 'text'} style={checked ? styles.struck : null}>
-                  {qty ? <Txt variant="bodyStrong" color={checked ? 'textFaint' : 'text'}>{`${qty} `}</Txt> : null}
-                  {ing.name}
-                  {ing.optional ? <Txt variant="footnote" color="textFaint">{'  optional'}</Txt> : null}
+                  {qty ? (
+                    <Trans
+                      k="recipe.ingredients.line"
+                      values={{ quantity: <Txt variant="bodyStrong" color={checked ? 'textFaint' : 'text'}>{qty}</Txt>, name: ing.name }}
+                    />
+                  ) : (
+                    ing.name
+                  )}
+                  {ing.optional ? <Txt variant="footnote" color="textFaint">{`  ${t('recipe.ingredients.optional')}`}</Txt> : null}
                 </Txt>
                 {ing.note || (ing.quantity === null && !ing.note) ? (
                   <Txt variant="footnote" color="textMuted">
-                    {ing.note ?? 'to taste'}
+                    {ing.note ?? t('recipe.ingredients.toTaste')}
                   </Txt>
                 ) : null}
                 {hasSubs && open === ing.id ? (
                   <Txt variant="footnote" color="accent" style={{ marginTop: 4 }}>
-                    Swap with: {ing.substitutes.join(' · ')}
+                    {t('recipe.ingredients.swapWith', { items: ing.substitutes.join(' · ') })}
                   </Txt>
                 ) : null}
               </View>
@@ -67,7 +75,7 @@ export function IngredientList({ ingredients, factor }: { ingredients: Ingredien
                 <PressableScale
                   onPress={() => setOpen(open === ing.id ? null : ing.id)}
                   hitSlop={8}
-                  accessibilityLabel={`Substitutes for ${ing.name}`}
+                  accessibilityLabel={t('recipe.ingredients.substitutesFor', { name: ing.name })}
                   style={[styles.swap, { backgroundColor: colors.accentSoft }]}
                 >
                   <Icon name="swap-horizontal" size={14} color={colors.accent} />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api, type Pricing } from './api';
+import { t, type MessageKey } from '@/i18n';
+import { api, type Plan, type Pricing } from './api';
 
 /** Mirrors server/src/domain/pricing.ts so the UI works offline; the server's copy wins when reachable. */
 export const FALLBACK_PRICING: Pricing = {
@@ -70,4 +71,35 @@ export function usePricing(): Pricing {
     };
   }, []);
   return pricing;
+}
+
+const PLAN_COPY: Record<string, { name: MessageKey; tagline: MessageKey; perks: MessageKey[] }> = {
+  basic: {
+    name: 'pricing.plans.basic.name',
+    tagline: 'pricing.plans.basic.tagline',
+    perks: ['pricing.plans.basic.perks.ai', 'pricing.plans.basic.perks.youtube', 'pricing.plans.basic.perks.topups'],
+  },
+  pro: {
+    name: 'pricing.plans.pro.name',
+    tagline: 'pricing.plans.pro.tagline',
+    perks: ['pricing.plans.pro.perks.everything', 'pricing.plans.pro.perks.credits'],
+  },
+  max: {
+    name: 'pricing.plans.max.name',
+    tagline: 'pricing.plans.max.tagline',
+    perks: ['pricing.plans.max.perks.everything', 'pricing.plans.max.perks.value'],
+  },
+};
+
+/** A plan's name, tagline and perks in the app language; the server's English copy for plans the app doesn't know yet. */
+export function planCopy(plan: Plan): { name: string; tagline: string; perks: string[] } {
+  const copy = PLAN_COPY[plan.id];
+  if (!copy) return { name: plan.name, tagline: plan.tagline, perks: plan.perks };
+  return { name: t(copy.name), tagline: t(copy.tagline), perks: copy.perks.map((key) => t(key)) };
+}
+
+/** A plan's display name by id, e.g. for the balance badge; the server's name for unknown plans. */
+export function planNameFor(planId: string | null, fallback: string | null): string | null {
+  const copy = planId ? PLAN_COPY[planId] : undefined;
+  return copy ? t(copy.name) : fallback;
 }

@@ -11,6 +11,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Text';
 import type { CookProfile, Persona } from '@/data/types';
 import { firstName } from '@/lib/format';
+import { t } from '@/i18n';
 import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { GUTTER, useTheme } from '@/theme';
@@ -27,10 +28,10 @@ export default function Onboarding() {
 
   const steps = useMemo(
     () => [
-      { title: 'What brings you\nto CookReel?', subtitle: 'Pick all that fit — we’ll shape your home screen around them.' },
-      { title: 'How do you eat?', subtitle: 'Chef will never suggest anything you can’t have.' },
-      { title: 'Your kitchen', subtitle: 'Recipes will only use what you actually own.' },
-      { title: 'You & your goals', subtitle: 'For portions, macros and grocery budgets.' },
+      { title: t('onboarding.steps.personas.title'), subtitle: t('onboarding.steps.personas.subtitle') },
+      { title: t('onboarding.steps.diet.title'), subtitle: t('onboarding.steps.diet.subtitle') },
+      { title: t('onboarding.steps.kitchen.title'), subtitle: t('onboarding.steps.kitchen.subtitle') },
+      { title: t('onboarding.steps.goals.title'), subtitle: t('onboarding.steps.goals.subtitle') },
     ],
     [],
   );
@@ -49,7 +50,7 @@ export default function Onboarding() {
     <Screen>
       <View style={[styles.top, { paddingTop: insets.top + 10 }]}>
         {step > 0 ? (
-          <PressableScale onPress={() => setStep(step - 1)} hitSlop={10} accessibilityLabel="Back">
+          <PressableScale onPress={() => setStep(step - 1)} hitSlop={10} accessibilityLabel={t('common.actions.back')}>
             <Icon name="chevron-back" size={24} />
           </PressableScale>
         ) : (
@@ -60,9 +61,9 @@ export default function Onboarding() {
             <View key={i} style={[styles.progressSeg, { backgroundColor: i <= step ? colors.primary : colors.border }]} />
           ))}
         </View>
-        <PressableScale onPress={finish} hitSlop={10} accessibilityLabel="Skip setup">
+        <PressableScale onPress={finish} hitSlop={10} accessibilityLabel={t('onboarding.skipSetup')}>
           <Txt variant="subheadStrong" color="textMuted">
-            Skip
+            {t('common.actions.skip')}
           </Txt>
         </PressableScale>
       </View>
@@ -71,7 +72,7 @@ export default function Onboarding() {
         <Animated.View key={step} entering={FadeInRight.springify().damping(20)} exiting={FadeOutLeft.duration(120)}>
           {step === 0 && name ? (
             <Txt variant="subheadStrong" color="primary" style={{ marginBottom: 6 }}>
-              Hi {name} 👋
+              {t('onboarding.hello', { name })}
             </Txt>
           ) : null}
           <Txt variant="title1">{current.title}</Txt>
@@ -86,7 +87,7 @@ export default function Onboarding() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 14, backgroundColor: colors.bg }]}>
-        <Button label={step === steps.length - 1 ? 'Start cooking' : 'Continue'} iconRight="arrow-forward" onPress={next} />
+        <Button label={step === steps.length - 1 ? t('onboarding.start') : t('common.actions.continue')} iconRight="arrow-forward" onPress={next} />
       </View>
     </Screen>
   );

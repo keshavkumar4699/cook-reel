@@ -4,6 +4,7 @@ import { joinFacts } from '@/i18n/format';
 import type { ExperimentRecipeInput } from '@/lib/api';
 import { formatMinutes, formatQuantity } from '@/lib/format';
 import { newId } from '@/lib/id';
+import { profileInEnglish } from './profileOptions';
 
 /** Turns an API recipe into a library entry with its own local ID. */
 export function fromApiRecipe(recipe: ApiRecipe, extra: Partial<Recipe> = {}): Recipe {
@@ -120,7 +121,8 @@ export function tasteHints(recipes: Recipe[]): string[] {
 
 export function profileForAI(profile: CookProfile, recipes: Recipe[]): CookProfile {
   const hints = tasteHints(recipes);
-  return hints.length ? { ...profile, tasteHints: hints } : profile;
+  const english = profileInEnglish(profile);
+  return hints.length ? { ...english, tasteHints: hints } : english;
 }
 
 /** Plain-text version for the share sheet. */

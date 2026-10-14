@@ -17,7 +17,8 @@ import { api, type Plan } from '@/lib/api';
 import { formatCurrency } from '@/lib/format';
 import { handleApiError } from '@/lib/gates';
 import { haptics } from '@/lib/haptics';
-import { usePricing } from '@/lib/pricing';
+import { planCopy, usePricing } from '@/lib/pricing';
+import { t } from '@/i18n';
 import { purchases, type StorePackage } from '@/native/purchases';
 import { useSession } from '@/state/session';
 import { toast } from '@/state/toast';
@@ -56,6 +57,7 @@ export default function Pricing() {
   }, [storeReady]);
 
   const plan = pricing.plans.find((p) => p.id === selected) ?? pricing.plans[0]!;
+  const planName = planCopy(plan).name;
   const pkg = storePackageFor(plan, period, packages);
   const price = pkg?.priceString ?? plan.displayPrice[period];
   const subscribed = !!balance?.planId;
@@ -76,7 +78,7 @@ export default function Pricing() {
       return;
     }
     if (!target) {
-      toast(storeReady ? 'This product isn’t available in your store yet.' : 'Purchases are available in the iOS and Android apps.', { tone: 'error' });
+      toast(storeReady ? t('pricing.toasts.unavailable') : t('pricing.toasts.appsOnly'), { tone: 'error' });
       return;
     }
     setBuying(id);
@@ -86,10 +88,10 @@ export default function Pricing() {
       const { balance: fresh } = await api.syncBilling();
       setBalance(fresh);
       haptics.success();
-      toast(`You’re all set — ${fresh.total} credits ready.`, { tone: 'success' });
+      toast(t('pricing.toasts.done', { count: fresh.total }), { tone: 'success' });
       if (router.canGoBack()) router.back();
     } catch (error) {
-      handleApiError(error, 'The purchase didn’t go through.');
+      handleApiError(error, 'pricing.errors.purchaseFailed');
     } finally {
       setBuying(null);
     }
@@ -100,17 +102,17 @@ export default function Pricing() {
       await purchases.restore();
       const { balance: fresh } = await api.syncBilling();
       setBalance(fresh);
-      toast('Purchases restored', { tone: 'success' });
+      toast(t('pricing.toasts.restored'), { tone: 'success' });
     } catch (error) {
-      handleApiError(error, 'Could not restore purchases.');
+      handleApiError(error, 'pricing.errors.restoreFailed');
     }
   };
 
   const costs = [
-    { emoji: '✨', label: 'AI recipe from Chef', value: pricing.costs.recipe },
-    { emoji: '🧪', label: 'Recipe variation', value: pricing.costs.experiment },
-    { emoji: '▶️', label: 'YouTube video breakdown', value: pricing.costs.youtube },
-    { emoji: '📱', label: 'YouTube Short breakdown', value: pricing.costs.youtubeShort },
+    { emoji: '✨', label: t('pricing.costs.recipe'), value: pricing.costs.recipe },
+    { emoji: '🧪', label: t('pricing.costs.experiment'), value: pricing.costs.experiment },
+    { emoji: '▶️', label: t('pricing.costs.youtube'), value: pricing.costs.youtube },
+    { emoji: '📱', label: t('pricing.costs.youtubeShort'), value: pricing.costs.youtubeShort },
   ];
 
   return (
@@ -118,18 +120,16 @@ export default function Pricing() {
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 140 }} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={isDark ? ['#3A1E14', colors.bg] : ['#FFE3D5', colors.bg]} style={[styles.hero, { paddingTop: insets.top + 8 }]}>
           <View style={styles.heroTop}>
-            <IconButton icon="close" label="Close" onPress={() => router.back()} />
-            {balance && status === 'signedIn' ? <Badge label={`${balance.total} credits left`} icon="flash" tone="saffron" /> : null}
+            <IconButton icon="close" label={t('common.actions.close')} onPress={() => router.back()} />
+            {balance && status === 'signedIn' ? <Badge label={t('pricing.creditsLeft', { count: balance.total })} icon="flash" tone="saffron" /> : null}
           </View>
           <Animated.View entering={FadeInDown.springify().damping(18)}>
             <Txt style={{ fontSize: 44, lineHeight: 52, marginTop: 8 }}>👩‍🍳</Txt>
             <Txt variant="title1" style={{ marginTop: 6 }}>
-              {reason !== 'credits' ? 'Cook more with Chef' : (balance?.total ?? 0) > 0 ? 'Not enough credits' : 'You’re out of credits'}
+              {reason !== 'credits' ? t('pricing.hero.title') : (balance?.total ?? 0) > 0 ? t('pricing.hero.notEnough') : t('pricing.hero.outOfCredits')}
             </Txt>
             <Txt variant="body" color="textMuted" style={{ marginTop: 8 }}>
-              {reason === 'credits'
-                ? 'Pick a plan to keep creating recipes and turning videos into step reels. Your saved recipes always stay free.'
-                : 'A fresh batch of credits every month for AI recipes, experiments and YouTube step reels.'}
+              {reason === 'credits' ? t('pricing.hero.bodyOut') : t('pricing.hero.body')}
             </Txt>
           </Animated.View>
         </LinearGradient>
@@ -139,8 +139,8 @@ export default function Pricing() {
             value={period}
             onChange={setPeriod}
             options={[
-              { value: 'monthly', label: 'Monthly' },
-              { value: 'yearly', label: savings > 0 ? `Yearly · save ${savings}%` : 'Yearly' },
+              { value: 'monthly', label: t('pricing.period.monthly') },
+              { value: 'yearly', label: savings > 0 ? t('pricing.period.yearlySave', { percent: savings }) : t('pricing.period.yearly') },
             ]}
           />
 
@@ -150,6 +150,7 @@ export default function Pricing() {
               const planPkg = storePackageFor(p, period, packages);
               const planPrice = planPkg?.priceString ?? p.displayPrice[period];
               const current = balance?.planId === p.id;
+              const copy = planCopy(p);
               return (
                 <Animated.View key={p.id} entering={FadeInDown.delay(80 * i).springify().damping(18)}>
                   <PressableScale
@@ -157,7 +158,7 @@ export default function Pricing() {
                     scaleTo={0.98}
                     onPress={() => setSelected(p.id)}
                     accessibilityState={{ selected: active }}
-                    accessibilityLabel={`${p.name}, ${planPrice} per ${period === 'monthly' ? 'month' : 'year'}`}
+                    accessibilityLabel={t(period === 'monthly' ? 'pricing.planA11y.monthly' : 'pricing.planA11y.yearly', { name: copy.name, price: planPrice })}
                     style={[
                       styles.plan,
                       { backgroundColor: colors.surface, borderColor: active ? colors.primary : colors.border },
@@ -170,30 +171,34 @@ export default function Pricing() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                          <Txt variant="title3">{p.name}</Txt>
-                          {current ? <Badge label="Current" tone="accent" /> : p.highlight ? <Badge label="Most popular" icon="star" tone="primary" /> : null}
+                          <Txt variant="title3">{copy.name}</Txt>
+                          {current ? (
+                            <Badge label={t('pricing.badges.current')} tone="accent" />
+                          ) : p.highlight ? (
+                            <Badge label={t('pricing.badges.mostPopular')} icon="star" tone="primary" />
+                          ) : null}
                         </View>
                         <Txt variant="footnote" color="textMuted">
-                          {p.tagline}
+                          {copy.tagline}
                         </Txt>
                       </View>
                       <View style={{ alignItems: 'flex-end' }}>
                         <Txt variant="headline">{planPrice}</Txt>
                         <Txt variant="caption" color="textMuted">
-                          {period === 'monthly' ? 'per month' : `≈ ${perMonth(planPkg, planPrice) ?? ''}/mo`}
+                          {period === 'monthly' ? t('pricing.perMonth') : t('pricing.perMonthApprox', { price: perMonth(planPkg, planPrice) ?? '' })}
                         </Txt>
                       </View>
                     </View>
                     <View style={[styles.credits, { backgroundColor: colors.saffronSoft }]}>
                       <Icon name="flash" size={14} color={colors.saffron} />
-                      <Txt variant="subheadStrong">{p.monthlyCredits} credits every month</Txt>
+                      <Txt variant="subheadStrong">{t('pricing.monthlyCredits', { count: p.monthlyCredits })}</Txt>
                       <Txt variant="caption" color="textMuted">
-                        ≈ {Math.floor(p.monthlyCredits / pricing.costs.recipe)} recipes
+                        {t('pricing.approxRecipes', { count: Math.floor(p.monthlyCredits / pricing.costs.recipe) })}
                       </Txt>
                     </View>
                     {active ? (
                       <View style={{ gap: 6, marginTop: 10 }}>
-                        {p.perks.map((perk) => (
+                        {copy.perks.map((perk) => (
                           <View key={perk} style={styles.perk}>
                             <Icon name="checkmark-circle" size={16} color={colors.accent} />
                             <Txt variant="subhead">{perk}</Txt>
@@ -208,7 +213,7 @@ export default function Pricing() {
           </View>
 
           <Card style={{ marginTop: 24 }}>
-            <Txt variant="headline">What uses credits</Txt>
+            <Txt variant="headline">{t('pricing.costs.title')}</Txt>
             <View style={{ marginTop: 10, gap: 10 }}>
               {costs.map((c) => (
                 <View key={c.label} style={styles.costRow}>
@@ -216,44 +221,45 @@ export default function Pricing() {
                   <Txt variant="subhead" style={{ flex: 1 }}>
                     {c.label}
                   </Txt>
-                  <Txt variant="subheadStrong">{c.value === 1 ? '1 credit' : `${c.value} credits`}</Txt>
+                  <Txt variant="subheadStrong">{t('common.counts.credits', { count: c.value })}</Txt>
                 </View>
               ))}
               <View style={styles.costRow}>
                 <Txt style={{ width: 26 }}>🍳</Txt>
                 <Txt variant="subhead" style={{ flex: 1 }}>
-                  Saving, planning & cooking mode
+                  {t('pricing.costs.free')}
                 </Txt>
                 <Txt variant="subheadStrong" color="accent">
-                  Free
+                  {t('pricing.costs.freeValue')}
                 </Txt>
               </View>
             </View>
             <Txt variant="caption" color="textFaint" style={{ marginTop: 12 }}>
-              Questions Chef asks are free. Failed imports are refunded automatically. Monthly credits reset each billing month; top-up credits never expire.
+              {t('pricing.costs.note')}
             </Txt>
           </Card>
 
           {subscribed ? (
             <View style={{ marginTop: 24 }}>
-              <Txt variant="title3">Need a top-up?</Txt>
+              <Txt variant="title3">{t('pricing.topups.title')}</Txt>
               <View style={styles.topups}>
-                {pricing.topups.map((t) => {
-                  const topupPkg = packages.find((p) => p.productId === t.productId);
+                {pricing.topups.map((topup) => {
+                  const topupPkg = packages.find((p) => p.productId === topup.productId);
+                  const topupPrice = topupPkg?.priceString ?? topup.displayPrice;
                   return (
                     <PressableScale
-                      key={t.productId}
-                      onPress={() => void buy(topupPkg, t.productId)}
+                      key={topup.productId}
+                      onPress={() => void buy(topupPkg, topup.productId)}
                       style={[styles.topup, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                      accessibilityLabel={`${t.credits} credits for ${topupPkg?.priceString ?? t.displayPrice}`}
+                      accessibilityLabel={t('pricing.topups.a11y', { count: topup.credits, price: topupPrice })}
                     >
                       <Icon name="flash" size={18} color={colors.saffron} />
-                      <Txt variant="title3">{t.credits}</Txt>
+                      <Txt variant="title3">{topup.credits}</Txt>
                       <Txt variant="caption" color="textMuted">
-                        credits
+                        {t('pricing.topups.unit', { count: topup.credits })}
                       </Txt>
                       <Txt variant="subheadStrong" style={{ marginTop: 6 }}>
-                        {buying === t.productId ? '…' : (topupPkg?.priceString ?? t.displayPrice)}
+                        {buying === topup.productId ? '…' : topupPrice}
                       </Txt>
                     </PressableScale>
                   );
@@ -266,31 +272,37 @@ export default function Pricing() {
             {Platform.OS !== 'web' ? (
               <PressableScale onPress={() => void restore()} hitSlop={8}>
                 <Txt variant="footnote" color="textMuted">
-                  Restore purchases
+                  {t('pricing.links.restore')}
                 </Txt>
               </PressableScale>
             ) : null}
             <PressableScale onPress={() => void Linking.openURL('https://cookreel.app/terms')} hitSlop={8}>
               <Txt variant="footnote" color="textMuted">
-                Terms
+                {t('pricing.links.terms')}
               </Txt>
             </PressableScale>
             <PressableScale onPress={() => void Linking.openURL('https://cookreel.app/privacy')} hitSlop={8}>
               <Txt variant="footnote" color="textMuted">
-                Privacy
+                {t('pricing.links.privacy')}
               </Txt>
             </PressableScale>
           </View>
           <Txt variant="caption" color="textFaint" align="center" style={{ marginTop: 8 }}>
-            Subscriptions renew automatically until cancelled in your {Platform.OS === 'ios' ? 'App Store' : Platform.OS === 'android' ? 'Google Play' : 'app store'} settings, at least 24 hours before the period ends.
+            {t('pricing.renewal', { store: Platform.OS === 'ios' ? 'App Store' : Platform.OS === 'android' ? 'Google Play' : t('pricing.genericStore') })}
           </Txt>
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12, backgroundColor: colors.bg, borderColor: colors.border }]}>
         <Button
-          label={status !== 'signedIn' ? 'Sign up to subscribe' : balance?.planId === plan.id ? `You’re on ${plan.name}` : `Continue with ${plan.name}`}
-          meta={status === 'signedIn' && balance?.planId !== plan.id ? `${price}/${period === 'monthly' ? 'mo' : 'yr'}` : undefined}
+          label={
+            status !== 'signedIn'
+              ? t('pricing.cta.signUp')
+              : balance?.planId === plan.id
+                ? t('pricing.cta.current', { plan: planName })
+                : t('pricing.cta.continue', { plan: planName })
+          }
+          meta={status === 'signedIn' && balance?.planId !== plan.id ? t(period === 'monthly' ? 'pricing.cta.perMonth' : 'pricing.cta.perYear', { price }) : undefined}
           disabled={status === 'signedIn' && balance?.planId === plan.id}
           loading={buying === plan.id}
           onPress={() => void buy(pkg, plan.id)}

@@ -10,6 +10,7 @@ import { Txt } from '@/components/ui/Text';
 import type { CookProfile, Persona } from '@/data/types';
 import { useProfile } from '@/state/profile';
 import { toast } from '@/state/toast';
+import { t } from '@/i18n';
 import { GUTTER, useTheme } from '@/theme';
 
 export default function EditProfile() {
@@ -23,36 +24,36 @@ export default function EditProfile() {
   const save = () => {
     store.setPersonas(personas);
     store.updateProfile(profile);
-    toast('Cooking profile saved', { tone: 'success' });
+    toast(t('onboarding.profile.saved'), { tone: 'success' });
     router.back();
   };
 
   return (
     <Screen>
-      <TopBar title="Cooking profile" />
+      <TopBar title={t('onboarding.profile.title')} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 110 }]}>
         <Txt variant="body" color="textMuted">
-          Chef uses this for every recipe: what you eat, what you own and what you’re aiming for.
+          {t('onboarding.profile.intro')}
         </Txt>
         <Txt variant="title3" style={styles.section}>
-          What brings you here
+          {t('onboarding.profile.sections.personas')}
         </Txt>
         <PersonaPicker value={personas} onChange={setPersonas} />
         <Txt variant="title3" style={styles.section}>
-          How you eat
+          {t('onboarding.profile.sections.diet')}
         </Txt>
         <DietFields profile={profile} patch={patch} />
         <Txt variant="title3" style={styles.section}>
-          Your kitchen
+          {t('onboarding.profile.sections.kitchen')}
         </Txt>
         <KitchenFields profile={profile} patch={patch} />
         <Txt variant="title3" style={styles.section}>
-          You & your goals
+          {t('onboarding.profile.sections.goals')}
         </Txt>
         <GoalFields profile={profile} patch={patch} />
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: insets.bottom + 14, backgroundColor: colors.bg, borderColor: colors.border }]}>
-        <Button label="Save profile" icon="checkmark" onPress={save} />
+        <Button label={t('onboarding.profile.save')} icon="checkmark" onPress={save} />
       </View>
     </Screen>
   );

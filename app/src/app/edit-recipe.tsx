@@ -15,6 +15,8 @@ import { TextField } from '@/components/ui/TextField';
 import { TopBar } from '@/components/ui/TopBar';
 import { Txt } from '@/components/ui/Text';
 import type { Difficulty, Ingredient, Recipe, Step } from '@/data/types';
+import { t } from '@/i18n';
+import { formatDecimal, parseLocaleNumber } from '@/i18n/format';
 import { haptics } from '@/lib/haptics';
 import { newId } from '@/lib/id';
 import { parseIngredientList } from '@/lib/parseIngredient';
@@ -42,9 +44,12 @@ interface DraftStep {
 }
 
 const num = (value: string) => {
-  const n = Number(value.replace(',', '.'));
-  return value.trim() && Number.isFinite(n) && n > 0 ? n : null;
+  const n = parseLocaleNumber(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
 };
+
+/** Tags are typed comma-separated; accept the Japanese and Arabic commas too. */
+const TAG_SEPARATOR = /[,\uFF0C\u3001\u060C]/;
 
 export default function EditRecipe() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -61,10 +66,10 @@ export default function EditRecipe() {
   const [prep, setPrep] = useState(String(base.prepMinutes || ''));
   const [cook, setCook] = useState(String(base.cookMinutes || ''));
   const [difficulty, setDifficulty] = useState<Difficulty>(base.difficulty);
-  const [tags, setTags] = useState(base.tags.join(', '));
+  const [tags, setTags] = useState(base.tags.join(t('common.format.listSeparator')));
   const [ingredients, setIngredients] = useState<DraftIngredient[]>(() =>
     base.ingredients.length
-      ? base.ingredients.map((i) => ({ key: i.id, quantity: i.quantity === null ? '' : String(Math.round(i.quantity * 100) / 100), unit: i.unit, name: i.name, source: i }))
+      ? base.ingredients.map((i) => ({ key: i.id, quantity: i.quantity === null ? '' : formatDecimal(i.quantity, 2), unit: i.unit, name: i.name, source: i }))
       : [{ key: newId(), quantity: '', unit: '', name: '' }],
   );
   const [steps, setSteps] = useState<DraftStep[]>(() =>
@@ -73,10 +78,10 @@ export default function EditRecipe() {
       : [{ key: newId(), instruction: '', minutes: '' }],
   );
   const per = base.nutrition?.perServing;
-  const [kcal, setKcal] = useState(per ? String(per.kcal) : '');
-  const [protein, setProtein] = useState(per ? String(per.proteinG) : '');
-  const [carbs, setCarbs] = useState(per ? String(per.carbsG) : '');
-  const [fat, setFat] = useState(per ? String(per.fatG) : '');
+  const [kcal, setKcal] = useState(per ? formatDecimal(per.kcal) : '');
+  const [protein, setProtein] = useState(per ? formatDecimal(per.proteinG) : '');
+  const [carbs, setCarbs] = useState(per ? formatDecimal(per.carbsG) : '');
+  const [fat, setFat] = useState(per ? formatDecimal(per.fatG) : '');
   const [pasting, setPasting] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -87,9 +92,9 @@ export default function EditRecipe() {
   const onSave = () => {
     const cleanIngredients = ingredients.filter((i) => i.name.trim());
     const cleanSteps = steps.filter((s) => s.instruction.trim());
-    if (!title.trim()) return setError('Give your recipe a name.');
-    if (!cleanIngredients.length) return setError('Add at least one ingredient.');
-    if (!cleanSteps.length) return setError('Add at least one step.');
+    if (!title.trim()) return setError(t('edit.errors.noTitle'));
+    if (!cleanIngredients.length) return setError(t('edit.errors.noIngredients'));
+    if (!cleanSteps.length) return setError(t('edit.errors.noSteps'));
 
     const nextIngredients: Ingredient[] = cleanIngredients.map((d) => {
       const quantity = num(d.quantity);
@@ -111,7 +116,7 @@ export default function EditRecipe() {
       const minutes = num(d.minutes);
       return {
         id: d.source?.id ?? newId(),
-        title: d.source?.title ?? `Step ${i + 1}`,
+        title: d.source?.title ?? t('edit.defaultStepTitle', { n: i + 1 }),
         instruction: d.instruction.trim(),
         durationSec: minutes ? Math.round(minutes * 60) : null,
         tip: d.source?.tip ?? null,
@@ -159,8 +164,8 @@ export default function EditRecipe() {
       totalMinutes: prepMinutes + cookMinutes,
       difficulty,
       tags: tags
-        .split(',')
-        .map((t) => t.trim().toLowerCase().replace(/\s+/g, '-'))
+        .split(TAG_SEPARATOR)
+        .map((tag) => tag.trim().toLowerCase().replace(/\s+/g, '-'))
         .filter(Boolean)
         .slice(0, 8),
       ingredients: nextIngredients,
@@ -169,14 +174,14 @@ export default function EditRecipe() {
       starter: existing?.starter && existing.title === title.trim() ? existing.starter : undefined,
     });
     haptics.success();
-    toast(existing ? 'Recipe updated' : 'Recipe saved to your library', { tone: 'success' });
+    toast(existing ? t('edit.toasts.updated') : t('edit.toasts.saved'), { tone: 'success' });
     if (existing) router.back();
     else router.replace(`/recipe/${saved.id}`);
   };
 
   return (
     <Screen>
-      <TopBar title={existing ? 'Edit recipe' : 'New recipe'} leading="close" right={<Button label="Save" size="sm" onPress={onSave} />} />
+      <TopBar title={existing ? t('edit.titleEdit') : t('edit.titleNew')} leading="close" right={<Button label={t('common.actions.save')} size="sm" onPress={onSave} />} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]} keyboardShouldPersistTaps="handled">
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.emojis}>
@@ -185,10 +190,10 @@ export default function EditRecipe() {
             ))}
           </ScrollView>
 
-          <TextField label="Recipe name" placeholder="Mum’s rajma chawal" value={title} onChangeText={setTitle} maxLength={120} />
+          <TextField label={t('edit.fields.name')} placeholder={t('edit.fields.namePlaceholder')} value={title} onChangeText={setTitle} maxLength={120} />
           <TextField
-            label="Description"
-            placeholder="What makes it special?"
+            label={t('edit.fields.description')}
+            placeholder={t('edit.fields.descriptionPlaceholder')}
             value={description}
             onChangeText={setDescription}
             multiline
@@ -198,47 +203,47 @@ export default function EditRecipe() {
           <View style={styles.rowFields}>
             <View style={{ flex: 1 }}>
               <Txt variant="footnote" color="textMuted" style={styles.label}>
-                Servings
+                {t('edit.fields.servings')}
               </Txt>
               <View style={styles.stepperBox}>
                 <Stepper value={servings} onChange={setServings} min={1} max={24} />
               </View>
             </View>
-            <TextField label="Prep (min)" value={prep} onChangeText={setPrep} keyboardType="number-pad" containerStyle={{ width: 92 }} />
-            <TextField label="Cook (min)" value={cook} onChangeText={setCook} keyboardType="number-pad" containerStyle={{ width: 92 }} />
+            <TextField label={t('edit.fields.prep')} value={prep} onChangeText={setPrep} keyboardType="number-pad" containerStyle={{ width: 92 }} />
+            <TextField label={t('edit.fields.cook')} value={cook} onChangeText={setCook} keyboardType="number-pad" containerStyle={{ width: 92 }} />
           </View>
 
           <Txt variant="footnote" color="textMuted" style={[styles.label, { marginTop: 16 }]}>
-            Difficulty
+            {t('edit.fields.difficulty')}
           </Txt>
           <Segmented<Difficulty>
             value={difficulty}
             onChange={setDifficulty}
             options={[
-              { value: 'easy', label: 'Easy' },
-              { value: 'medium', label: 'Medium' },
-              { value: 'hard', label: 'Hard' },
+              { value: 'easy', label: t('common.difficulty.easy') },
+              { value: 'medium', label: t('common.difficulty.medium') },
+              { value: 'hard', label: t('common.difficulty.hard') },
             ]}
           />
 
           <View style={styles.sectionHead}>
-            <Txt variant="title3">Ingredients</Txt>
-            <Button label="Paste a list" variant="soft" size="sm" icon="clipboard-outline" onPress={() => setPasting(true)} />
+            <Txt variant="title3">{t('edit.ingredients.title')}</Txt>
+            <Button label={t('edit.paste.open')} variant="soft" size="sm" icon="clipboard-outline" onPress={() => setPasting(true)} />
           </View>
           <Animated.View layout={LinearTransition} style={{ gap: 8 }}>
             {ingredients.map((ing) => (
               <Animated.View key={ing.key} entering={FadeIn} style={styles.ingredientRow}>
-                <TextField placeholder="Qty" value={ing.quantity} onChangeText={(v) => updateIngredient(ing.key, { quantity: v })} keyboardType="decimal-pad" containerStyle={{ width: 64 }} />
-                <TextField placeholder="Unit" value={ing.unit} onChangeText={(v) => updateIngredient(ing.key, { unit: v })} autoCapitalize="none" containerStyle={{ width: 70 }} />
-                <TextField placeholder="Ingredient" value={ing.name} onChangeText={(v) => updateIngredient(ing.key, { name: v })} containerStyle={{ flex: 1 }} />
-                <IconButton icon="close" label="Remove ingredient" variant="ghost" size={32} iconSize={16} onPress={() => setIngredients((list) => list.filter((i) => i.key !== ing.key))} />
+                <TextField placeholder={t('edit.ingredients.quantity')} value={ing.quantity} onChangeText={(v) => updateIngredient(ing.key, { quantity: v })} keyboardType="decimal-pad" containerStyle={{ width: 64 }} />
+                <TextField placeholder={t('edit.ingredients.unit')} value={ing.unit} onChangeText={(v) => updateIngredient(ing.key, { unit: v })} autoCapitalize="none" containerStyle={{ width: 70 }} />
+                <TextField placeholder={t('edit.ingredients.name')} value={ing.name} onChangeText={(v) => updateIngredient(ing.key, { name: v })} containerStyle={{ flex: 1 }} />
+                <IconButton icon="close" label={t('edit.ingredients.remove')} variant="ghost" size={32} iconSize={16} onPress={() => setIngredients((list) => list.filter((i) => i.key !== ing.key))} />
               </Animated.View>
             ))}
           </Animated.View>
-          <Button label="Add ingredient" variant="ghost" icon="add" size="md" onPress={() => setIngredients((list) => [...list, { key: newId(), quantity: '', unit: '', name: '' }])} style={styles.addButton} />
+          <Button label={t('edit.ingredients.add')} variant="ghost" icon="add" size="md" onPress={() => setIngredients((list) => [...list, { key: newId(), quantity: '', unit: '', name: '' }])} style={styles.addButton} />
 
           <View style={styles.sectionHead}>
-            <Txt variant="title3">Steps</Txt>
+            <Txt variant="title3">{t('edit.steps.title')}</Txt>
           </View>
           <Animated.View layout={LinearTransition} style={{ gap: 12 }}>
             {steps.map((step, index) => (
@@ -249,36 +254,36 @@ export default function EditRecipe() {
                   </Txt>
                 </View>
                 <View style={{ flex: 1, gap: 8 }}>
-                  <TextField placeholder="What to do in this step" value={step.instruction} onChangeText={(v) => updateStep(step.key, { instruction: v })} multiline />
+                  <TextField placeholder={t('edit.steps.placeholder')} value={step.instruction} onChangeText={(v) => updateStep(step.key, { instruction: v })} multiline />
                   <View style={styles.stepMeta}>
-                    <TextField placeholder="Timer (min)" value={step.minutes} onChangeText={(v) => updateStep(step.key, { minutes: v })} keyboardType="number-pad" containerStyle={{ width: 130 }} icon="timer-outline" />
+                    <TextField placeholder={t('edit.steps.timer')} value={step.minutes} onChangeText={(v) => updateStep(step.key, { minutes: v })} keyboardType="number-pad" containerStyle={{ width: 130 }} icon="timer-outline" />
                     {step.source?.clip ? (
                       <Txt variant="caption" color="textFaint" style={{ flex: 1 }}>
-                        Keeps its video clip
+                        {t('edit.steps.keepsClip')}
                       </Txt>
                     ) : (
                       <View style={{ flex: 1 }} />
                     )}
-                    <IconButton icon="trash-outline" label="Remove step" variant="ghost" size={32} iconSize={16} onPress={() => setSteps((list) => list.filter((s) => s.key !== step.key))} />
+                    <IconButton icon="trash-outline" label={t('edit.steps.remove')} variant="ghost" size={32} iconSize={16} onPress={() => setSteps((list) => list.filter((s) => s.key !== step.key))} />
                   </View>
                 </View>
               </Animated.View>
             ))}
           </Animated.View>
-          <Button label="Add step" variant="ghost" icon="add" size="md" onPress={() => setSteps((list) => [...list, { key: newId(), instruction: '', minutes: '' }])} style={styles.addButton} />
+          <Button label={t('edit.steps.add')} variant="ghost" icon="add" size="md" onPress={() => setSteps((list) => [...list, { key: newId(), instruction: '', minutes: '' }])} style={styles.addButton} />
 
-          <TextField label="Tags" placeholder="quick, high-protein, comfort" value={tags} onChangeText={setTags} autoCapitalize="none" containerStyle={{ marginTop: 18 }} />
+          <TextField label={t('edit.fields.tags')} placeholder={t('edit.fields.tagsPlaceholder')} value={tags} onChangeText={setTags} autoCapitalize="none" containerStyle={{ marginTop: 18 }} />
 
           <Card tone="muted" style={{ marginTop: 22 }} elevated={false}>
-            <Txt variant="headline">Nutrition per serving</Txt>
+            <Txt variant="headline">{t('edit.nutrition.title')}</Txt>
             <Txt variant="footnote" color="textMuted" style={{ marginTop: 2 }}>
-              Optional — fill in what you know.
+              {t('edit.nutrition.hint')}
             </Txt>
             <View style={styles.macros}>
-              <TextField label="kcal" value={kcal} onChangeText={setKcal} keyboardType="decimal-pad" containerStyle={styles.macro} />
-              <TextField label="Protein g" value={protein} onChangeText={setProtein} keyboardType="decimal-pad" containerStyle={styles.macro} />
-              <TextField label="Carbs g" value={carbs} onChangeText={setCarbs} keyboardType="decimal-pad" containerStyle={styles.macro} />
-              <TextField label="Fat g" value={fat} onChangeText={setFat} keyboardType="decimal-pad" containerStyle={styles.macro} />
+              <TextField label={t('edit.nutrition.kcal')} value={kcal} onChangeText={setKcal} keyboardType="decimal-pad" containerStyle={styles.macro} />
+              <TextField label={t('edit.nutrition.protein')} value={protein} onChangeText={setProtein} keyboardType="decimal-pad" containerStyle={styles.macro} />
+              <TextField label={t('edit.nutrition.carbs')} value={carbs} onChangeText={setCarbs} keyboardType="decimal-pad" containerStyle={styles.macro} />
+              <TextField label={t('edit.nutrition.fat')} value={fat} onChangeText={setFat} keyboardType="decimal-pad" containerStyle={styles.macro} />
             </View>
           </Card>
 
@@ -287,27 +292,27 @@ export default function EditRecipe() {
               {error}
             </Txt>
           ) : null}
-          <Button label={existing ? 'Save changes' : 'Save recipe'} icon="checkmark" onPress={onSave} style={{ marginTop: 20 }} />
+          <Button label={existing ? t('edit.saveChanges') : t('edit.saveRecipe')} icon="checkmark" onPress={onSave} style={{ marginTop: 20 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <Sheet visible={pasting} onClose={() => setPasting(false)} title="Paste ingredients" subtitle="One per line — “2 cups rice”, “½ tsp salt”, “200g paneer, cubed”">
+      <Sheet visible={pasting} onClose={() => setPasting(false)} title={t('edit.paste.title')} subtitle={t('edit.paste.subtitle')}>
         <View style={{ paddingHorizontal: GUTTER, gap: 14 }}>
-          <TextField multiline value={pasteText} onChangeText={setPasteText} placeholder={'2 cups basmati rice\n1 tbsp ghee\n½ tsp turmeric'} style={{ minHeight: 140 }} autoFocus />
+          <TextField multiline value={pasteText} onChangeText={setPasteText} placeholder={t('edit.paste.placeholder')} style={{ minHeight: 140 }} autoFocus />
           <Button
-            label="Add these"
+            label={t('edit.paste.add')}
             disabled={!pasteText.trim()}
             onPress={() => {
               const parsed = parseIngredientList(pasteText).map((p) => ({
                 key: newId(),
-                quantity: p.quantity === null ? '' : String(Math.round(p.quantity * 100) / 100),
+                quantity: p.quantity === null ? '' : formatDecimal(p.quantity, 2),
                 unit: p.unit,
                 name: p.note ? `${p.name} (${p.note})` : p.name,
               }));
               setIngredients((list) => [...list.filter((i) => i.name.trim()), ...parsed]);
               setPasteText('');
               setPasting(false);
-              toast(`${parsed.length} ingredients added`, { tone: 'success' });
+              toast(t('edit.paste.added', { count: parsed.length }), { tone: 'success' });
             }}
           />
         </View>

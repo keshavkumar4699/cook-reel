@@ -19,6 +19,8 @@ import { Txt } from '@/components/ui/Text';
 import type { Macros } from '@/data/types';
 import { api, type ExperimentResponse } from '@/lib/api';
 import { handleApiError } from '@/lib/gates';
+import { t } from '@/i18n';
+import { formatInteger } from '@/i18n/format';
 import { haptics } from '@/lib/haptics';
 import { usePricing } from '@/lib/pricing';
 import { fromApiRecipe, profileForAI, toExperimentInput } from '@/lib/recipes';
@@ -29,22 +31,30 @@ import { toast } from '@/state/toast';
 import { GUTTER, radius, useTheme } from '@/theme';
 
 const TWISTS = [
-  { emoji: '🌱', label: 'Make it vegan' },
-  { emoji: '💪', label: 'More protein' },
-  { emoji: '🔥', label: 'Fewer calories' },
-  { emoji: '🌶️', label: 'Spicier' },
-  { emoji: '💸', label: 'Budget version' },
-  { emoji: '⚡', label: 'Ready in 15 min' },
-  { emoji: '🍳', label: 'One pot only' },
-  { emoji: '🌀', label: 'Air fryer version' },
-  { emoji: '🥡', label: 'Meal prep for 4 days' },
-  { emoji: '🧒', label: 'Kid-friendly' },
-];
+  { id: 'vegan', emoji: '🌱' },
+  { id: 'protein', emoji: '💪' },
+  { id: 'lighter', emoji: '🔥' },
+  { id: 'spicier', emoji: '🌶️' },
+  { id: 'budget', emoji: '💸' },
+  { id: 'quick', emoji: '⚡' },
+  { id: 'onePot', emoji: '🍳' },
+  { id: 'airFryer', emoji: '🌀' },
+  { id: 'mealPrep', emoji: '🥡' },
+  { id: 'kids', emoji: '🧒' },
+] as const;
+type TwistId = (typeof TWISTS)[number]['id'];
+const twistLabel = (id: TwistId) => t(`experiment.twists.${id}`);
+
+/** "+12 g" / "−4 g" with a real minus sign. */
+function signed(diff: number, grams: boolean): string {
+  const n = `${diff > 0 ? '+' : '\u2212'}${formatInteger(Math.abs(diff))}`;
+  return grams ? t('experiment.macros.grams', { n }) : n;
+}
 
 /** Which direction counts as an improvement; 'either' keeps the change neutral. */
 type Better = 'up' | 'down' | 'either';
 
-function MacroDelta({ label, before, after, unit, better }: { label: string; before: number; after: number; unit: string; better: Better }) {
+function MacroDelta({ label, before, after, grams, better }: { label: string; before: number; after: number; grams: boolean; better: Better }) {
   const { colors } = useTheme();
   const diff = Math.round(after - before);
   const improved = better === 'up' ? diff > 0 : diff < 0;
@@ -54,14 +64,9 @@ function MacroDelta({ label, before, after, unit, better }: { label: string; bef
       <Txt variant="caption" color="textMuted">
         {label}
       </Txt>
-      <Txt variant="headline">
-        {Math.round(after)}
-        <Txt variant="footnote" color="textMuted">
-          {unit}
-        </Txt>
-      </Txt>
+      <Txt variant="headline">{grams ? t('experiment.macros.grams', { n: formatInteger(after) }) : formatInteger(after)}</Txt>
       <Txt variant="caption" color={color}>
-        {diff === 0 ? 'same' : `${diff > 0 ? '+' : ''}${diff}${unit}`}
+        {diff === 0 ? t('experiment.macros.same') : signed(diff, grams)}
       </Txt>
     </View>
   );
@@ -77,7 +82,7 @@ export default function Experiment() {
   const recipes = useLibrary((s) => s.recipes);
   const save = useLibrary((s) => s.save);
   const setBalance = useSession((s) => s.setBalance);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<TwistId[]>([]);
   const [custom, setCustom] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ExperimentResponse | null>(null);
@@ -87,13 +92,13 @@ export default function Experiment() {
   if (!recipe) {
     return (
       <Screen>
-        <TopBar title="Experiment" />
-        <EmptyState emoji="🧪" title="Recipe not found" body="Pick a recipe from your library to experiment with." />
+        <TopBar title={t('experiment.title')} />
+        <EmptyState emoji="🧪" title={t('experiment.notFound.title')} body={t('experiment.notFound.body')} />
       </Screen>
     );
   }
 
-  const instruction = [...selected, custom.trim()].filter(Boolean).join('; ');
+  const instruction = [...selected.map(twistLabel), custom.trim()].filter(Boolean).join('; ');
 
   const run = async () => {
     if (!instruction || loading) return;
@@ -116,7 +121,7 @@ export default function Experiment() {
     if (!result) return;
     const saved = save(fromApiRecipe(result.recipe, { parentId: recipe.id, changes: result.changes, collections: recipe.collections }));
     haptics.success();
-    toast('Variation saved', { tone: 'success' });
+    toast(t('experiment.saved'), { tone: 'success' });
     router.replace(`/recipe/${saved.id}`);
   };
 
@@ -126,33 +131,34 @@ export default function Experiment() {
 
   return (
     <Screen>
-      <TopBar title="Experiment" subtitle="Chef rewrites the recipe your way" right={<CreditsPill />} />
+      <TopBar title={t('experiment.title')} subtitle={t('experiment.subtitle')} right={<CreditsPill />} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]} keyboardShouldPersistTaps="handled">
-        <RecipeRow recipe={recipe} subtitle="Starting from" />
+        <RecipeRow recipe={recipe} subtitle={t('experiment.startingFrom')} />
 
         {!result && !loading ? (
           <Animated.View entering={FadeInDown.springify().damping(18)}>
             <Txt variant="title2" style={{ marginTop: 26 }}>
-              Pick a twist
+              {t('experiment.pickTitle')}
             </Txt>
             <Txt variant="subhead" color="textMuted" style={{ marginTop: 4 }}>
-              Choose up to three, or describe your own.
+              {t('experiment.pickHint')}
             </Txt>
             <View style={styles.grid}>
-              {TWISTS.map((t) => {
-                const on = selected.includes(t.label);
+              {TWISTS.map((twist) => {
+                const on = selected.includes(twist.id);
+                const label = twistLabel(twist.id);
                 return (
                   <PressableScale
-                    key={t.label}
+                    key={twist.id}
                     haptic="select"
                     accessibilityState={{ selected: on }}
-                    accessibilityLabel={t.label}
-                    onPress={() => setSelected(on ? selected.filter((x) => x !== t.label) : selected.length < 3 ? [...selected, t.label] : selected)}
+                    accessibilityLabel={label}
+                    onPress={() => setSelected(on ? selected.filter((x) => x !== twist.id) : selected.length < 3 ? [...selected, twist.id] : selected)}
                     style={[styles.twist, { backgroundColor: on ? colors.aiSoft : colors.surface, borderColor: on ? colors.ai : colors.border }]}
                   >
-                    <Txt style={{ fontSize: 24, lineHeight: 30 }}>{t.emoji}</Txt>
+                    <Txt style={{ fontSize: 24, lineHeight: 30 }}>{twist.emoji}</Txt>
                     <Txt variant="subheadStrong" style={{ flex: 1 }}>
-                      {t.label}
+                      {label}
                     </Txt>
                     {on ? <Icon name="checkmark-circle" size={18} color={colors.ai} /> : null}
                   </PressableScale>
@@ -161,19 +167,19 @@ export default function Experiment() {
             </View>
             <TextField
               containerStyle={{ marginTop: 16 }}
-              placeholder="Or describe it, e.g. no onion or garlic"
+              placeholder={t('experiment.customPlaceholder')}
               value={custom}
               onChangeText={setCustom}
               maxLength={200}
               icon="create-outline"
             />
             <Button
-              label="Create variation"
+              label={t('experiment.create')}
               icon="flask"
               variant="ai"
               disabled={!instruction}
               style={{ marginTop: 20 }}
-              meta={`${pricing.costs.experiment} credit`}
+              meta={t('common.counts.credits', { count: pricing.costs.experiment })}
               onPress={() => void run()}
             />
           </Animated.View>
@@ -186,7 +192,9 @@ export default function Experiment() {
               <Txt variant="title3" align="center">
                 {instruction}
               </Txt>
-              <TypingIndicator phrases={['Rethinking the ingredients…', 'Adjusting heat and timings…', 'Re-balancing the macros…', 'Plating it up…']} />
+              <TypingIndicator
+                phrases={[t('experiment.working.ingredients'), t('experiment.working.timings'), t('experiment.working.macros'), t('experiment.working.plating')]}
+              />
             </Card>
           </Animated.View>
         ) : null}
@@ -195,7 +203,7 @@ export default function Experiment() {
           <Animated.View entering={FadeInDown.springify().damping(18)} style={{ gap: 16, marginTop: 24 }}>
             <Card tone="ai">
               <Txt variant="overline" color="ai">
-                What changed
+                {t('experiment.changes')}
               </Txt>
               <Txt variant="subhead" color="textMuted" style={{ marginTop: 6 }}>
                 {result.message}
@@ -214,19 +222,19 @@ export default function Experiment() {
             {before && after ? (
               <Card>
                 <Txt variant="overline" color="textMuted">
-                  Per serving · before → after
+                  {t('experiment.perServingCompare')}
                 </Txt>
                 <View style={styles.deltas}>
-                  <MacroDelta label="Calories" before={before.kcal} after={after.kcal} unit="" better={kcalBetter} />
-                  <MacroDelta label="Protein" before={before.proteinG} after={after.proteinG} unit="g" better="up" />
-                  <MacroDelta label="Carbs" before={before.carbsG} after={after.carbsG} unit="g" better="either" />
-                  <MacroDelta label="Fat" before={before.fatG} after={after.fatG} unit="g" better="either" />
+                  <MacroDelta label={t('experiment.macros.calories')} before={before.kcal} after={after.kcal} grams={false} better={kcalBetter} />
+                  <MacroDelta label={t('experiment.macros.protein')} before={before.proteinG} after={after.proteinG} grams better="up" />
+                  <MacroDelta label={t('experiment.macros.carbs')} before={before.carbsG} after={after.carbsG} grams better="either" />
+                  <MacroDelta label={t('experiment.macros.fat')} before={before.fatG} after={after.fatG} grams better="either" />
                 </View>
               </Card>
             ) : null}
             <RecipePreviewCard recipe={result.recipe} />
-            <Button label="Save as new version" icon="bookmark" onPress={keep} />
-            <Button label="Try another twist" icon="refresh" variant="secondary" onPress={() => setResult(null)} />
+            <Button label={t('experiment.save')} icon="bookmark" onPress={keep} />
+            <Button label={t('experiment.again')} icon="refresh" variant="secondary" onPress={() => setResult(null)} />
           </Animated.View>
         ) : null}
       </ScrollView>
