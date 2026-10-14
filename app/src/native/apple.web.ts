@@ -1,3 +1,6 @@
+import { t } from '@/i18n';
+import { LocalizedError } from '@/lib/errors';
+
 export type AppleResult =
   | { identityToken: string; authorizationCode: string | null; fullName: string | null }
   | { cancelled: true };
@@ -5,6 +8,6 @@ export type AppleResult =
 export const appleAuth = {
   isAvailable: async () => false,
   async signIn(): Promise<AppleResult> {
-    throw new Error('Sign in with Apple is available in the iOS app.');
+    throw new LocalizedError(t('auth.errors.appleIosOnly'));
   },
 };

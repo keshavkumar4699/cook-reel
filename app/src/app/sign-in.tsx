@@ -6,12 +6,13 @@ import { Icon, type IconName } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { TopBar } from '@/components/ui/TopBar';
 import { Txt } from '@/components/ui/Text';
+import { t } from '@/i18n';
 import { GUTTER, radius, useTheme } from '@/theme';
 
-const PERKS: { icon: IconName; title: string; body: string; tone: 'ai' | 'youtube' | 'accent' }[] = [
-  { icon: 'sparkles', title: 'Chef, your AI cook', body: 'Describe a craving — get a recipe for your kitchen and goals.', tone: 'ai' },
-  { icon: 'logo-youtube', title: 'YouTube → step reels', body: 'Any recipe video becomes short clips you can follow by voice.', tone: 'youtube' },
-  { icon: 'flash', title: 'Free credits to start', body: 'Try every AI feature on us. Your saved recipes stay on your phone.', tone: 'accent' },
+const PERKS: { id: 'chef' | 'youtube' | 'credits'; icon: IconName; tone: 'ai' | 'youtube' | 'accent' }[] = [
+  { id: 'chef', icon: 'sparkles', tone: 'ai' },
+  { id: 'youtube', icon: 'logo-youtube', tone: 'youtube' },
+  { id: 'credits', icon: 'flash', tone: 'accent' },
 ];
 
 /** "Sign up to use AI": shown whenever a guest taps an AI feature. */
@@ -33,10 +34,10 @@ export default function SignIn() {
           <Txt style={{ fontSize: 34, lineHeight: 42 }}>👩‍🍳</Txt>
         </View>
         <Txt variant="title1" align="center" style={{ marginTop: 16 }}>
-          Sign up to cook with AI
+          {t('auth.signIn.title')}
         </Txt>
         <Txt variant="body" color="textMuted" align="center" style={{ marginTop: 8 }}>
-          It takes one tap. Your recipes, plans and lists stay on this device.
+          {t('auth.signIn.body')}
         </Txt>
 
         <View style={styles.perks}>
@@ -44,14 +45,14 @@ export default function SignIn() {
             const tint = perk.tone === 'ai' ? colors.ai : perk.tone === 'youtube' ? colors.youtube : colors.accent;
             const bg = perk.tone === 'ai' ? colors.aiSoft : perk.tone === 'youtube' ? colors.primarySoft : colors.accentSoft;
             return (
-              <View key={perk.title} style={styles.perk}>
+              <View key={perk.id} style={styles.perk}>
                 <View style={[styles.perkIcon, { backgroundColor: bg }]}>
                   <Icon name={perk.icon} size={20} color={tint} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Txt variant="headline">{perk.title}</Txt>
+                  <Txt variant="headline">{t(`auth.signIn.perks.${perk.id}.title`)}</Txt>
                   <Txt variant="subhead" color="textMuted">
-                    {perk.body}
+                    {t(`auth.signIn.perks.${perk.id}.body`)}
                   </Txt>
                 </View>
               </View>
@@ -61,7 +62,7 @@ export default function SignIn() {
 
         <AuthButtons onSuccess={done} />
         <Txt variant="caption" color="textFaint" align="center" style={{ marginTop: 14 }}>
-          By continuing you agree to the Terms and Privacy Policy.
+          {t('auth.signIn.legal')}
         </Txt>
       </ScrollView>
     </Screen>

@@ -1,3 +1,6 @@
+import { t } from '@/i18n';
+import { LocalizedError } from '@/lib/errors';
+
 export interface StorePackage {
   id: string;
   productId: string;
@@ -16,7 +19,7 @@ export const purchases = {
     return [];
   },
   async purchase(_pkg: StorePackage): Promise<'purchased' | 'cancelled'> {
-    throw new Error('Purchases are available in the iOS and Android apps.');
+    throw new LocalizedError(t('auth.errors.purchasesAppsOnly'));
   },
   async restore() {},
 };

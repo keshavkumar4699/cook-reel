@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { api, ApiError, type Health, type SessionResponse } from '@/lib/api';
+import { t } from '@/i18n';
+import { api, type Health, type SessionResponse } from '@/lib/api';
+import { errorMessage } from '@/lib/errors';
 import { haptics } from '@/lib/haptics';
 import { appleAuth } from '@/native/apple';
 import { googleAuth } from '@/native/google';
@@ -31,14 +33,12 @@ export function useSignIn(onSuccess: (session: SessionResponse) => void) {
       await useSession.getState().setSession(session);
       haptics.success();
       if (session.starterCreditsGranted > 0) {
-        toast(`Welcome! ${session.starterCreditsGranted} free credits are in your account.`, { tone: 'success', durationMs: 4000 });
+        toast(t('auth.welcomeCredits', { count: session.starterCreditsGranted }), { tone: 'success', durationMs: 4000 });
       }
       onSuccess(session);
     } catch (error) {
       haptics.error();
-      const message =
-        error instanceof ApiError || error instanceof Error ? error.message : "Couldn't sign you in. Please try again.";
-      toast(message, { tone: 'error', durationMs: 4500 });
+      toast(errorMessage(error, 'auth.errors.generic'), { tone: 'error', durationMs: 4500 });
     } finally {
       setBusy(null);
     }

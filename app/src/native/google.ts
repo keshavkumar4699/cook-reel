@@ -1,4 +1,6 @@
 import { Platform } from 'react-native';
+import { t } from '@/i18n';
+import { LocalizedError } from '@/lib/errors';
 
 type GoogleModule = typeof import('@react-native-google-signin/google-signin');
 
@@ -15,7 +17,7 @@ function load(): GoogleModule {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       mod = require('@react-native-google-signin/google-signin') as GoogleModule;
     } catch {
-      throw new Error('Google sign-in needs the CookReel development build (it is not available in Expo Go).');
+      throw new LocalizedError(t('auth.errors.googleNeedsBuild'));
     }
   }
   if (!configured) {
@@ -37,14 +39,15 @@ export const googleAuth = {
       const response = await GoogleSignin.signIn();
       if (response.type !== 'success') return { cancelled: true };
       const idToken = response.data.idToken ?? (await GoogleSignin.getTokens()).idToken;
-      if (!idToken) throw new Error('Google did not return an ID token. Check the web client ID.');
+      // Usually a wrong web client ID in the build's configuration.
+      if (!idToken) throw new LocalizedError(t('auth.errors.googleNoToken'));
       return { idToken };
     } catch (error) {
       if (isErrorWithCode(error)) {
         if (error.code === statusCodes.SIGN_IN_CANCELLED) return { cancelled: true };
         if (error.code === statusCodes.IN_PROGRESS) return { cancelled: true };
         if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-          throw new Error('Google Play Services is unavailable on this device.');
+          throw new LocalizedError(t('auth.errors.googleNoPlayServices'));
         }
       }
       throw error;

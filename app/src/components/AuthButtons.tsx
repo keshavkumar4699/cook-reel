@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import type { SessionResponse } from '@/lib/api';
+import { t } from '@/i18n';
 import { useSignIn } from '@/lib/useSignIn';
 import { radius, useTheme } from '@/theme';
 import { AppleButton } from './AppleButton';
@@ -26,19 +27,19 @@ export function AuthButtons({ onSuccess }: { onSuccess: (session: SessionRespons
         onPress={auth.signInWithGoogle}
         disabled={!!auth.busy}
         haptic="press"
-        accessibilityLabel="Continue with Google"
+        accessibilityLabel={t('auth.buttons.google')}
         style={[styles.google, { backgroundColor: colors.surface, borderColor: colors.borderStrong }]}
       >
         {auth.busy === 'google' ? <ActivityIndicator color={colors.text} /> : <GoogleLogo size={20} />}
-        <Txt variant="button">Continue with Google</Txt>
+        <Txt variant="button">{t('auth.buttons.google')}</Txt>
       </PressableScale>
       {auth.devAvailable ? (
         <View style={[styles.dev, { borderColor: colors.border, backgroundColor: colors.surfaceMuted }]}>
           <Txt variant="overline" color="textMuted">
-            Development sign-in
+            {t('auth.buttons.devTitle')}
           </Txt>
-          <TextField placeholder="Your name" value={devName} onChangeText={setDevName} autoCapitalize="words" returnKeyType="go" onSubmitEditing={() => auth.signInDev(devName)} />
-          <Button label="Sign in for testing" variant="ink" size="md" loading={auth.busy === 'dev'} onPress={() => auth.signInDev(devName)} />
+          <TextField placeholder={t('auth.buttons.devName')} value={devName} onChangeText={setDevName} autoCapitalize="words" returnKeyType="go" onSubmitEditing={() => auth.signInDev(devName)} />
+          <Button label={t('auth.buttons.devButton')} variant="ink" size="md" loading={auth.busy === 'dev'} onPress={() => auth.signInDev(devName)} />
         </View>
       ) : null}
     </View>

@@ -1,5 +1,7 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Platform } from 'react-native';
+import { t } from '@/i18n';
+import { LocalizedError } from '@/lib/errors';
 
 export type AppleResult =
   | { identityToken: string; authorizationCode: string | null; fullName: string | null }
@@ -16,7 +18,7 @@ export const appleAuth = {
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       });
-      if (!credential.identityToken) throw new Error('Apple did not return an identity token.');
+      if (!credential.identityToken) throw new LocalizedError(t('auth.errors.appleNoToken'));
       const name = credential.fullName
         ? [credential.fullName.givenName, credential.fullName.familyName].filter(Boolean).join(' ')
         : '';
