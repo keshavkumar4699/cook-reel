@@ -31,6 +31,33 @@ function ing(
   };
 }
 
+/** What cooking mode says for each starter step: warm, spoken English, numbers as words. */
+const NARRATION: Record<string, string> = {
+  'eb-s1': 'First, chop the onion, tomato and chilli nice and fine. Then crack the eggs into a bowl with a pinch of salt and give them a good whisk.',
+  'eb-s2': 'Warm the oil in your pan over medium heat, then add the onion and chilli. Stir now and then until they’re soft and just turning golden, about three minutes.',
+  'eb-s3': 'Now tip in the tomato with the turmeric, chilli powder and a little salt. Keep stirring until the tomato breaks down and looks thick and jammy.',
+  'eb-s4': 'Turn the heat right down and pour in the eggs. Give them a few seconds, then stir slowly, scraping the bottom, until they’re just set but still glossy.',
+  'eb-s5': 'Sprinkle over the garam masala and coriander, give it one last stir, and serve it hot with your toast. Enjoy!',
+  'dt-s1': 'Put the dal in a bowl of water and rub it gently between your fingers. Drain and repeat three times, until the water runs almost clear.',
+  'dt-s2': 'Add the dal to the pressure cooker with six hundred millilitres of water, the turmeric and half the salt. Lock the lid, cook for three whistles, then let the pressure drop on its own.',
+  'dt-s3': 'Open the cooker and whisk the dal until it’s creamy. Add a little hot water at a time, until it pours like a thick soup.',
+  'dt-s4': 'Now for the tadka. Heat the ghee and add the cumin. Once it sizzles, add the garlic, ginger and chilli, then cook the onion until golden, and the tomato with the chilli powder until soft.',
+  'dt-s5': 'Pour that sizzling tadka into the dal, add the rest of the salt and let it simmer for two or three minutes. Finish with coriander and a squeeze of lemon.',
+  'cb-s1': 'Toss the chicken with the soy sauce, half the pepper and a pinch of salt. While it sits, slice the onion and capsicum and chop the garlic.',
+  'cb-s2': 'Get your pan really hot with the oil, then lay the chicken in a single layer. Leave it alone for two minutes so it browns, then stir until it’s golden and cooked through.',
+  'cb-s3': 'Turn the heat down to medium. Add the garlic for half a minute, then the onion and capsicum, and stir-fry until they’re tender but still have a little crunch.',
+  'cb-s4': 'Add the rice, break up any clumps, and toss everything until it’s piping hot. Season with the rest of the pepper and a little salt.',
+  'cb-s5': 'Squeeze over the lemon, scatter the spring onions, and it’s ready. Pack half away for tomorrow’s lunch.',
+  'pn-s1': 'Fill a big pot with water, add a pinch of salt and bring it to a rolling boil.',
+  'pn-s2': 'Add the noodles and cook them as the packet says, dropping in the edamame for the last two minutes. Save half a cup of the cooking water before you drain.',
+  'pn-s3': 'While the noodles cook, whisk the peanut butter, soy sauce, lime juice, sugar, garlic and chilli flakes with a few spoonfuls of hot water until smooth.',
+  'pn-s4': 'Toss the hot noodles and edamame in the sauce, adding a splash of the saved water at a time, until it’s glossy and creamy.',
+  'pn-s5': 'Pile everything into bowls and top with cucumber, spring onions and chopped peanuts. Eat it straight away, while it’s warm.',
+  'oo-s1': 'In a jar, stir together the oats, chia seeds, milk, yogurt and cinnamon until there are no dry oats left.',
+  'oo-s2': 'Pop the lid on and leave the jar in the fridge for at least six hours, or overnight.',
+  'oo-s3': 'Give it a stir, loosen it with a splash of milk if it’s too thick, then top with banana, peanut butter and a drizzle of honey.',
+};
+
 function step(
   id: string,
   title: string,
@@ -46,7 +73,7 @@ function step(
     doneCue: extra.doneCue ?? null,
     glossary: extra.glossary ?? [],
     clip: null,
-    narration: extra.narration ?? null,
+    narration: extra.narration ?? NARRATION[id] ?? null,
   };
 }
 

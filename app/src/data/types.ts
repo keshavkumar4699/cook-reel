@@ -97,6 +97,8 @@ export interface Recipe extends ApiRecipe {
   lastCookedAt: string | null;
   /** Recipes that ship with the app. */
   starter?: boolean;
+  /** A starter recipe whose text the cook hasn't edited: it follows the app language. */
+  starterText?: boolean;
 }
 
 export interface Collection {

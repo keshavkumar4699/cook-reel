@@ -1,8 +1,10 @@
 import { create } from 'zustand';
 import { STARTER_RECIPES } from '@/data/starterRecipes';
+import { isPristineStarter, localizeStarter } from '@/data/starterText';
 import type { Collection, Recipe } from '@/data/types';
 import { docstore } from '@/native/docstore';
 import { kv } from '@/native/kv';
+import { getLanguage } from '@/i18n';
 import { newId } from '@/lib/id';
 
 const SEEDED_KEY = 'cookreel.seeded.v1';
@@ -39,11 +41,14 @@ export const useLibrary = create<LibraryState>()((set, get) => ({
     if (!seeded) {
       // First launch: a few starter recipes so cooking mode works before any AI or import.
       const now = Date.now();
-      const starters = STARTER_RECIPES.map((r, i) => ({ ...r, createdAt: new Date(now - i * 60_000).toISOString() }));
+      const starters = STARTER_RECIPES.map((r, i) => ({ ...r, starterText: true, createdAt: new Date(now - i * 60_000).toISOString() }));
       await docstore.putMany('recipes', starters);
       await kv.setItem(SEEDED_KEY, '1');
       list = [...recipes, ...starters];
     }
+    // Starter recipes the cook hasn't edited are shown in the app language (in memory only).
+    const language = getLanguage();
+    list = list.map((r) => (isPristineStarter(r) ? localizeStarter(r, language) : r));
     set({
       ready: true,
       recipes: Object.fromEntries(list.map((r) => [r.id, r])),

@@ -6,19 +6,22 @@ import {
   useSpeechRecognitionEvent,
   type ExpoSpeechRecognitionOptions,
 } from 'expo-speech-recognition';
-import { commandFromTranscript, wordCount, type VoiceCommand } from '@/lib/voice';
+import { getLanguage, LANGUAGE_INFO } from '@/i18n';
+import { speechLocaleFor } from '@/i18n/languages';
+import { commandFromTranscript, contextualStrings, isLongUtterance, type VoiceCommand } from '@/lib/voice';
 
 export type VoiceState = 'off' | 'starting' | 'listening' | 'paused' | 'denied' | 'unavailable';
-
-const COMMAND_WORDS = ['next', 'back', 'previous', 'stop', 'pause', 'play', 'resume', 'repeat', 'read', 'timer', 'ingredients', 'chef', 'help'];
 
 /** How long the "heard you" bubble stays up after a command. */
 const HEARD_MS = 1600;
 
-function recognitionLanguage(): string {
-  const locale = getLocales()[0];
-  // English commands work best with an English recogniser in the cook's region (en-IN, en-GB…).
-  return locale?.regionCode ? `en-${locale.regionCode}` : 'en-US';
+/**
+ * The recogniser listens in the app language, in the cook's regional variant when their region
+ * speaks it (es-MX, fr-CA, en-IN…); `fallback` is the language's default variant (es-ES, fr-FR…).
+ */
+function recognitionLocale(fallback: boolean): string {
+  const language = getLanguage();
+  return fallback ? LANGUAGE_INFO[language].defaultSpeechLocale : speechLocaleFor(language, getLocales()[0]?.regionCode);
 }
 
 function recognitionAvailable(): boolean {
@@ -42,16 +45,16 @@ function abortRecognizer() {
   }
 }
 
-const OPTIONS: ExpoSpeechRecognitionOptions = {
-  lang: recognitionLanguage(),
+const options = (fallback: boolean): ExpoSpeechRecognitionOptions => ({
+  lang: recognitionLocale(fallback),
   interimResults: true,
   continuous: true,
   maxAlternatives: 1,
-  contextualStrings: COMMAND_WORDS,
+  contextualStrings: contextualStrings(),
   addsPunctuation: false,
   // Keep the video's sound playing while we listen.
   iosCategory: { category: 'playAndRecord', categoryOptions: ['defaultToSpeaker', 'allowBluetooth', 'mixWithOthers'], mode: 'default' },
-};
+});
 
 /**
  * Hands-free control for cooking mode. Listens continuously, matches short commands
@@ -69,6 +72,8 @@ export function useVoiceCommands({ enabled, paused, onCommand }: { enabled: bool
   const last = useRef<{ command: VoiceCommand; at: number } | null>(null);
   const restartTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set when the regional variant isn't installed and the language's default one is used instead.
+  const fallbackLocale = useRef(false);
 
   useLayoutEffect(() => {
     handler.current = onCommand;
@@ -77,7 +82,7 @@ export function useVoiceCommands({ enabled, paused, onCommand }: { enabled: bool
   const startRecognizer = useCallback(() => {
     if (!wanted.current || pausedRef.current) return;
     try {
-      ExpoSpeechRecognitionModule.start(OPTIONS);
+      ExpoSpeechRecognitionModule.start(options(fallbackLocale.current));
     } catch {
       setReported('unavailable');
     }
@@ -101,6 +106,9 @@ export function useVoiceCommands({ enabled, paused, onCommand }: { enabled: bool
     if (event.error === 'not-allowed') {
       wanted.current = false;
       setReported('denied');
+    } else if (event.error === 'language-not-supported' && !fallbackLocale.current && recognitionLocale(true) !== recognitionLocale(false)) {
+      // e.g. es-AR missing on this phone: the `end` handler restarts with es-ES.
+      fallbackLocale.current = true;
     } else if (event.error === 'service-not-allowed' || event.error === 'language-not-supported') {
       wanted.current = false;
       setReported('unavailable');
@@ -113,7 +121,7 @@ export function useVoiceCommands({ enabled, paused, onCommand }: { enabled: bool
     const command = commandFromTranscript(transcript);
     if (!command) {
       // Long stretches of non-command speech (often the video itself): reset to keep windows short.
-      if (wordCount(transcript) > 14) abortRecognizer();
+      if (isLongUtterance(transcript)) abortRecognizer();
       return;
     }
     const now = Date.now();

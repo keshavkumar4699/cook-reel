@@ -3,6 +3,8 @@ import type { ExpoConfig } from 'expo/config';
 const bundleId = process.env.APP_BUNDLE_ID ?? 'com.cookreel.app';
 const googleIosUrlScheme = process.env.GOOGLE_IOS_URL_SCHEME;
 const microphonePermission = 'CookReel listens for "next", "back" and "stop" so you can cook hands-free.';
+/** App languages besides English; each has its system permission texts in ./locales. */
+const languages = ['es', 'fr', 'de', 'pt', 'it', 'ar', 'ja'] as const;
 
 const config: ExpoConfig = {
   name: 'CookReel',
@@ -13,6 +15,8 @@ const config: ExpoConfig = {
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
   backgroundColor: '#FBF7F2',
+  // Permission prompts in the phone's language.
+  locales: Object.fromEntries(languages.map((code) => [code, `./locales/${code}.json`])),
   ios: {
     bundleIdentifier: bundleId,
     supportsTablet: false,
@@ -44,7 +48,8 @@ const config: ExpoConfig = {
     'expo-secure-store',
     'expo-font',
     'expo-image',
-    'expo-localization',
+    // Lists CookReel's languages in the system's per-app language settings (Android 13+, iOS).
+    ['expo-localization', { supportedLocales: ['en', ...languages] }],
     'expo-apple-authentication',
     'expo-asset',
     // Natural narration plays through expo-audio; it never records (speech recognition does that).

@@ -1,0 +1,4 @@
+{
+  "NSMicrophoneUsageDescription": "CookReel listens for \"next\", \"back\" and \"stop\" so you can cook hands-free.",
+  "NSSpeechRecognitionUsageDescription": "CookReel turns your voice commands into actions while you cook."
+}

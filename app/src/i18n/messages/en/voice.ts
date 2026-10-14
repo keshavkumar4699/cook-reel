@@ -1,17 +1,19 @@
 /** Voice control in cooking mode. */
 export default {
   /**
-   * Rows of the "Voice commands" help sheet. `say` is what the cook says, in quotation marks: use the
-   * words the voice control understands in your language. `does` explains what the command does.
+   * How a spoken command is quoted in the "Voice commands" help sheet, e.g. “next”. Use your
+   * language's quotation marks. The command words themselves come from the voice control.
    */
+  quote: '“{word}”',
+  /** What each command does, in the help sheet next to the words to say. */
   help: {
-    move: { say: '“Next” · “Back”', does: 'Move between steps' },
-    playPause: { say: '“Stop” · “Play”', does: 'Pause or resume the clip' },
-    repeat: { say: '“Repeat”', does: 'Replay this step from the start' },
-    read: { say: '“Read”', does: 'Read the step out loud' },
-    timer: { say: '“Start timer”', does: 'Start this step’s timer' },
-    ingredients: { say: '“Ingredients”', does: 'Hear what you need' },
-    /** "Hey Chef" is the wake phrase that lets longer sentences through. */
-    wake: { say: '“Hey Chef, …”', does: 'Use for longer phrases' },
+    move: 'Move between steps',
+    playPause: 'Pause or resume the clip',
+    repeat: 'Replay this step from the start',
+    read: 'Read the step out loud',
+    timer: 'Start this step’s timer',
+    ingredients: 'Hear what you need',
+    /** Saying the wake word ("Chef") first lets longer sentences through. */
+    wake: 'Say this first for longer phrases',
   },
 } as const;

@@ -172,6 +172,8 @@ export default function EditRecipe() {
       steps: nextSteps,
       nutrition,
       starter: existing?.starter && existing.title === title.trim() ? existing.starter : undefined,
+      // Edited text is the cook's own: it no longer follows the app language.
+      starterText: existing?.starterText ? false : existing?.starterText,
     });
     haptics.success();
     toast(existing ? t('edit.toasts.updated') : t('edit.toasts.saved'), { tone: 'success' });
