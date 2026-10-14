@@ -1,4 +1,4 @@
-import { t, type MessageKey } from '@/i18n';
+import { t, tFor, type AppLanguage, type MessageKey } from '@/i18n';
 import { formatDecimal } from '@/i18n/format';
 import { canonicalUnitCode, FRACTIONAL_UNITS } from './units';
 
@@ -34,20 +34,22 @@ function roundMetric(value: number): number {
 }
 
 /**
- * "½ tsp", "1½ cups", "1.5 kg" (or "1,5 kg", "大さじ½"…) in the app language. Unknown units are
- * shown as written.
+ * "½ tsp", "1½ cups", "1.5 kg" (or "1,5 kg", "大さじ½"…) in the app language, or in `language`
+ * (spoken text follows the recipe's language). Unknown units are shown as written.
  */
-export function formatQuantity(quantity: number | null, unit: string): string {
+export function formatQuantity(quantity: number | null, unit: string, language?: AppLanguage): string {
   if (quantity === null || !Number.isFinite(quantity) || quantity <= 0) return '';
   let code = canonicalUnitCode(unit);
   let value = quantity;
   if (code === 'g' && value >= 1000) [code, value] = ['kg', value / 1000];
   if (code === 'ml' && value >= 1000) [code, value] = ['l', value / 1000];
   const fractional = code === null || FRACTIONAL_UNITS.has(code);
-  const amount = fractional ? toFraction(value) : formatDecimal(roundMetric(value));
+  const amount = fractional ? toFraction(value) : formatDecimal(roundMetric(value), 1, language);
   if (code === null) return `${amount} ${unit.trim()}`;
   // Amounts of one or less read as singular in every language we support ("½ cup").
-  return t(`common.units.${code}` as MessageKey, { n: amount, count: value <= 1 ? 1 : value });
+  const key = `common.units.${code}` as MessageKey;
+  const params = { n: amount, count: value <= 1 ? 1 : value };
+  return language ? tFor(language, key, params) : t(key, params);
 }
 
 export function formatMinutes(minutes: number): string {

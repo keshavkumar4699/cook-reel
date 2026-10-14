@@ -1,5 +1,5 @@
 import type { ApiRecipe, CookProfile, Recipe } from '@/data/types';
-import { stripBidi, t } from '@/i18n';
+import { isAppLanguage, stripBidi, t, type AppLanguage } from '@/i18n';
 import { joinFacts } from '@/i18n/format';
 import type { ExperimentRecipeInput } from '@/lib/api';
 import { formatMinutes, formatQuantity } from '@/lib/format';
@@ -147,4 +147,9 @@ export function recipeToText(recipe: Recipe): string {
   if (recipe.youtube) lines.push('', t('common.share.video', { url: recipe.youtube.url }));
   lines.push('', t('common.share.sharedFrom'));
   return stripBidi(lines.filter((l, i, all) => !(l === '' && all[i - 1] === '')).join('\n'));
+}
+
+/** The language a recipe is written in, which its narration is spoken in. */
+export function recipeLanguage(recipe: { language?: string } | null | undefined): AppLanguage {
+  return isAppLanguage(recipe?.language) ? recipe.language : 'en';
 }

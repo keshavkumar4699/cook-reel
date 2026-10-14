@@ -87,7 +87,9 @@ export interface Pricing {
 
 export interface Health {
   ok: boolean;
-  features: { ai: boolean; youtube: boolean; devLogin: boolean; google: boolean; apple: boolean; billing: boolean };
+  features: { ai: boolean; youtube: boolean; devLogin: boolean; google: boolean; apple: boolean; billing: boolean; naturalVoice?: boolean };
+  /** Natural narration settings; null when the server has it switched off (older servers omit it). */
+  naturalVoice?: { version: string; voices: string[]; defaultVoice: string } | null;
 }
 
 export interface ChatMessage {
@@ -150,6 +152,19 @@ export function configureApi(options: { token: TokenSource; onUnauthorized: Unau
   onUnauthorized = options.onUnauthorized;
 }
 
+/** Authorization header for the signed-in cook, if any. */
+export function authHeader(): Record<string, string> {
+  const token = getToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
+}
+
+/** An ApiError for an error response; a 401 on a signed-in request also reports the expired session. */
+export function apiErrorFrom(status: number, payload: unknown, authed: boolean): ApiError {
+  const error = (payload as { error?: { code: ErrorCode; message: string; details?: Record<string, unknown> } } | null)?.error;
+  if (status === 401 && authed && getToken()) onUnauthorized();
+  return new ApiError(status, error?.code ?? 'internal', error?.message ?? t('common.errors.generic'), error?.details);
+}
+
 async function request<T>(
   path: string,
   options: { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown; auth?: boolean; timeoutMs?: number; signal?: AbortSignal } = {},
@@ -159,10 +174,7 @@ async function request<T>(
   options.signal?.addEventListener('abort', () => controller.abort());
   const headers: Record<string, string> = { accept: 'application/json' };
   if (options.body !== undefined) headers['content-type'] = 'application/json';
-  if (options.auth !== false) {
-    const token = getToken();
-    if (token) headers.authorization = `Bearer ${token}`;
-  }
+  if (options.auth !== false) Object.assign(headers, authHeader());
 
   let res: Response;
   try {
@@ -183,14 +195,8 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  const payload = (await res.json().catch(() => null)) as
-    | (T & { error?: { code: ErrorCode; message: string; details?: Record<string, unknown> } })
-    | null;
-  if (!res.ok) {
-    const error = payload?.error;
-    if (res.status === 401 && options.auth !== false && getToken()) onUnauthorized();
-    throw new ApiError(res.status, error?.code ?? 'internal', error?.message ?? t('common.errors.generic'), error?.details);
-  }
+  const payload: unknown = await res.json().catch(() => null);
+  if (!res.ok) throw apiErrorFrom(res.status, payload, options.auth !== false);
   return payload as T;
 }
 

@@ -1,4 +1,4 @@
-import { getLanguage, intlLocale, t } from './index';
+import { getLanguage, intlLocale, t, tFor, type AppLanguage } from './index';
 
 /** Full-width (Japanese IME) and Arabic-Indic digits → ASCII, so typed numbers parse anywhere. */
 export function normalizeDigits(text: string): string {
@@ -18,11 +18,12 @@ export function parseLocaleNumber(text: string): number {
   return Number(cleaned.replace(',', '.'));
 }
 
-/** Plain decimal in the app language (1.5 → "1,5" in German). */
-export function formatDecimal(value: number, maxFractionDigits = 1): string {
+/** Plain decimal in the app language, or `language` (1.5 → "1,5" in German). */
+export function formatDecimal(value: number, maxFractionDigits = 1, language?: AppLanguage): string {
   const rounded = Math.round(value * 10 ** maxFractionDigits) / 10 ** maxFractionDigits;
   const [whole, fraction] = String(rounded).split('.');
-  return fraction ? `${whole}${t('common.format.decimalSeparator')}${fraction}` : (whole ?? '0');
+  const separator = language ? tFor(language, 'common.format.decimalSeparator') : t('common.format.decimalSeparator');
+  return fraction ? `${whole}${separator}${fraction}` : (whole ?? '0');
 }
 
 /** Grouped integer ("1,200" / "1.200" / "1 200"). */

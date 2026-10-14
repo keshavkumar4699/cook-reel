@@ -1,17 +1,18 @@
-import { useState, type ReactNode } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { useState } from 'react';
+import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LanguageSheet } from '@/components/LanguageSheet';
+import { VoiceSettings } from '@/components/VoiceSettings';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Icon, type IconName } from '@/components/ui/Icon';
-import { PressableScale } from '@/components/ui/PressableScale';
+import { Icon } from '@/components/ui/Icon';
 import { Screen } from '@/components/ui/Screen';
 import { Segmented } from '@/components/ui/Segmented';
+import { SettingsGroup, SettingsRow, SettingsSwitch } from '@/components/ui/Settings';
 import { Txt } from '@/components/ui/Text';
 import { getLanguageSetting, LANGUAGE_INFO, getLanguage, t } from '@/i18n';
 import { joinFacts } from '@/i18n/format';
@@ -27,48 +28,7 @@ import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { useSettings, type Appearance } from '@/state/settings';
 import { toast } from '@/state/toast';
-import { GUTTER, radius, useTheme } from '@/theme';
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  const { colors } = useTheme();
-  return (
-    <View style={{ marginTop: 28 }}>
-      <Txt variant="overline" color="textMuted" style={{ marginBottom: 8, marginLeft: 4 }}>
-        {title}
-      </Txt>
-      <View style={[styles.group, { backgroundColor: colors.surface, borderColor: colors.border }]}>{children}</View>
-    </View>
-  );
-}
-
-function Row({ icon, label, detail, onPress, right, danger, last }: { icon: IconName; label: string; detail?: string; onPress?: () => void; right?: ReactNode; danger?: boolean; last?: boolean }) {
-  const { colors } = useTheme();
-  const body = (
-    <View style={[styles.row, !last ? { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: colors.border } : null]}>
-      <View style={[styles.rowIcon, { backgroundColor: danger ? colors.dangerSoft : colors.surfaceMuted }]}>
-        <Icon name={icon} size={17} color={danger ? colors.danger : colors.text} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Txt variant="bodyStrong" color={danger ? 'danger' : 'text'}>
-          {label}
-        </Txt>
-        {detail ? (
-          <Txt variant="footnote" color="textMuted">
-            {detail}
-          </Txt>
-        ) : null}
-      </View>
-      {right ?? (onPress ? <Icon name="chevron-forward" size={18} color="textFaint" /> : null)}
-    </View>
-  );
-  return onPress ? (
-    <PressableScale onPress={onPress} scaleTo={0.99} accessibilityLabel={label}>
-      {body}
-    </PressableScale>
-  ) : (
-    body
-  );
-}
+import { GUTTER, useTheme } from '@/theme';
 
 export default function Me() {
   const insets = useSafeAreaInsets();
@@ -83,16 +43,6 @@ export default function Me() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const languageSetting = getLanguageSetting();
   const planName = planNameFor(balance?.planId ?? null, balance?.planName ?? null);
-
-  const switchProps = (value: boolean, onValueChange: (v: boolean) => void) => ({
-    value,
-    onValueChange,
-    trackColor: { true: colors.primary, false: colors.borderStrong },
-    thumbColor: '#FFFFFF',
-    ios_backgroundColor: colors.borderStrong,
-    // react-native-web reads these instead of thumbColor/trackColor.
-    ...({ activeThumbColor: '#FFFFFF', activeTrackColor: colors.primary } as object),
-  });
 
   const toggleSharing = async (sharingOptIn: boolean) => {
     try {
@@ -188,33 +138,20 @@ export default function Me() {
           </Card>
         )}
 
-        <Group title={t('me.groups.cooking')}>
-          <Row icon="person-outline" label={t('me.rows.profile')} detail={profileSummary || t('me.rows.profileEmpty')} onPress={() => router.push('/profile')} />
-          <Row
+        <SettingsGroup title={t('me.groups.cooking')}>
+          <SettingsRow icon="person-outline" label={t('me.rows.profile')} detail={profileSummary || t('me.rows.profileEmpty')} onPress={() => router.push('/profile')} />
+          <SettingsRow
             icon="language-outline"
             label={t('me.rows.language')}
             detail={languageSetting === 'system' ? t('common.language.systemDetail', { language: LANGUAGE_INFO[getLanguage()].nativeName }) : LANGUAGE_INFO[languageSetting].nativeName}
             onPress={() => setLanguageOpen(true)}
+            last
           />
-          <Row icon="mic-outline" label={t('me.rows.voiceControl')} detail={t('me.rows.voiceControlDetail')} right={<Switch {...switchProps(settings.voiceControl, (v) => settings.set({ voiceControl: v }))} />} />
-          <Row icon="volume-high-outline" label={t('me.rows.readAloud')} detail={t('me.rows.readAloudDetail')} right={<Switch {...switchProps(settings.autoNarrate, (v) => settings.set({ autoNarrate: v }))} />} />
-          <View style={styles.inlineSetting}>
-            <Txt variant="footnote" color="textMuted" style={{ marginBottom: 8 }}>
-              {t('me.voice.pace')}
-            </Txt>
-            <Segmented
-              value={String(settings.speechRate)}
-              onChange={(v) => settings.set({ speechRate: Number(v) })}
-              options={[
-                { value: '0.85', label: t('me.voice.paces.relaxed') },
-                { value: '1', label: t('me.voice.paces.normal') },
-                { value: '1.15', label: t('me.voice.paces.brisk') },
-              ]}
-            />
-          </View>
-        </Group>
+        </SettingsGroup>
 
-        <Group title={t('me.groups.appearance')}>
+        <VoiceSettings />
+
+        <SettingsGroup title={t('me.groups.appearance')}>
           <View style={styles.inlineSetting}>
             <Segmented<Appearance>
               value={settings.appearance}
@@ -226,24 +163,24 @@ export default function Me() {
               ]}
             />
           </View>
-        </Group>
+        </SettingsGroup>
 
         {signedIn ? (
-          <Group title={t('me.groups.privacy')}>
-            <Row
+          <SettingsGroup title={t('me.groups.privacy')}>
+            <SettingsRow
               icon="people-outline"
               label={t('me.rows.sharing')}
               detail={t('me.rows.sharingDetail')}
-              right={<Switch {...switchProps(session.user?.sharingOptIn ?? true, (v) => void toggleSharing(v))} />}
+              right={<SettingsSwitch value={session.user?.sharingOptIn ?? true} onValueChange={(v) => void toggleSharing(v)} label={t('me.rows.sharing')} />}
               last
             />
-          </Group>
+          </SettingsGroup>
         ) : null}
 
-        <Group title={t('me.groups.purchases')}>
-          <Row icon="pricetags-outline" label={t('me.rows.plans')} onPress={() => router.push('/pricing')} />
-          {Platform.OS !== 'web' ? <Row icon="refresh-outline" label={t('me.rows.restore')} onPress={() => void restore()} /> : null}
-          <Row
+        <SettingsGroup title={t('me.groups.purchases')}>
+          <SettingsRow icon="pricetags-outline" label={t('me.rows.plans')} onPress={() => router.push('/pricing')} />
+          {Platform.OS !== 'web' ? <SettingsRow icon="refresh-outline" label={t('me.rows.restore')} onPress={() => void restore()} /> : null}
+          <SettingsRow
             icon="card-outline"
             label={t('me.rows.manage')}
             last
@@ -253,13 +190,13 @@ export default function Me() {
               )
             }
           />
-        </Group>
+        </SettingsGroup>
 
         {signedIn ? (
-          <Group title={t('me.groups.account')}>
-            <Row icon="log-out-outline" label={t('me.rows.signOut')} onPress={() => void session.signOut()} />
-            <Row icon="trash-outline" label={t('me.rows.deleteAccount')} danger last onPress={() => void deleteAccount()} />
-          </Group>
+          <SettingsGroup title={t('me.groups.account')}>
+            <SettingsRow icon="log-out-outline" label={t('me.rows.signOut')} onPress={() => void session.signOut()} />
+            <SettingsRow icon="trash-outline" label={t('me.rows.deleteAccount')} danger last onPress={() => void deleteAccount()} />
+          </SettingsGroup>
         ) : null}
 
         <Txt variant="caption" color="textFaint" align="center" style={{ marginTop: 28 }}>
@@ -277,8 +214,5 @@ const styles = StyleSheet.create({
   credits: { padding: 18 },
   creditsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 },
   creditsValue: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  group: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 58 },
-  rowIcon: { width: 32, height: 32, borderRadius: radius.xs, alignItems: 'center', justifyContent: 'center' },
   inlineSetting: { paddingHorizontal: 14, paddingVertical: 12 },
 });

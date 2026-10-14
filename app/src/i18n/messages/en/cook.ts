@@ -76,6 +76,10 @@ export default {
     forServings: plural({ one: 'For {count} serving', other: 'For {count} servings' }),
     readAloud: 'Read them to me',
   },
+  /** While Chef's natural voice is being generated for what's about to be read. */
+  narration: {
+    preparing: 'Getting Chef’s voice ready…',
+  },
   /** Sheet listing the voice commands (long-press the voice pill). */
   help: {
     title: 'Voice commands',

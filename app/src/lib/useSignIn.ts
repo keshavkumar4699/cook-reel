@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { t } from '@/i18n';
-import { api, type Health, type SessionResponse } from '@/lib/api';
+import { api, type SessionResponse } from '@/lib/api';
+import { fetchHealth } from '@/lib/health';
 import { errorMessage } from '@/lib/errors';
 import { haptics } from '@/lib/haptics';
 import { appleAuth } from '@/native/apple';
 import { googleAuth } from '@/native/google';
 import { useSession } from '@/state/session';
 import { toast } from '@/state/toast';
-
-let healthCache: Promise<Health | null> | null = null;
-export const fetchHealth = () => (healthCache ??= api.health().catch(() => null));
 
 export type Provider = 'apple' | 'google' | 'dev';
 

@@ -6,6 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeIn, FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityLine, useDelayedFlag } from '@/components/ui/ActivityLine';
 import { Button } from '@/components/ui/Button';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { IconButton } from '@/components/ui/IconButton';
@@ -18,10 +19,10 @@ import { useNarrator } from '@/features/cook/useNarrator';
 import { useStepTimer, type StepTimer } from '@/features/cook/useStepTimer';
 import { useVoiceCommands, type VoiceState } from '@/features/cook/useVoiceCommands';
 import { YouTubeStage } from '@/features/cook/YouTubeStage';
-import { t } from '@/i18n';
-import { joinList } from '@/i18n/format';
+import { t, tFor, type AppLanguage } from '@/i18n';
 import { formatClock, formatQuantity } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { recipeLanguage } from '@/lib/recipes';
 import { VOICE_HELP, type VoiceCommand } from '@/lib/voice';
 import { useLibrary, useRecipe } from '@/state/library';
 import { useSettings } from '@/state/settings';
@@ -37,9 +38,13 @@ const VOICE_LABEL: Record<VoiceState, string> = {
   unavailable: t('cook.voiceState.unavailable'),
 };
 
-function narrationFor(step: Step) {
-  return step.narration ?? t('speech.titleAndInstruction', { title: step.title, instruction: step.instruction });
+/** What cooking mode says for a step, in the recipe's language. */
+function narrationFor(step: Step, language: AppLanguage) {
+  return step.narration ?? tFor(language, 'speech.titleAndInstruction', { title: step.title, instruction: step.instruction });
 }
+
+/** A step change waits this long before asking for narration, so fast swipes don't queue clips. */
+const NARRATE_AFTER_MS = 300;
 
 function PulseDot({ active }: { active: boolean }) {
   const scale = useSharedValue(1);
@@ -86,6 +91,7 @@ export default function Cook() {
   const yt = recipe?.youtube ?? null;
   const isShort = !!yt?.isShort;
   const autoNarrate = isShort || settings.autoNarrate;
+  const language = recipeLanguage(recipe);
   const servings = Number(servingsParam) || recipe?.servings || 1;
   const factor = recipe ? servings / Math.max(1, recipe.servings) : 1;
 
@@ -102,14 +108,15 @@ export default function Cook() {
   const [rating, setRating] = useState<number | null>(recipe?.rating ?? null);
   const listRef = useRef<FlatList<Step | 'done'>>(null);
 
-  const narrator = useNarrator(settings.speechRate);
+  const narrator = useNarrator({ rate: settings.speechRate, language, listening: voiceOn });
   const onTimerDone = useCallback(
     (timer: StepTimer) => {
       haptics.warning();
-      narrator.speak(t('speech.timerDone', { label: timer.label }));
+      // An alarm can't wait: if the natural clip isn't ready quickly, the phone's voice says it.
+      narrator.speak(tFor(language, 'speech.timerDone', { label: timer.label }), { maxWaitMs: 1500 });
       toast(t('cook.timer.doneToast', { label: timer.label }), { tone: 'success', durationMs: 5000 });
     },
-    [narrator],
+    [narrator, language],
   );
   const timers = useStepTimer(onTimerDone);
 
@@ -132,30 +139,30 @@ export default function Cook() {
     [index, total],
   );
 
-  // Speak each step as it arrives (always for Shorts — their clips are muted under the voice).
+  // Speak each step as it arrives (always for Shorts — their clips are muted under the voice), and get
+  // the next two ready so they play without a wait.
   useEffect(() => {
-    if (!step) {
-      narrator.stop();
-      return;
-    }
-    if (autoNarrate) narrator.speak(narrationFor(step));
+    narrator.stop();
+    if (!step || !autoNarrate) return;
+    narrator.prefetch(steps.slice(index + 1, index + 3).map((s) => narrationFor(s, language)), language);
+    const timer = setTimeout(() => narrator.speak(narrationFor(step, language)), NARRATE_AFTER_MS);
+    return () => clearTimeout(timer);
     // Narrate on step change only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const readIngredients = useCallback(() => {
     if (!recipe) return;
-    const list = joinList(
-      recipe.ingredients
-        .filter((i) => !i.optional)
-        .map((i) => {
-          const amount = formatQuantity(i.quantity === null ? null : i.quantity * factor, i.unit);
-          return amount ? t('speech.ingredientAmount', { amount, name: i.name }) : i.name;
-        }),
-    );
-    narrator.speak(t('speech.youNeed', { list }));
+    const list = recipe.ingredients
+      .filter((i) => !i.optional)
+      .map((i) => {
+        const amount = formatQuantity(i.quantity === null ? null : i.quantity * factor, i.unit, language);
+        return amount ? tFor(language, 'speech.ingredientAmount', { amount, name: i.name }) : i.name;
+      })
+      .join(tFor(language, 'common.format.listSeparator'));
+    narrator.speak(tFor(language, 'speech.youNeed', { list }));
     setShowIngredients(true);
-  }, [recipe, factor, narrator]);
+  }, [recipe, factor, narrator, language]);
 
   const startTimer = useCallback(
     (s: Step) => {
@@ -167,9 +174,10 @@ export default function Cook() {
       }
       haptics.press();
       timers.start(s.id, s.title, s.durationSec);
+      narrator.prefetch([tFor(language, 'speech.timerDone', { label: s.title })], language);
       toast(t('cook.timer.started', { time: formatClock(s.durationSec) }));
     },
-    [timers],
+    [timers, narrator, language],
   );
 
   const onCommand = useCallback(
@@ -191,10 +199,10 @@ export default function Cook() {
         case 'repeat':
           setPlaying(true);
           setRestart((r) => r + 1);
-          if (step && autoNarrate) narrator.speak(narrationFor(step));
+          if (step && autoNarrate) narrator.speak(narrationFor(step, language));
           break;
         case 'read':
-          if (step) narrator.speak(step.tip ? t('speech.instructionWithTip', { instruction: step.instruction, tip: step.tip }) : step.instruction);
+          if (step) narrator.speak(step.tip ? tFor(language, 'speech.instructionWithTip', { instruction: step.instruction, tip: step.tip }) : step.instruction);
           break;
         case 'ingredients':
           readIngredients();
@@ -214,10 +222,13 @@ export default function Cook() {
           break;
       }
     },
-    [go, index, narrator, step, autoNarrate, readIngredients, startTimer, timers],
+    [go, index, narrator, step, autoNarrate, language, readIngredients, startTimer, timers],
   );
 
-  const voice = useVoiceCommands({ enabled: voiceOn, paused: narrator.speaking, onCommand });
+  // The microphone rests while Chef speaks (and while the voice is on its way) so it can't hear itself.
+  const voice = useVoiceCommands({ enabled: voiceOn, paused: narrator.busy, onCommand });
+  // Words join the progress line only when the wait is long enough to wonder about.
+  const showPreparing = useDelayedFlag(narrator.preparing, 700);
 
   // FlatList requires a stable onViewableItemsChanged.
   const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -236,7 +247,7 @@ export default function Cook() {
     );
   }
 
-  const muted = userMuted || narrator.speaking;
+  const muted = userMuted || narrator.busy;
   const finished = index >= total;
 
   const finish = () => {
@@ -377,6 +388,13 @@ export default function Cook() {
             }
           />
         ) : null}
+        {showPreparing ? (
+          <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(160)} style={styles.preparing} pointerEvents="none">
+            <Txt variant="caption" color={stage.text}>
+              {t('cook.narration.preparing')}
+            </Txt>
+          </Animated.View>
+        ) : null}
       </View>
 
       {timers.timer ? (
@@ -404,6 +422,7 @@ export default function Cook() {
       ) : null}
 
       <View style={[styles.controls, { paddingBottom: insets.bottom + 12 }]}>
+        <ActivityLine active={narrator.preparing} label={t('cook.narration.preparing')} color={stage.ai} trackColor="rgba(255,255,255,0.08)" style={styles.activity} />
         <Control icon="chevron-up" label={t('cook.controls.previous')} onPress={() => go(index - 1)} />
         <Control icon="refresh" label={t('cook.controls.replay')} onPress={() => onCommand('repeat')} />
         <Control
@@ -420,9 +439,9 @@ export default function Cook() {
           <Control icon={userMuted ? 'volume-mute' : 'volume-high'} label={userMuted ? t('cook.controls.unmute') : t('cook.controls.mute')} onPress={() => setUserMuted(!userMuted)} />
         ) : (
           <Control
-            icon={narrator.speaking ? 'stop' : 'volume-high'}
-            label={narrator.speaking ? t('cook.controls.stopReading') : t('cook.controls.readAloud')}
-            onPress={() => (narrator.speaking ? narrator.stop() : onCommand('read'))}
+            icon={narrator.busy ? 'stop' : 'volume-high'}
+            label={narrator.busy ? t('cook.controls.stopReading') : t('cook.controls.readAloud')}
+            onPress={() => (narrator.busy ? narrator.stop() : onCommand('read'))}
           />
         )}
         <Control icon="chevron-down" label={t('cook.controls.next')} onPress={() => go(index + 1)} />
@@ -441,7 +460,15 @@ export default function Cook() {
               </Txt>
             </View>
           ))}
-          <Button label={t('cook.ingredients.readAloud')} icon="volume-high-outline" variant="secondary" size="md" style={{ marginTop: 14 }} onPress={readIngredients} />
+          <ActivityLine active={narrator.preparing} label={t('cook.narration.preparing')} color={stage.ai} style={{ marginTop: 14 }} />
+          <Button
+            label={narrator.busy ? t('cook.controls.stopReading') : t('cook.ingredients.readAloud')}
+            icon={narrator.busy ? 'stop' : 'volume-high-outline'}
+            variant="secondary"
+            size="md"
+            style={{ marginTop: 14 }}
+            onPress={narrator.busy ? narrator.stop : readIngredients}
+          />
         </ScrollView>
       </Sheet>
 
@@ -513,6 +540,19 @@ const styles = StyleSheet.create({
     borderColor: stage.border,
   },
   controls: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', paddingTop: 10, paddingHorizontal: 12 },
+  // Overlays the top edge of the control dock, so it appears without moving anything.
+  activity: { position: 'absolute', top: 0, left: 24, right: 24 },
+  preparing: {
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(20,16,14,0.82)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: stage.border,
+  },
   control: { alignItems: 'center', justifyContent: 'center' },
   ingRow: { flexDirection: 'row', gap: 12, paddingVertical: 10 },
   helpRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },

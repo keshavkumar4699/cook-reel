@@ -57,6 +57,8 @@ export interface YouTubeSource {
 /** What the API returns. */
 export interface ApiRecipe {
   id: string;
+  /** Language the recipe is written in (an app language code). Older recipes have none: English. */
+  language?: string;
   title: string;
   description: string;
   emoji: string;

@@ -2,6 +2,7 @@ import type { ExpoConfig } from 'expo/config';
 
 const bundleId = process.env.APP_BUNDLE_ID ?? 'com.cookreel.app';
 const googleIosUrlScheme = process.env.GOOGLE_IOS_URL_SCHEME;
+const microphonePermission = 'CookReel listens for "next", "back" and "stop" so you can cook hands-free.';
 
 const config: ExpoConfig = {
   name: 'CookReel',
@@ -45,6 +46,9 @@ const config: ExpoConfig = {
     'expo-image',
     'expo-localization',
     'expo-apple-authentication',
+    'expo-asset',
+    // Natural narration plays through expo-audio; it never records (speech recognition does that).
+    ['expo-audio', { microphonePermission, recordAudioAndroid: false, enableBackgroundPlayback: false }],
     [
       'expo-splash-screen',
       {
@@ -57,7 +61,7 @@ const config: ExpoConfig = {
     [
       'expo-speech-recognition',
       {
-        microphonePermission: 'CookReel listens for "next", "back" and "stop" so you can cook hands-free.',
+        microphonePermission,
         speechRecognitionPermission: 'CookReel turns your voice commands into actions while you cook.',
         androidSpeechServicePackages: ['com.google.android.googlequicksearchbox'],
       },
