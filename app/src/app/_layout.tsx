@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
+import { reloadAppAsync } from 'expo';
 import { useFonts } from 'expo-font';
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces/600SemiBold';
 import { Fraunces_600SemiBold_Italic } from '@expo-google-fonts/fraunces/600SemiBold_Italic';
@@ -14,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
+import { reloadIfDeviceLanguageChanged, syncLayoutDirection } from '@/i18n';
 import { useImports } from '@/state/imports';
 import { useKitchen } from '@/state/kitchen';
 import { useLibrary } from '@/state/library';
@@ -49,14 +52,37 @@ export default function RootLayout() {
   const { colors, isDark } = useTheme();
 
   useEffect(() => {
-    Promise.allSettled([
-      persisted(useProfile),
-      persisted(useSettings),
-      persisted(useImports),
-      useSession.getState().hydrate(),
-      useLibrary.getState().hydrate(),
-      useKitchen.getState().hydrate(),
-    ]).finally(() => setReady(true));
+    let active = true;
+    const boot = async () => {
+      // The language was read synchronously when '@/i18n' loaded. Arabic also needs a right-to-left
+      // layout, which React Native only applies after a restart — do that before anything renders.
+      if (syncLayoutDirection()) {
+        try {
+          await reloadAppAsync('Layout direction changed');
+          return;
+        } catch {
+          // Carry on in the old direction; it applies on the next launch.
+        }
+      }
+      await Promise.allSettled([
+        persisted(useProfile),
+        persisted(useSettings),
+        persisted(useImports),
+        useSession.getState().hydrate(),
+        useLibrary.getState().hydrate(),
+        useKitchen.getState().hydrate(),
+      ]);
+      if (active) setReady(true);
+    };
+    void boot();
+    // With "phone language" selected, follow a language change made in system settings.
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void reloadIfDeviceLanguageChanged().catch(() => undefined);
+    });
+    return () => {
+      active = false;
+      subscription.remove();
+    };
   }, []);
 
   const loaded = (fontsLoaded || !!fontError) && ready;

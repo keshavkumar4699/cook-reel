@@ -257,7 +257,7 @@ export default function RecipeDetail() {
               <Button label={t('recipe.sections.addToList')} icon="cart-outline" variant="soft" size="sm" onPress={addToShopping} />
             </View>
             <Txt variant="footnote" color="textMuted" style={{ marginBottom: 10 }}>
-              Tap to tick off what you already have.
+              {t('recipe.sections.ingredientsHint')}
             </Txt>
             <IngredientList ingredients={recipe.ingredients} factor={factor} />
           </View>

@@ -78,14 +78,6 @@ export function formatGrams(value: number): string {
   return t('common.units.g', { n: amount });
 }
 
-/**
- * @deprecated Use a plural message from the catalog, e.g. t('common.counts.recipes', { count }).
- * Kept only until every call site is migrated.
- */
-export function plural(count: number, one: string, many = `${one}s`): string {
-  return `${count} ${count === 1 ? one : many}`;
-}
-
 export function greeting(date = new Date()): string {
   const h = date.getHours();
   if (h < 5) return t('common.greeting.lateNight');
