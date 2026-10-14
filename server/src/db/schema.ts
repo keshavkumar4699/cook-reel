@@ -88,9 +88,26 @@ export const creditLedger = pgTable(
 export const videoAnalyses = pgTable('video_analyses', {
   videoId: text('video_id').primaryKey(),
   recipe: jsonb('recipe').notNull(),
+  /** Language the analysed recipe is written in; other languages are translations (below). */
+  language: text('language').notNull().default('en'),
   model: text('model'),
   createdAt: createdAt(),
 });
+
+/** An analysed video's recipe in another language, translated once and shared by every cook. */
+export const videoRecipeTranslations = pgTable(
+  'video_recipe_translations',
+  {
+    videoId: text('video_id')
+      .notNull()
+      .references(() => videoAnalyses.videoId, { onDelete: 'cascade' }),
+    language: text('language').notNull(),
+    recipe: jsonb('recipe').notNull(),
+    model: text('model'),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.videoId, t.language] })],
+);
 
 export const importJobs = pgTable(
   'import_jobs',
@@ -103,7 +120,11 @@ export const importJobs = pgTable(
     url: text('url').notNull(),
     isShort: boolean('is_short').notNull().default(false),
     status: text('status').notNull(), // 'queued' | 'watching' | 'writing' | 'done' | 'failed'
+    /** Language the cook wants the recipe in. */
+    language: text('language').notNull().default('en'),
     error: text('error'),
+    /** Stable reason for a failed job (not_a_recipe_video, import_interrupted…); the app words it. */
+    errorCode: text('error_code'),
     creditsCharged: integer('credits_charged').notNull().default(0),
     chargeId: text('charge_id'),
     createdAt: createdAt(),

@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import type { ApiRecipe, CookProfile } from '@/data/types';
-import { t } from '@/i18n';
+import { getLanguage, t } from '@/i18n';
 
 const DEFAULT_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8787' : 'http://localhost:8787';
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_URL).replace(/\/$/, '');
@@ -116,6 +116,8 @@ export interface ImportJob {
   status: ImportStatus;
   videoId?: string;
   isShort?: boolean;
+  /** The language the recipe is being written in. */
+  language?: string;
   creditsCharged: number;
   error?: string | null;
   /** Stable code for a failed job (e.g. not_a_recipe_video, import_interrupted); the app shows its own text. */
@@ -220,11 +222,12 @@ export const api = {
   builder: (
     body: { messages: ChatMessage[]; mode: 'describe' | 'fridge'; pantry?: string[]; profile?: CookProfile },
     signal?: AbortSignal,
-  ) => request<BuilderResponse>('/api/ai/builder', { method: 'POST', body, timeoutMs: AI_TIMEOUT, signal }),
+  ) => request<BuilderResponse>('/api/ai/builder', { method: 'POST', body: { ...body, language: getLanguage() }, timeoutMs: AI_TIMEOUT, signal }),
   experiment: (body: { recipe: ExperimentRecipeInput; instruction: string; profile?: CookProfile }, signal?: AbortSignal) =>
-    request<ExperimentResponse>('/api/ai/experiment', { method: 'POST', body, timeoutMs: AI_TIMEOUT, signal }),
+    request<ExperimentResponse>('/api/ai/experiment', { method: 'POST', body: { ...body, language: getLanguage() }, timeoutMs: AI_TIMEOUT, signal }),
+  /** Chef writes the recipe in the app language; a video someone already analysed is translated for free. */
   startImport: (body: { url: string; profile?: CookProfile }) =>
-    request<ImportJob>('/api/ai/youtube', { method: 'POST', body, timeoutMs: 45_000 }),
+    request<ImportJob>('/api/ai/youtube', { method: 'POST', body: { ...body, language: getLanguage() }, timeoutMs: 45_000 }),
   importStatus: (jobId: string) => request<ImportJob>(`/api/ai/youtube/${jobId}`),
 
   syncBilling: () => request<{ balance: Balance }>('/api/billing/sync', { method: 'POST', body: {} }),

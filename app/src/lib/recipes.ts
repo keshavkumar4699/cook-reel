@@ -1,5 +1,5 @@
 import type { ApiRecipe, CookProfile, Recipe } from '@/data/types';
-import { isAppLanguage, stripBidi, t, type AppLanguage } from '@/i18n';
+import { getLanguage, isAppLanguage, stripBidi, t, type AppLanguage } from '@/i18n';
 import { joinFacts } from '@/i18n/format';
 import type { ExperimentRecipeInput } from '@/lib/api';
 import { formatMinutes, formatQuantity } from '@/lib/format';
@@ -30,6 +30,8 @@ export function emptyRecipe(): Recipe {
   const now = new Date().toISOString();
   return {
     id: newId(),
+    // The cook writes it in the app language, and cooking mode reads it in that language.
+    language: getLanguage(),
     title: '',
     description: '',
     emoji: '🍽️',

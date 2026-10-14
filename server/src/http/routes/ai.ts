@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type { AppDeps } from '../../app.js';
+import { LanguageSchema } from '../../domain/languages.js';
 import { costOf } from '../../domain/pricing.js';
 import { CookProfileSchema, normalizeRecipe, RecipeInputSchema } from '../../domain/recipe.js';
 import { HttpError, InsufficientCreditsError } from '../../lib/errors.js';
@@ -21,6 +22,7 @@ const BuilderBody = z
     mode: z.enum(['describe', 'fridge']).default('describe'),
     pantry: z.array(z.string().trim().min(1).max(60)).max(40).default([]),
     profile: CookProfileSchema.optional(),
+    language: LanguageSchema,
   })
   .refine((body) => body.messages[0]?.role === 'user' && body.messages[body.messages.length - 1]?.role === 'user', {
     message: 'The conversation must start and end with a message from the cook.',
@@ -30,11 +32,13 @@ const ExperimentBody = z.object({
   recipe: RecipeInputSchema,
   instruction: z.string().trim().min(3).max(300),
   profile: CookProfileSchema.optional(),
+  language: LanguageSchema,
 });
 
 const YouTubeBody = z.object({
   url: z.string().trim().min(5).max(500),
   profile: CookProfileSchema.optional(),
+  language: LanguageSchema,
 });
 
 export function aiRoutes(deps: AppDeps) {
@@ -68,10 +72,11 @@ export function aiRoutes(deps: AppDeps) {
       profile: body.profile,
       references,
       forceRecipe: questionsAsked >= MAX_QUESTION_ROUNDS,
+      language: body.language,
     });
 
     if (turn.kind === 'recipe' && turn.recipe) {
-      const recipe = normalizeRecipe(turn.recipe, { source: 'ai' });
+      const recipe = normalizeRecipe(turn.recipe, { source: 'ai', language: body.language });
       if (!recipe.ingredients.length || !recipe.steps.length) {
         throw new HttpError(502, 'ai_failed', 'Chef lost track of that recipe. No credits were used — please try again.');
       }
@@ -104,8 +109,8 @@ export function aiRoutes(deps: AppDeps) {
 
     const charge = await chargeCredits(deps.db, deps.pricing, { userId: user.id, amount: cost, feature: 'experiment' });
     try {
-      const result = await ai.experiment({ recipe: body.recipe, instruction: body.instruction, profile: body.profile });
-      const recipe = normalizeRecipe(result.recipe, { source: 'ai' });
+      const result = await ai.experiment({ recipe: body.recipe, instruction: body.instruction, profile: body.profile, language: body.language });
+      const recipe = normalizeRecipe(result.recipe, { source: 'ai', language: body.language });
       if (!recipe.ingredients.length || !recipe.steps.length) {
         throw new HttpError(502, 'ai_failed', 'Chef lost track of that variation. No credits were used — please try again.');
       }
@@ -126,7 +131,7 @@ export function aiRoutes(deps: AppDeps) {
   router.post('/youtube', async (req, res) => {
     const user = currentUser(res);
     const body = parseBody(YouTubeBody, req);
-    const result = await deps.imports.start({ userId: user.id, url: body.url, profile: body.profile });
+    const result = await deps.imports.start({ userId: user.id, url: body.url, profile: body.profile, language: body.language });
     if (result.kind === 'cached') {
       res.json({ status: 'done', cached: true, creditsCharged: 0, recipe: result.recipe });
       return;

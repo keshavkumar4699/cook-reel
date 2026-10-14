@@ -2,19 +2,24 @@ import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import type { Logger } from 'pino';
 import { z } from 'zod';
+import { LANGUAGE_INFO, type AppLanguage } from '../domain/languages.js';
 import {
   RecipeDraftSchema,
+  RecipeTranslationSchema,
   describeProfile,
   recipeToPromptText,
+  translatableText,
   type CookProfile,
+  type Recipe,
   type RecipeDraft,
   type RecipeInput,
+  type RecipeTranslation,
 } from '../domain/recipe.js';
 import type { VideoMeta } from '../domain/youtube.js';
 import { AIError } from '../lib/errors.js';
 import type { VideoBreakdown } from './gemini.js';
 import type { KnowledgeReference } from './knowledge.js';
-import { BUILDER_SYSTEM_PROMPT, EXPERIMENT_SYSTEM_PROMPT, FRIDGE_MODE_NOTE, VIDEO_SYSTEM_PROMPT } from './prompts.js';
+import { BUILDER_SYSTEM_PROMPT, EXPERIMENT_SYSTEM_PROMPT, FRIDGE_MODE_NOTE, TRANSLATE_SYSTEM_PROMPT, VIDEO_SYSTEM_PROMPT } from './prompts.js';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -44,6 +49,8 @@ export interface BuilderTurnInput {
   references: KnowledgeReference[];
   /** Set once enough questions were asked: the model must deliver the recipe now. */
   forceRecipe: boolean;
+  /** The cook's app language: what Chef writes in unless the cook writes in another one. */
+  language: AppLanguage;
 }
 
 export interface VideoRecipeInput {
@@ -53,21 +60,37 @@ export interface VideoRecipeInput {
   isShort: boolean;
   durationSec: number | null;
   profile?: CookProfile;
+  language: AppLanguage;
+}
+
+export interface ExperimentInput {
+  recipe: RecipeInput;
+  instruction: string;
+  profile?: CookProfile;
+  language: AppLanguage;
 }
 
 /** Everything the API needs from a text model. Implemented by Claude; faked in tests. */
 export interface RecipeAI {
   readonly model: string;
   builderTurn(input: BuilderTurnInput): Promise<BuilderTurn>;
-  experiment(input: { recipe: RecipeInput; instruction: string; profile?: CookProfile }): Promise<ExperimentResult>;
+  experiment(input: ExperimentInput): Promise<ExperimentResult>;
   recipeFromVideo(input: VideoRecipeInput): Promise<RecipeDraft>;
+  /** Translates a finished recipe's text; the caller keeps its numbers. */
+  translateRecipe(input: { recipe: Recipe; language: AppLanguage }): Promise<RecipeTranslation>;
 }
 
 /* ---------------------------------------------------------------------------------------------- */
 
-function contextBlock(input: Pick<BuilderTurnInput, 'profile' | 'mode' | 'pantry' | 'references'>): string {
+/** The language to write in, as a user-turn block (the system prompts stay identical for every language). */
+export function outputLanguageBlock(language: AppLanguage): string {
+  const info = LANGUAGE_INFO[language];
+  return `<output_language>\n${info.name} (${language}). Register: ${info.register}.\n</output_language>`;
+}
+
+function contextBlock(input: Pick<BuilderTurnInput, 'profile' | 'mode' | 'pantry' | 'references' | 'language'>): string {
   const profile = describeProfile(input.profile);
-  const parts = [`<cook_profile>\n${profile || 'Not provided — ask what matters.'}\n</cook_profile>`];
+  const parts = [outputLanguageBlock(input.language), `<cook_profile>\n${profile || 'Not provided — ask what matters.'}\n</cook_profile>`];
   if (input.mode === 'fridge') {
     parts.push(`<mode>\n${FRIDGE_MODE_NOTE}\n</mode>`);
     parts.push(`<ingredients_on_hand>\n${input.pantry.length ? input.pantry.join(', ') : 'Not listed yet — ask.'}\n</ingredients_on_hand>`);
@@ -126,6 +149,7 @@ export function createClaudeRecipeAI(
     schema: z.ZodType<T>,
     system: string,
     messages: Anthropic.Beta.BetaMessageParam[],
+    effort = config.effort,
   ): Promise<T> {
     const started = Date.now();
     try {
@@ -137,7 +161,7 @@ export function createClaudeRecipeAI(
         ...(config.fallbacks ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
         system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
         messages,
-        output_config: { effort: config.effort, format: betaZodOutputFormat(schema) },
+        output_config: { effort, format: betaZodOutputFormat(schema) },
       });
       const message = await stream.finalMessage();
 
@@ -180,12 +204,13 @@ export function createClaudeRecipeAI(
       return generate('builder', BuilderTurnSchema, BUILDER_SYSTEM_PROMPT, buildBuilderMessages(input));
     },
 
-    experiment({ recipe, instruction, profile }) {
+    experiment({ recipe, instruction, profile, language }) {
       const profileText = describeProfile(profile);
       return generate('experiment', ExperimentResultSchema, EXPERIMENT_SYSTEM_PROMPT, [
         {
           role: 'user',
           content: [
+            { type: 'text', text: outputLanguageBlock(language) },
             { type: 'text', text: `<cook_profile>\n${profileText || 'Not provided.'}\n</cook_profile>` },
             { type: 'text', text: `<original_recipe>\n${recipeToPromptText(recipe)}\n</original_recipe>` },
             { type: 'text', text: `Make this variation: ${instruction}` },
@@ -194,12 +219,13 @@ export function createClaudeRecipeAI(
       ]);
     },
 
-    recipeFromVideo({ url, meta, breakdown, isShort, durationSec, profile }) {
+    recipeFromVideo({ url, meta, breakdown, isShort, durationSec, profile, language }) {
       const profileText = describeProfile(videoProfile(profile));
       return generate('video-recipe', RecipeDraftSchema, VIDEO_SYSTEM_PROMPT, [
         {
           role: 'user',
           content: [
+            { type: 'text', text: outputLanguageBlock(language) },
             {
               type: 'text',
               text: [
@@ -218,6 +244,26 @@ export function createClaudeRecipeAI(
           ],
         },
       ]);
+    },
+
+    translateRecipe({ recipe, language }) {
+      // A careful translation, not a new recipe: low effort is plenty and keeps it quick.
+      return generate(
+        'translate',
+        RecipeTranslationSchema,
+        TRANSLATE_SYSTEM_PROMPT,
+        [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: outputLanguageBlock(language) },
+              { type: 'text', text: `<recipe language="${recipe.language}">\n${JSON.stringify(translatableText(recipe))}\n</recipe>` },
+              { type: 'text', text: 'Translate this recipe.' },
+            ],
+          },
+        ],
+        'low',
+      );
     },
   };
 }

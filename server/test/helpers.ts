@@ -6,11 +6,12 @@ import { loadConfig } from '../src/config.js';
 import { openDatabase, type Database } from '../src/db/client.js';
 import { EMBEDDING_DIMENSIONS } from '../src/db/schema.js';
 import { DEFAULT_PRICING, type Pricing } from '../src/domain/pricing.js';
-import type { RecipeDraft } from '../src/domain/recipe.js';
+import type { AppLanguage } from '../src/domain/languages.js';
+import { translatableText, type Recipe, type RecipeDraft, type RecipeTranslation } from '../src/domain/recipe.js';
 import type { OEmbedResult, ParsedYouTubeUrl } from '../src/domain/youtube.js';
 import { createIdentityVerifier, createSecretBox, createSessionSigner } from '../src/services/auth.js';
 import type { RevenueCatClient, RevenueCatSubscriber } from '../src/services/billing.js';
-import type { BuilderTurn, BuilderTurnInput, ExperimentResult, RecipeAI, VideoRecipeInput } from '../src/services/claude.js';
+import type { BuilderTurn, BuilderTurnInput, ExperimentInput, ExperimentResult, RecipeAI, VideoRecipeInput } from '../src/services/claude.js';
 import type { Embedder, VideoAnalyzer, VideoBreakdown } from '../src/services/gemini.js';
 import { createImportService } from '../src/services/imports.js';
 import { createKnowledgeBase } from '../src/services/knowledge.js';
@@ -21,6 +22,7 @@ export const APPLE_BUNDLE_ID = 'com.cookreel.app';
 
 export function sampleDraft(overrides: Partial<RecipeDraft> = {}): RecipeDraft {
   return {
+    language: 'en',
     title: 'Masala Egg Bhurji',
     description: 'Spicy scrambled eggs ready in 12 minutes, 20 g protein a plate.',
     emoji: '🍳',
@@ -117,10 +119,13 @@ export function sampleBreakdown(overrides: Partial<VideoBreakdown> = {}): VideoB
 export class FakeRecipeAI implements RecipeAI {
   readonly model = 'fake-claude';
   builderCalls: BuilderTurnInput[] = [];
+  experimentCalls: ExperimentInput[] = [];
   videoCalls: VideoRecipeInput[] = [];
+  translateCalls: Array<{ recipe: Recipe; language: AppLanguage }> = [];
   builderQueue: Array<BuilderTurn | Error> = [];
   experimentQueue: Array<ExperimentResult | Error> = [];
   videoQueue: Array<RecipeDraft | Error> = [];
+  translateQueue: Array<RecipeTranslation | Error> = [];
 
   async builderTurn(input: BuilderTurnInput): Promise<BuilderTurn> {
     this.builderCalls.push(input);
@@ -134,7 +139,8 @@ export class FakeRecipeAI implements RecipeAI {
     return next;
   }
 
-  async experiment(): Promise<ExperimentResult> {
+  async experiment(input: ExperimentInput): Promise<ExperimentResult> {
+    this.experimentCalls.push(input);
     const next = this.experimentQueue.shift() ?? {
       message: 'Here is a vegan twist.',
       changes: ['Swapped eggs for tofu'],
@@ -159,14 +165,33 @@ export class FakeRecipeAI implements RecipeAI {
     if (next instanceof Error) throw next;
     return next;
   }
+
+  /** Tags every translated text with the language, e.g. "[es] Eggs", so tests can see what changed. */
+  async translateRecipe(input: { recipe: Recipe; language: AppLanguage }): Promise<RecipeTranslation> {
+    this.translateCalls.push(input);
+    const next = this.translateQueue.shift();
+    if (next instanceof Error) throw next;
+    if (next) return next;
+    const tag = (text: string) => `[${input.language}] ${text}`;
+    const source = translatableText(input.recipe);
+    return {
+      ...source,
+      language: input.language,
+      title: tag(source.title),
+      ingredients: source.ingredients.map((i) => ({ ...i, name: tag(i.name) })),
+      steps: source.steps.map((s) => ({ ...s, instruction: tag(s.instruction), narration: s.narration ? tag(s.narration) : null })),
+    };
+  }
 }
 
 export class FakeAnalyzer implements VideoAnalyzer {
   readonly model = 'fake-gemini';
   calls: ParsedYouTubeUrl[] = [];
   queue: Array<VideoBreakdown | Error> = [];
+  delayMs = 0;
   async analyze(video: ParsedYouTubeUrl): Promise<VideoBreakdown> {
     this.calls.push(video);
+    if (this.delayMs) await new Promise((resolve) => setTimeout(resolve, this.delayMs));
     const next = this.queue.shift() ?? sampleBreakdown();
     if (next instanceof Error) throw next;
     return next;

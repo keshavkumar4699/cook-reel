@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { FALLBACK_TEXT, languageFromCode, type AppLanguage } from './languages.js';
+import { canonicalUnit } from './units.js';
 
 /* ------------------------------------------------------------------------------------------------
  * AI-facing schemas. Used as Claude structured-output formats, so every field is required
@@ -63,6 +65,7 @@ export const StepDraftSchema = z.object({
 });
 
 export const RecipeDraftSchema = z.object({
+  language: z.string().describe('ISO 639-1 code of the language this recipe is written in, e.g. "es"'),
   title: z.string().describe('Appetising, specific dish name'),
   description: z.string().describe('1-2 sentences on why this recipe fits the cook (taste, time, goals)'),
   emoji: z.string().describe('A single emoji representing the dish'),
@@ -125,6 +128,8 @@ export interface YouTubeSource {
 
 export interface Recipe {
   id: string;
+  /** The language every text field is written in. */
+  language: AppLanguage;
   title: string;
   description: string;
   emoji: string;
@@ -257,6 +262,8 @@ function normalizeTags(tags: string[]): string[] {
 
 export interface NormalizeOptions {
   source: Recipe['source'];
+  /** The language the cook asked for: used when the model doesn't say, and for text the server fills in. */
+  language?: AppLanguage;
   youtube?: YouTubeSource | null;
   /** Video length, used to clamp clip ranges. */
   durationSec?: number | null;
@@ -269,6 +276,8 @@ export function normalizeRecipe(draft: RecipeDraft, options: NormalizeOptions): 
   const cookMinutes = Math.max(0, Math.round(finiteOr(draft.cookMinutes, 0)));
   const durationSec = options.durationSec ?? options.youtube?.durationSec ?? null;
   const isVideo = options.source === 'youtube';
+  const language = languageFromCode(draft.language) ?? options.language ?? 'en';
+  const fallback = FALLBACK_TEXT[language];
 
   const ingredients: Ingredient[] = draft.ingredients
     .map((ing) => ({
@@ -276,7 +285,7 @@ export function normalizeRecipe(draft: RecipeDraft, options: NormalizeOptions): 
       name: clean(ing.name) ?? '',
       quantity:
         typeof ing.quantity === 'number' && Number.isFinite(ing.quantity) && ing.quantity > 0 ? round(ing.quantity, 2) : null,
-      unit: clean(ing.unit) ?? '',
+      unit: canonicalUnit(ing.unit),
       note: clean(ing.note),
       category: ing.category,
       substitutes: ing.substitutes.map((s) => clean(s)).filter((s): s is string => !!s).slice(0, 3),
@@ -290,7 +299,7 @@ export function normalizeRecipe(draft: RecipeDraft, options: NormalizeOptions): 
       const duration = finiteOr(step.durationSec, 0);
       return {
         id: randomUUID(),
-        title: clean(step.title) ?? 'Next step',
+        title: clean(step.title) ?? fallback.step,
         instruction: clean(step.instruction) ?? '',
         durationSec: duration > 0 ? Math.min(MAX_STEP_SECONDS, Math.round(duration)) : null,
         tip: clean(step.tip),
@@ -313,7 +322,8 @@ export function normalizeRecipe(draft: RecipeDraft, options: NormalizeOptions): 
 
   return {
     id: randomUUID(),
-    title: clean(draft.title) ?? 'Untitled recipe',
+    language,
+    title: clean(draft.title) ?? fallback.untitled,
     description: clean(draft.description) ?? '',
     emoji: firstEmoji(draft.emoji),
     cuisine: clean(draft.cuisine),
@@ -334,6 +344,101 @@ export function normalizeRecipe(draft: RecipeDraft, options: NormalizeOptions): 
     source: options.source,
     youtube: options.youtube ?? null,
     createdAt: (options.now ?? new Date()).toISOString(),
+  };
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Translations. A YouTube recipe is analysed once; other languages get a translation of its text,
+ * with quantities, units, timings, clips and nutrition copied from the original in code.
+ * ---------------------------------------------------------------------------------------------- */
+
+const SAME_ORDER = 'Exactly one entry per entry of the original, in the same order';
+
+export const RecipeTranslationSchema = z.object({
+  language: z.string().describe('ISO 639-1 code of the language you translated into'),
+  title: z.string(),
+  description: z.string(),
+  cuisine: z.string().nullable(),
+  equipment: z.array(z.string()),
+  storage: z.string().nullable(),
+  tags: z.array(z.string()),
+  ingredients: z
+    .array(z.object({ name: z.string(), note: z.string().nullable(), substitutes: z.array(z.string()) }))
+    .describe(SAME_ORDER),
+  steps: z
+    .array(
+      z.object({
+        title: z.string(),
+        instruction: z.string(),
+        tip: z.string().nullable(),
+        doneCue: z.string().nullable(),
+        glossary: z.array(z.object({ term: z.string(), meaning: z.string() })),
+        narration: z.string().nullable(),
+      }),
+    )
+    .describe(SAME_ORDER),
+});
+export type RecipeTranslation = z.infer<typeof RecipeTranslationSchema>;
+
+/** The text a translation replaces, in the same shape it comes back in. */
+export function translatableText(recipe: Recipe): Omit<RecipeTranslation, 'language'> {
+  return {
+    title: recipe.title,
+    description: recipe.description,
+    cuisine: recipe.cuisine,
+    equipment: recipe.equipment,
+    storage: recipe.storage,
+    tags: recipe.tags,
+    ingredients: recipe.ingredients.map((i) => ({ name: i.name, note: i.note, substitutes: i.substitutes })),
+    steps: recipe.steps.map((s) => ({
+      title: s.title,
+      instruction: s.instruction,
+      tip: s.tip,
+      doneCue: s.doneCue,
+      glossary: s.glossary,
+      narration: s.narration,
+    })),
+  };
+}
+
+/** The recipe with its text from `translation`; everything else stays the original's. */
+export function applyTranslation(recipe: Recipe, translation: RecipeTranslation, language: AppLanguage): Recipe {
+  if (translation.ingredients.length !== recipe.ingredients.length || translation.steps.length !== recipe.steps.length) {
+    throw new Error('translation does not line up with the recipe');
+  }
+  const keep = (original: string | null, translated: string | null) => (original === null ? null : (clean(translated) ?? original));
+  const texts = (list: string[], max: number) => list.map((v) => clean(v)).filter((v): v is string => !!v).slice(0, max);
+  const equipment = texts(translation.equipment, 12);
+  const tags = normalizeTags(translation.tags);
+  return {
+    ...recipe,
+    language,
+    title: clean(translation.title) ?? recipe.title,
+    description: clean(translation.description) ?? recipe.description,
+    cuisine: keep(recipe.cuisine, translation.cuisine),
+    equipment: equipment.length ? equipment : recipe.equipment,
+    storage: keep(recipe.storage, translation.storage),
+    tags: tags.length ? tags : recipe.tags,
+    ingredients: recipe.ingredients.map((ingredient, i) => {
+      const t = translation.ingredients[i]!;
+      return { ...ingredient, name: clean(t.name) ?? ingredient.name, note: keep(ingredient.note, t.note), substitutes: texts(t.substitutes, 3) };
+    }),
+    steps: recipe.steps.map((step, i) => {
+      const t = translation.steps[i]!;
+      const glossary = t.glossary
+        .map((g) => ({ term: clean(g.term) ?? '', meaning: clean(g.meaning) ?? '' }))
+        .filter((g) => g.term && g.meaning)
+        .slice(0, 4);
+      return {
+        ...step,
+        title: clean(t.title) ?? step.title,
+        instruction: clean(t.instruction) ?? step.instruction,
+        tip: keep(step.tip, t.tip),
+        doneCue: keep(step.doneCue, t.doneCue),
+        glossary: step.glossary.length ? glossary : [],
+        narration: keep(step.narration, t.narration),
+      };
+    }),
   };
 }
 

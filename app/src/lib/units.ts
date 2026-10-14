@@ -42,7 +42,7 @@ const ALIASES: Record<UnitCode, string[]> = {
   packet: ['packet', 'packets', 'pack', 'packs', 'sachet', 'sachets', 'sobre', 'sobres', 'paquete', 'paquetes', 'paquet', 'paquets', 'päckchen', 'packung', 'pck', 'pacote', 'pacotes', 'sachê', 'bustina', 'bustine', 'confezione', 'كيس', 'عبوة', '袋', 'パック'],
 };
 
-/** Lower-cases and strips accents/trailing dots so "Cucharadas." and "cucharadas" match. */
+/** Lower-cases and drops a trailing dot, so "Cucharadas." and "cucharadas" match. */
 export function foldUnit(raw: string): string {
   return raw
     .trim()
