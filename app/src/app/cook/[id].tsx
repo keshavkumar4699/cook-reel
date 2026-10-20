@@ -144,8 +144,11 @@ export default function Cook() {
   useEffect(() => {
     narrator.stop();
     if (!step || !autoNarrate) return;
-    narrator.prefetch(steps.slice(index + 1, index + 3).map((s) => narrationFor(s, language)), language);
-    const timer = setTimeout(() => narrator.speak(narrationFor(step, language)), NARRATE_AFTER_MS);
+    const timer = setTimeout(() => {
+      // The step on screen first; the next ones queue behind it.
+      narrator.speak(narrationFor(step, language));
+      narrator.prefetch(steps.slice(index + 1, index + 3).map((s) => narrationFor(s, language)), language);
+    }, NARRATE_AFTER_MS);
     return () => clearTimeout(timer);
     // Narrate on step change only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
