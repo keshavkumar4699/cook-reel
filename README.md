@@ -11,8 +11,10 @@ reels and lets you design new dishes with an AI chef that knows your kitchen, yo
 
 | | |
 |---|---|
-| **YouTube → step reels** | Paste any recipe video or Short. Gemini watches it, Claude writes clean steps, and each step plays its own looping clip in a vertical, swipeable cook mode. Shorts get an AI voice that explains every step. |
-| **Hands-free cooking** | Say “next”, “back”, “stop”, “repeat”, “ingredients”, “start timer”… (English and Hinglish). The mic pauses while the app is speaking, so narration can’t trigger commands. |
+| **YouTube → step reels** | Paste any recipe video or Short. Gemini watches it, Claude writes clean steps, and each step plays its own looping clip in a vertical, swipeable cook mode. Shorts get Chef’s voice explaining every step. |
+| **8 languages** | English, Spanish, French, German, Portuguese (Brazil), Italian, Arabic (right-to-left) and Japanese — menus, Chef’s recipes, YouTube recipes, voice commands and narration. Follows the phone’s language, or pick one in **Me → App language**. |
+| **A natural voice** | Chef reads steps in a warm, human-sounding voice in every language (Gemini TTS), cached so each step is generated once. While a clip is still being generated, a thin progress line sweeps above the controls. Guests and offline cooks hear the most natural voice installed on the phone. |
+| **Hands-free cooking** | Say “next”, “back”, “stop”, “repeat”, “ingredients”, “start timer”… in the app’s language (plus Hinglish in English). The mic rests while Chef speaks, so narration can’t trigger commands. |
 | **Chef, the AI recipe builder** | Describe a craving; Chef asks a few quick questions (always *how many people?*), then writes a recipe for your equipment, diet, time and skill. **Cook from my fridge** builds dishes from what you already have. |
 | **Experiments** | One tap for “make it vegan”, “more protein”, “air fryer version”… Chef rewrites the recipe and shows the before → after macros. Variations are saved as new versions. |
 | **Calories & macros everywhere** | Per-serving calories, protein, carbs, fat and fibre on every recipe, rescaled live when you change servings. Daily targets on the meal plan. |
@@ -33,7 +35,7 @@ flowchart LR
   subgraph Phone["Expo app (iOS / Android)"]
     UI["Screens · expo-router"]
     Store[("SQLite: recipes, plans,<br/>shopping list, settings")]
-    Voice["Speech recognition<br/>+ text-to-speech"]
+    Voice["Speech recognition<br/>+ natural voice player"]
     YT["YouTube iframe player<br/>(clip looper)"]
   end
   subgraph API["CookReel API (Node + Express)"]
@@ -41,6 +43,7 @@ flowchart LR
     Credits["Credits ledger"]
     AI["AI routes: builder, experiment, YouTube import jobs"]
     KB["Recipe knowledge base (RAG)"]
+    TTS["Natural voice: /api/speech<br/>(clip cache + daily caps)"]
   end
   PG[("Postgres + pgvector")]
   Claude["Claude API"]
@@ -52,15 +55,16 @@ flowchart LR
   AI --> Claude
   AI --> Gemini
   KB --> Gemini
+  TTS --> Gemini
   API --> PG
   RC -- webhook --> API
   API -- "subscriber lookup" --> RC
   UI -- "in-app purchase" --> RC
 ```
 
-- **Recipes stay on the phone** (SQLite). The server only stores accounts, the credit ledger, import jobs, cached video breakdowns and the recipe knowledge base. Guests need no account; the app only fetches current prices from the server.
+- **Recipes stay on the phone** (SQLite). The server only stores accounts, the credit ledger, import jobs, cached video breakdowns (and their translations), the recipe knowledge base and cached narration clips. Guests need no account; the app only fetches current prices from the server.
 - **Claude** (`claude-opus-5-5`, structured outputs) runs the builder interview, writes and rewrites recipes, and turns raw video breakdowns into clean recipes with per-step narration.
-- **Gemini** (`gemini-3.5-flash`) watches the YouTube video by URL and returns timestamped steps; `gemini-embedding-001` powers the knowledge base.
+- **Gemini** (`gemini-3.5-flash`) watches the YouTube video by URL and returns timestamped steps; `gemini-embedding-001` powers the knowledge base; `gemini-3.8-flash-tts` speaks the narration.
 - **Credits** are charged on the server inside a Postgres transaction (idempotency keys, row locks) and refunded automatically when an AI call fails.
 
 ```
@@ -119,6 +123,19 @@ All server settings are documented in [`server/.env.example`](server/.env.exampl
 | `GEMINI_API_KEY` | — | Required for YouTube imports and the knowledge base. |
 | `GEMINI_MODEL` | `gemini-3.5-flash` | Watches the video. Regular videos are sampled at low media resolution; Shorts at 2 fps / medium resolution. |
 | `GEMINI_EMBEDDING_MODEL` | `gemini-embedding-001` | 768-dimension embeddings. |
+
+### Natural voice
+
+| Variable | Default | Notes |
+|---|---|---|
+| `TTS_ENABLED` | `true` | Needs `GEMINI_API_KEY`. Off: everyone hears the phone’s own voice. |
+| `GEMINI_TTS_MODEL` | `gemini-3.8-flash-tts` | `gemini-3.8-flash-lite-tts` is cheaper. |
+| `TTS_VOICES` | `warm:Sulafat,friendly:Achird,gentle:Vindemiatrix,easygoing:Callirrhoe` | App voice id → Gemini voice; the first is the default. The app shows the ids it gets from `/health`. |
+| `TTS_USER_DAILY_SECONDS` | `900` | Seconds of *new* narration per cook per day (cached clips are free). |
+| `TTS_GLOBAL_DAILY_SECONDS` | `50000` | Daily ceiling for the whole service — a cost guard. |
+| `GEMINI_TTS_STYLE` | `true` | Sends the delivery direction (warm home cook, pace, accent) as speech metadata, never as text to read. |
+| `GEMINI_TTS_LANGUAGE_CODE` | `true` | Sends the ISO language code; the server retries without it if the API rejects it. |
+| `TTS_CACHE_VERSION` | `1` | Bump to discard every cached clip after changing voices or style. |
 
 ### Database
 
@@ -199,39 +216,91 @@ deletes their data. CookReel gets the same benefit with a **knowledge base** (re
 Sharing is opt-in per user (**Me → Help Chef learn from my imports**). Turning it off or deleting the account
 removes that user’s contributions from the shared pool.
 
+## Languages
+
+| | Register | Notes |
+|---|---|---|
+| English | friendly, plain | Hinglish voice commands too |
+| Español | informal *tú*, neutral | |
+| Français | *vous* | French typography (non-breaking spaces) |
+| Deutsch | informal *du* | |
+| Português | Brazilian, *você* | |
+| Italiano | informal *tu* | |
+| العربية | Modern Standard Arabic, gender-neutral where possible | right-to-left layout, Western digits |
+| 日本語 | です/ます | system fonts, Japanese units (大さじ, 小さじ, 個…) |
+
+- **Choosing a language.** The app follows the phone’s language (falling back to English) or the one picked in
+  **Me → App language** or on the welcome screen. CookReel restarts in the new language — Arabic needs a restart for
+  its right-to-left layout anyway. All copy lives in typed catalogs (`app/src/i18n/messages/<lang>/`): a missing or
+  extra key is a type error, and `catalogs.test.ts` checks placeholders and plural forms (Arabic uses all six CLDR
+  plural categories; Japanese one).
+- **Chef writes in the cook’s language.** Requests carry the app language and the prompt asks for it in the user turn,
+  so the cached system prompts are identical for every language. If the cook types in another language, Chef answers
+  in that one. Recipes record their language, and narration and spoken timers use the recipe’s language.
+- **Units are stored as codes** (`tbsp`, `g`, `clove`…), so “2 cucharadas”, “2 EL” and “大さじ2” are the same amount;
+  each language shows them its own way.
+- **YouTube recipes are analysed once.** A video imported in one language is translated for cooks who ask for it in
+  another — free for them, stored and shared, with quantities, timings, clips and nutrition copied from the original.
+- **Starter recipes** that the cook hasn’t edited are shown in the app language.
+- **Adding a language:** a catalog folder, starter recipe text (`app/src/data/starterRecipes.i18n/`), a voice lexicon
+  in `app/src/lib/voice.ts`, `app/locales/<lang>.json` for permission prompts, and the code in
+  `server/src/domain/languages.ts`.
+
+## Natural voice
+
+- Signed-in cooks hear Chef’s natural voice: the app sends the text to speak to `POST /api/speech`, which asks
+  **Gemini 3.8 Flash TTS** for audio with a delivery direction — a warm home cook talking a friend through the recipe,
+  at the cook’s pace (Relaxed / Normal / Brisk), with a Brazilian accent for Portuguese. The direction travels as
+  speech metadata, so it is never read out.
+- The server trims long silences, fades the edges and encodes 48 kbps MP3 (the Gemini audio is WAV/PCM). Clips are
+  cached in Postgres for everyone (keyed by text, language, voice, pace and model) and on the phone, so a step is
+  generated once. Clips nobody played for 90 days are pruned.
+- Cooking mode asks for the current step and the next two only when narration is on. If a clip isn’t ready within a
+  few seconds (1.5 s for timer alarms), or the cook is a guest, offline or over the daily allowance, the phone’s own
+  voice reads it instead — the best installed one (Apple’s Premium/Enhanced voices, an offline Android voice).
+- **Progress line:** while Chef’s voice is being generated, a thin line sweeps across the top of the cooking controls
+  (a gentle pulse with Reduce Motion on). It appears only after 250 ms, so cached clips never flash it, and after a
+  moment it’s joined by “Getting Chef’s voice ready…”. The same line shows in the ingredients sheet and when
+  sampling voices in **Me → Voice and narration**.
+- **Privacy:** the text being narrated (recipe steps, timer and ingredient phrases) is sent to Google’s Gemini API to
+  make the audio. Nothing about the cook is sent with it.
+
 ## YouTube reels and platform rules
 
 - Videos play in the **official YouTube embedded player** (`react-native-youtube-iframe`). CookReel never downloads,
   cuts or re-hosts video. A “clip” is just seeking to the step’s start and jumping back at its end.
 - Nothing is drawn over the player; step text and controls sit below it.
-- Shorts narration is spoken on the device with text-to-speech (`expo-speech`). The video keeps its own audio
-  unless the cook mutes it.
+- While Chef is speaking (and while the voice is being prepared) the video is muted; its own sound comes back when
+  Chef is done, unless the cook muted it. Shorts are always narrated.
 - `react-native-youtube-iframe` loads its player page from `lonelycpp.github.io` by default. For production,
   host that page yourself and pass `baseUrlOverride` (see `app/src/features/cook/YouTubeStage.tsx`).
 - Imports that aren’t embeddable (private, removed, or embedding disabled) are rejected before any credits are used.
 
 ## Voice commands
 
-Short phrases work on their own. Longer sentences need the wake word — “Hey Chef, go to the next step” — so
-the video’s own audio can’t trigger anything.
+The recogniser listens in the app language (in the cook’s regional variant when there is one, e.g. es-MX). Short
+phrases work on their own; longer sentences need the wake word — “Hey Chef, go to the next step”, «Oye Chef…»,
+「ねえシェフ…」, «يا شيف…» — so the video’s own audio can’t trigger anything. Words that are everyday speech (Spanish
+*para*, German *halt*, Japanese 次に…) only count said on their own.
 
-| Say | Does |
-|---|---|
-| next · skip · go on · *aage* · *agla* | Next step |
-| back · previous · last step · *peeche* | Previous step |
-| stop · pause · wait · *ruko* | Pause the clip |
-| play · resume · continue · *chalao* | Resume |
-| repeat · again · *phir se* · *dobara* | Replay the clip and narration |
-| read · explain · tell me · *batao* | Read the step aloud |
-| ingredients · what do I need | Read the ingredient list |
-| start timer / stop timer | Step timer |
-| help · what can I say | Show the commands |
-| exit · I’m done · *band karo* | Leave cook mode |
+| | Next | Back | Pause | Resume | Repeat | Read | Timer |
+|---|---|---|---|---|---|---|---|
+| English | next · skip · *aage* | back · previous · *peeche* | stop · wait · *ruko* | play · continue | repeat · again · *phir se* | read · explain | start timer |
+| Español | siguiente | atrás · anterior | pausa · espera | sigue · continúa | repite · otra vez | lee · explícame | pon el temporizador |
+| Français | suivant | retour · précédent | pause · attends | reprends · continue | répète · encore | lis · explique | lance le minuteur |
+| Deutsch | weiter · nächster | zurück | Pause · warte | fortsetzen | nochmal | vorlesen · erklär | Timer starten |
+| Português | próximo | voltar · anterior | pausa · espera | continua | repete · de novo | lê · explica | inicia o timer |
+| Italiano | avanti | indietro | pausa · aspetta | riprendi · continua | ripeti | leggi · spiega | avvia il timer |
+| العربية | التالي | السابق · ارجع | توقف · انتظر | تابع · استمر | أعد · كرر | اقرأ · اشرح | شغّل المؤقت |
+| 日本語 | 次へ | 戻って | ストップ · 待って | 再生 · 続けて | もう一回 | 読んで | タイマースタート |
+
+Every language also has “ingredients”, “help”, “stop the timer” and “exit” phrases, and Spanish, French, German,
+Portuguese and Italian understand the English commands too. The full lists are in `app/src/lib/voice.ts`.
 
 ## Tests and checks
 
 ```bash
-cd server && npm run typecheck && npm test     # 71 tests: credits ledger, billing, auth, API, YouTube parsing, RAG
+cd server && npm run typecheck && npm test     # 101 tests: credits, billing, auth, API, YouTube, RAG, languages, natural voice
 cd app && npm run typecheck && npm run lint && npm test   # 52 tests: voice commands, formatting, shopping list, ingredient parsing, YouTube links
 cd app && npx expo export --platform android  # confirms the Hermes bundle builds
 ```
@@ -240,7 +309,10 @@ Server tests run against the embedded Postgres with fake Claude/Gemini/RevenueCa
 keys or network. Things that need a real device and real accounts:
 
 - [ ] Import a regular video and a Short; swipe between steps; check that each clip loops on its step.
-- [ ] Say “next”, “back”, “stop”, “repeat”, “start timer” while a video plays (try speaker and earphones).
+- [ ] Say “next”, “back”, “stop”, “repeat”, “start timer” while a video plays (try speaker and earphones), in English and at least one other language.
+- [ ] With a real `GEMINI_API_KEY`: listen to every voice in every language; narration plays through the speaker, over the silent switch, while voice commands keep working, and the video’s sound comes back afterwards.
+- [ ] Switch the app to Arabic on a release build: it restarts once into a right-to-left layout, and back to English restarts once into left-to-right.
+- [ ] Switch the phone’s language with **Phone language** selected: the app follows it.
 - [ ] Sign in with Google (iOS + Android) and Apple; delete the account; sign in again — no second starter grant.
 - [ ] Buy a plan and a top-up in sandbox; renew; cancel; restore purchases on a second device.
 
@@ -254,12 +326,20 @@ keys or network. Things that need a real device and real accounts:
 
 ## Costs
 
-Every Claude and Gemini call logs its token usage — measure real traffic before you fix prices. Rough
-guide for Claude Opus 5.5 ($4 / $20 per million input/output tokens):
+Every Claude and Gemini call logs its token usage, and every narration clip its length — measure real traffic before
+you fix prices. Rough guide for Claude Opus 5.5 ($4 / $20 per million input/output tokens):
 
 - a finished recipe or variation is roughly 4–6K input and 3–6K output tokens (including thinking): **≈ $0.08–0.15**;
 - each free question turn in the builder: **≈ $0.02–0.05**;
-- a YouTube import adds Gemini’s video tokens to a Claude pass of similar size.
+- a YouTube import adds Gemini’s video tokens to a Claude pass of similar size;
+- translating an analysed video for a new language is one low-effort Claude pass (**≈ $0.05–0.10**), once per
+  video and language;
+- **natural voice:** Gemini 3.8 Flash TTS bills about 25 audio tokens per second of speech — $9 per million audio
+  tokens until 2026-12-31, then $18 ([pricing](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash-tts)),
+  i.e. **≈ $0.014 per narrated minute, ≈ $0.027 from 2027** (text input is negligible). A typical recipe is 1–2
+  minutes of narration and is generated once for everyone; replays and other cooks’ plays are free. The caps bound
+  the worst case: 900 s per cook per day ≈ $0.20 (≈ $0.41 from 2027), and `TTS_GLOBAL_DAILY_SECONDS` ≈ $11 a day at
+  the default (≈ $22 from 2027).
 
 The placeholder plans sell credits at roughly **$0.02–0.05 each** (Basic monthly: $2.99 for 60; Max yearly:
 $119.99 for 7,200), before the store’s 15–30% fee. With Opus 5.5 that doesn’t cover a 1-credit recipe. Before launch, raise prices or credit costs
