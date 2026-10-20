@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
   cover: { overflow: 'hidden', backgroundColor: '#E9E1D6' },
   center: { alignItems: 'center', justifyContent: 'center' },
   glow: { position: 'absolute' },
-  pill: { position: 'absolute', left: 10, bottom: 10 },
-  badges: { position: 'absolute', top: 10, left: 10, flexDirection: 'row', gap: 6 },
+  pill: { position: 'absolute', start: 10, bottom: 10 },
+  badges: { position: 'absolute', top: 10, start: 10, flexDirection: 'row', gap: 6 },
 });

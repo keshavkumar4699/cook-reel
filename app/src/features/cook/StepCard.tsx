@@ -7,7 +7,7 @@ import { Txt } from '@/components/ui/Text';
 import type { Step } from '@/data/types';
 import { t } from '@/i18n';
 import { formatClock } from '@/lib/format';
-import { radius, stage } from '@/theme';
+import { font, lineHeight, radius, stage } from '@/theme';
 import type { StepTimer } from './useStepTimer';
 
 export interface StepCardProps {
@@ -85,7 +85,7 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
         {meaning ? (
           <Animated.View entering={FadeIn} style={[styles.box, { backgroundColor: 'rgba(155,140,255,0.14)' }]}>
             <Txt variant="callout" color={stage.text}>
-              <Txt variant="callout" color={stage.ai} style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
+              <Txt variant="callout" color={stage.ai} style={font('bold')}>
                 {t('cook.step.glossaryTerm', { term: term ?? '' })}{' '}
               </Txt>
               {meaning}
@@ -105,7 +105,7 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
           <View style={[styles.box, { backgroundColor: 'rgba(82,183,136,0.12)' }]}>
             <Icon name="checkmark-circle-outline" size={18} color={stage.accent} />
             <Txt variant="callout" color={stage.textMuted} style={{ flex: 1 }}>
-              <Txt variant="callout" color={stage.accent} style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
+              <Txt variant="callout" color={stage.accent} style={font('bold')}>
                 {t('cook.step.doneWhen')}{' '}
               </Txt>
               {step.doneCue}
@@ -119,11 +119,11 @@ export function StepCard({ step, index, total, height, compact, emoji, timer, on
 
 const styles = StyleSheet.create({
   page: { overflow: 'hidden' },
-  watermark: { position: 'absolute', right: -30, bottom: -20, fontSize: 220, lineHeight: 260, opacity: 0.08 },
+  watermark: { position: 'absolute', end: -30, bottom: -20, fontSize: 220, lineHeight: 260, opacity: 0.08 },
   scroll: { paddingHorizontal: 22, paddingTop: 8, paddingBottom: 24 },
   counter: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 2 },
   number: { fontSize: 52, lineHeight: 58 },
-  instruction: { fontFamily: 'PlusJakartaSans_500Medium', fontSize: 21, lineHeight: 31, marginTop: 12 },
+  instruction: { ...font('medium'), fontSize: 21, lineHeight: lineHeight(31), marginTop: 12 },
   instructionCompact: { fontSize: 18, lineHeight: 27, marginTop: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1 },

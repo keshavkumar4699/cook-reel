@@ -1,6 +1,6 @@
 import { forwardRef, type ReactNode } from 'react';
 import { StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
-import { fonts, inputReset, radius, useTheme } from '@/theme';
+import { font, inputReset, radius, useTheme } from '@/theme';
 import { Icon, type IconName } from './Icon';
 import { Txt } from './Text';
 
@@ -46,7 +46,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           style={[
             styles.input,
             inputReset,
-            { color: colors.text, fontFamily: fonts.medium, paddingTop: multiline ? 14 : 0, textAlignVertical: multiline ? 'top' : 'center' },
+            { color: colors.text, ...font('medium'), paddingTop: multiline ? 14 : 0, textAlignVertical: multiline ? 'top' : 'center' },
             style,
           ]}
         />
@@ -62,8 +62,8 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
 });
 
 const styles = StyleSheet.create({
-  label: { marginBottom: 6, marginLeft: 4 },
+  label: { marginBottom: 6, marginStart: 4 },
   field: { flexDirection: 'row', borderRadius: radius.md, borderWidth: StyleSheet.hairlineWidth * 2, paddingHorizontal: 14, gap: 10 },
   input: { flex: 1, fontSize: 16, minHeight: 50, paddingVertical: 0 },
-  hint: { marginTop: 6, marginLeft: 4 },
+  hint: { marginTop: 6, marginStart: 4 },
 });

@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   play: {
     position: 'absolute',
     bottom: 10,
-    right: 10,
+    end: 10,
     width: 28,
     height: 28,
     borderRadius: 14,

@@ -49,7 +49,7 @@ export function RecipeCard({ recipe, width, coverHeight }: { recipe: Recipe; wid
 
 const styles = StyleSheet.create({
   card: { borderRadius: radius.lg, overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
-  bookmark: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(17,14,12,0.28)' },
+  bookmark: { position: 'absolute', top: 8, end: 8, backgroundColor: 'rgba(17,14,12,0.28)' },
   body: { padding: 12, gap: 6 },
   title: { minHeight: 44 },
 });

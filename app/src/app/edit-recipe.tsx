@@ -326,7 +326,7 @@ export default function EditRecipe() {
 const styles = StyleSheet.create({
   content: { paddingHorizontal: GUTTER },
   emojis: { gap: 8, paddingBottom: 16 },
-  label: { marginBottom: 6, marginLeft: 4 },
+  label: { marginBottom: 6, marginStart: 4 },
   rowFields: { flexDirection: 'row', gap: 10, marginTop: 16, alignItems: 'flex-start' },
   // Same height as a TextField so the labels and controls line up across the row.
   stepperBox: { height: 52, justifyContent: 'center', alignItems: 'flex-start' },

@@ -1,4 +1,5 @@
 import { Platform, type TextStyle, type ViewStyle } from 'react-native';
+import { getLanguage, LANGUAGE_INFO } from '@/i18n';
 
 /**
  * CookReel design tokens.
@@ -106,7 +107,53 @@ export const fonts = {
   extrabold: 'PlusJakartaSans_800ExtraBold',
 } as const;
 
-export const type = {
+/*
+ * Our fonts (Fraunces, Plus Jakarta Sans) only cover Latin script. Arabic and Japanese use the
+ * phone's own fonts at matching weights, without letter-spacing (it breaks Arabic joining) and
+ * with taller lines for their taller glyphs. The language is fixed for the life of the app, so this
+ * is decided once.
+ */
+const script = LANGUAGE_INFO[getLanguage()].script;
+const systemFonts = script !== 'latin';
+const LINE_HEIGHT_FACTOR = script === 'arabic' ? 1.2 : script === 'cjk' ? 1.12 : 1;
+
+export type FontWeight = keyof typeof fonts;
+const WEIGHTS: Record<FontWeight, NonNullable<TextStyle['fontWeight']>> = {
+  display: '700',
+  displayBold: '800',
+  displayItalic: '700',
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+  extrabold: '800',
+};
+const WEIGHT_OF_FAMILY = Object.fromEntries(Object.entries(fonts).map(([weight, family]) => [family, WEIGHTS[weight as FontWeight]]));
+
+/** Text style for a weight: our font in Latin scripts, the system font at that weight otherwise. */
+export function font(weight: FontWeight): TextStyle {
+  return systemFonts ? { fontWeight: WEIGHTS[weight] } : { fontFamily: fonts[weight] };
+}
+
+/** A line height adjusted for the app's script (taller for Arabic and Japanese). */
+export const lineHeight = (value: number) => Math.round(value * LINE_HEIGHT_FACTOR);
+
+function forScript<T extends Record<string, TextStyle>>(scale: T): T {
+  if (!systemFonts) return scale;
+  const adjusted: Record<string, TextStyle> = {};
+  for (const [name, style] of Object.entries(scale)) {
+    const { fontFamily, letterSpacing: _letterSpacing, ...rest } = style;
+    adjusted[name] = {
+      ...rest,
+      fontWeight: WEIGHT_OF_FAMILY[fontFamily ?? ''] ?? '400',
+      letterSpacing: 0,
+      lineHeight: style.lineHeight ? lineHeight(style.lineHeight) : undefined,
+    };
+  }
+  return adjusted as T;
+}
+
+export const type = forScript({
   hero: { fontFamily: fonts.display, fontSize: 40, lineHeight: 44, letterSpacing: -0.8 },
   title1: { fontFamily: fonts.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.5 },
   title2: { fontFamily: fonts.display, fontSize: 24, lineHeight: 30, letterSpacing: -0.3 },
@@ -122,7 +169,7 @@ export const type = {
   overline: { fontFamily: fonts.bold, fontSize: 11, lineHeight: 14, letterSpacing: 1.1, textTransform: 'uppercase' },
   stat: { fontFamily: fonts.displayBold, fontSize: 22, lineHeight: 26, letterSpacing: -0.4 },
   button: { fontFamily: fonts.bold, fontSize: 16, lineHeight: 20, letterSpacing: -0.1 },
-} satisfies Record<string, TextStyle>;
+} satisfies Record<string, TextStyle>);
 export type TypeVariant = keyof typeof type;
 
 /** Removes the browser focus ring on web text inputs (our fields draw their own frame). */

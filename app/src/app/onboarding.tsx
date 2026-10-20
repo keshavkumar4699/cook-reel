@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
+import Animated, { FadeInLeft, FadeInRight, FadeOutLeft, FadeOutRight } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DietFields, GoalFields, KitchenFields, localeDefaults, PersonaPicker } from '@/components/profile/ProfileFields';
 import { Button } from '@/components/ui/Button';
@@ -11,10 +11,13 @@ import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Text';
 import type { CookProfile, Persona } from '@/data/types';
 import { firstName } from '@/lib/format';
-import { t } from '@/i18n';
+import { isRTL, t } from '@/i18n';
 import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { GUTTER, useTheme } from '@/theme';
+
+// Each question arrives from the side the cook reads towards.
+const rtl = isRTL();
 
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
@@ -69,7 +72,7 @@ export default function Onboarding() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 120 + insets.bottom }]} keyboardShouldPersistTaps="handled">
-        <Animated.View key={step} entering={FadeInRight.springify().damping(20)} exiting={FadeOutLeft.duration(120)}>
+        <Animated.View key={step} entering={(rtl ? FadeInLeft : FadeInRight).springify().damping(20)} exiting={(rtl ? FadeOutRight : FadeOutLeft).duration(120)}>
           {step === 0 && name ? (
             <Txt variant="subheadStrong" color="primary" style={{ marginBottom: 6 }}>
               {t('onboarding.hello', { name })}

@@ -16,7 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '@/components/ui/ToastHost';
-import { reloadIfDeviceLanguageChanged, syncLayoutDirection } from '@/i18n';
+import { isRTL, reloadIfDeviceLanguageChanged, syncLayoutDirection } from '@/i18n';
 import { useImports } from '@/state/imports';
 import { useKitchen } from '@/state/kitchen';
 import { useLibrary } from '@/state/library';
@@ -102,7 +102,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider value={navTheme}>
           <StatusBar style={isDark ? 'light' : 'dark'} />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: 'slide_from_right' }}>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg }, animation: isRTL() ? 'slide_from_left' : 'slide_from_right' }}>
             <Stack.Screen name="index" options={{ animation: 'none' }} />
             <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
             <Stack.Screen name="onboarding" options={{ animation: 'fade', gestureEnabled: false }} />

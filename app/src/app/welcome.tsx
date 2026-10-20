@@ -12,7 +12,7 @@ import { Screen } from '@/components/ui/Screen';
 import { Txt } from '@/components/ui/Text';
 import { getLanguage, LANGUAGE_INFO, t } from '@/i18n';
 import { useProfile } from '@/state/profile';
-import { GUTTER, radius, useTheme } from '@/theme';
+import { font, GUTTER, radius, useTheme } from '@/theme';
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   },
   logo: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', paddingLeft: 2 },
   copy: { marginTop: 4 },
-  italic: { fontFamily: 'Fraunces_600SemiBold_Italic' },
+  italic: font('displayItalic'),
   actions: { marginTop: 28, gap: 14 },
   guest: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 48 },
 });

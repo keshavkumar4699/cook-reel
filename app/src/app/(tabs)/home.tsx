@@ -25,7 +25,7 @@ import { useLibrary } from '@/state/library';
 import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { useSettings } from '@/state/settings';
-import { fonts, GUTTER, inputReset, radius, shadow, useTheme } from '@/theme';
+import { font, GUTTER, inputReset, radius, shadow, useTheme } from '@/theme';
 
 const PROMPTS = [
   { label: t('home.prompts.highProteinDinner'), emoji: '💪' },
@@ -144,7 +144,7 @@ export default function Home() {
                 onChangeText={setPrompt}
                 placeholder={t('home.composer.placeholder')}
                 placeholderTextColor={colors.textFaint}
-                style={[styles.input, inputReset, { color: colors.text, fontFamily: fonts.medium }]}
+                style={[styles.input, inputReset, { color: colors.text, ...font('medium') }]}
                 returnKeyType="send"
                 onSubmitEditing={() => ask(prompt)}
                 accessibilityLabel={t('home.composer.inputLabel')}
@@ -237,9 +237,9 @@ const styles = StyleSheet.create({
   composer: { borderRadius: radius.xl, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   composerHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   sparkle: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.lg, paddingLeft: 14, paddingRight: 6, height: 50, gap: 8 },
+  inputRow: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.lg, paddingStart: 14, paddingEnd: 6, height: 50, gap: 8 },
   input: { flex: 1, fontSize: 15, height: '100%' },
-  prompts: { gap: 8, paddingRight: 8 },
+  prompts: { gap: 8, paddingEnd: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
   action: { width: '48%', flexGrow: 1, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 2 },
   actionIcon: { width: 42, height: 42, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import type { Step } from '@/data/types';
 import { t } from '@/i18n';
 import { formatClock, formatDuration } from '@/lib/format';
-import { radius, useTheme } from '@/theme';
+import { font, radius, useTheme } from '@/theme';
 import { Badge } from '../ui/Badge';
 import { Icon } from '../ui/Icon';
 import { Txt } from '../ui/Text';
@@ -46,7 +46,7 @@ export function StepList({ steps }: { steps: Step[] }) {
               <View style={[styles.note, { backgroundColor: colors.accentSoft }]}>
                 <Icon name="checkmark-circle-outline" size={16} color={colors.accent} />
                 <Txt variant="footnote" style={{ flex: 1 }}>
-                  <Txt variant="footnote" color="accent" style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
+                  <Txt variant="footnote" color="accent" style={font('bold')}>
                     {t('recipe.steps.doneWhen')}{' '}
                   </Txt>
                   {step.doneCue}
@@ -55,7 +55,7 @@ export function StepList({ steps }: { steps: Step[] }) {
             ) : null}
             {step.glossary.map((g) => (
               <Txt key={g.term} variant="footnote" color="textMuted" style={{ marginTop: 6 }}>
-                <Txt variant="footnote" color="ai" style={{ fontFamily: 'PlusJakartaSans_700Bold' }}>
+                <Txt variant="footnote" color="ai" style={font('bold')}>
                   {t('recipe.steps.glossaryTerm', { term: g.term })}{' '}
                 </Txt>
                 {g.meaning}

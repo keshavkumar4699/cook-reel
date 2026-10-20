@@ -28,7 +28,7 @@ import { useLibrary } from '@/state/library';
 import { useProfile } from '@/state/profile';
 import { useSession } from '@/state/session';
 import { toast } from '@/state/toast';
-import { fonts, GUTTER, inputReset, radius, useTheme } from '@/theme';
+import { font, GUTTER, inputReset, radius, useTheme } from '@/theme';
 
 interface Message {
   id: string;
@@ -259,7 +259,7 @@ export default function Builder() {
                     onChangeText={setPantryInput}
                     placeholder={t('builder.fridge.addPlaceholder')}
                     placeholderTextColor={colors.textFaint}
-                    style={[styles.inputText, inputReset, { color: colors.text, fontFamily: fonts.medium }]}
+                    style={[styles.inputText, inputReset, { color: colors.text, ...font('medium') }]}
                     onSubmitEditing={() => {
                       const v = pantryInput.trim();
                       if (v && !pantry.includes(v)) setPantry([...pantry, v]);
@@ -368,7 +368,7 @@ export default function Builder() {
                 placeholderTextColor={colors.textFaint}
                 multiline
                 numberOfLines={Platform.OS === 'web' ? 1 : undefined}
-                style={[styles.inputText, inputReset, { color: colors.text, fontFamily: fonts.medium, maxHeight: 110 }]}
+                style={[styles.inputText, inputReset, { color: colors.text, ...font('medium'), maxHeight: 110 }]}
                 editable={!loading}
                 accessibilityLabel={t('builder.composer.label')}
               />
@@ -389,10 +389,10 @@ const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pantryBox: { marginTop: 18, padding: 14, borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, gap: 12 },
   pantryInput: { borderRadius: radius.md, paddingHorizontal: 12, height: 44, justifyContent: 'center' },
-  userBubble: { alignSelf: 'flex-end', maxWidth: '82%', paddingHorizontal: 16, paddingVertical: 11, borderRadius: 20, borderBottomRightRadius: 6 },
+  userBubble: { alignSelf: 'flex-end', maxWidth: '82%', paddingHorizontal: 16, paddingVertical: 11, borderRadius: 20, borderBottomEndRadius: 6 },
   assistantRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', maxWidth: '100%' },
-  assistantBubble: { alignSelf: 'flex-start', maxWidth: '100%', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 20, borderTopLeftRadius: 6, borderWidth: StyleSheet.hairlineWidth },
+  assistantBubble: { alignSelf: 'flex-start', maxWidth: '100%', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 20, borderTopStartRadius: 6, borderWidth: StyleSheet.hairlineWidth },
   composer: { paddingHorizontal: GUTTER, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
-  inputBox: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, paddingLeft: 16, paddingRight: 6, paddingVertical: 6 },
+  inputBox: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, borderRadius: 24, borderWidth: StyleSheet.hairlineWidth, paddingStart: 16, paddingEnd: 6, paddingVertical: 6 },
   inputText: { flex: 1, fontSize: 16, paddingTop: 8, paddingBottom: 8, minHeight: 38 },
 });

@@ -318,5 +318,5 @@ const styles = StyleSheet.create({
   group: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
   check: { width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
-  divider: { height: StyleSheet.hairlineWidth, marginLeft: 34 },
+  divider: { height: StyleSheet.hairlineWidth, marginStart: 34 },
 });

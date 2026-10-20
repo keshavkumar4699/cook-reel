@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   list: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14 },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 13 },
   check: { width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
-  divider: { height: StyleSheet.hairlineWidth, marginLeft: 34 },
+  divider: { height: StyleSheet.hairlineWidth, marginStart: 34 },
   struck: { textDecorationLine: 'line-through' },
   swap: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
 });

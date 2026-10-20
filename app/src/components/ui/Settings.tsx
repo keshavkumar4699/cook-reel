@@ -81,7 +81,7 @@ export function SettingsSwitch({ value, onValueChange, label }: { value: boolean
 }
 
 const styles = StyleSheet.create({
-  title: { marginBottom: 8, marginLeft: 4 },
+  title: { marginBottom: 8, marginStart: 4 },
   group: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 58 },
   rowIcon: { width: 32, height: 32, borderRadius: radius.xs, alignItems: 'center', justifyContent: 'center' },
