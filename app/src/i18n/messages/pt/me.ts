@@ -1,0 +1,88 @@
+import { plural } from '../../catalog';
+
+/** Aba Perfil: conta, créditos e configurações. */
+export default {
+  cook: 'Cozinheiro(a)',
+  guest: 'Visitante',
+  signedIn: 'Conectado',
+  recipesOnPhone: plural({ one: '{count} receita neste celular', other: '{count} receitas neste celular' }),
+  credits: {
+    title: 'Créditos',
+    starter: 'Inicial',
+    refill: 'Os créditos do plano voltam para {allowance} em {date}',
+    extra: plural({ one: '{count} crédito extra', other: '{count} créditos extras' }),
+    starterNote: 'Créditos iniciais, dados uma única vez. Assine para receber créditos novos todo mês.',
+    more: 'Obter mais créditos',
+    plans: 'Ver planos',
+  },
+  guestCard: {
+    title: 'Desbloqueie o Chef e os reels do YouTube',
+    body: 'Crie uma conta grátis para usar os recursos de IA. Suas receitas ficam neste celular de qualquer jeito.',
+    cta: 'Criar conta grátis',
+  },
+  groups: {
+    cooking: 'Cozinha',
+    voice: 'Voz e narração',
+    appearance: 'Aparência',
+    language: 'Idioma',
+    privacy: 'Privacidade',
+    purchases: 'Compras',
+    account: 'Conta',
+  },
+  rows: {
+    profile: 'Perfil culinário',
+    profileEmpty: 'Dieta, cozinha, objetivos',
+    voiceControl: 'Controle por voz',
+    voiceControlDetail: 'Diga “próximo”, “voltar”, “pausa” enquanto cozinha',
+    readAloud: 'Ler os passos em voz alta',
+    readAloudDetail: 'Sempre ativado nos Shorts do YouTube',
+    language: 'Idioma do app',
+    sharing: 'Ajudar o Chef a aprender com minhas importações',
+    sharingDetail: 'As receitas dos vídeos que você importa melhoram as sugestões para todo mundo. Desativar esta opção remove essas receitas.',
+    plans: 'Planos e créditos',
+    restore: 'Restaurar compras',
+    manage: 'Gerenciar assinatura',
+    signOut: 'Sair',
+    deleteAccount: 'Excluir conta',
+  },
+  profileSummary: {
+    household: plural({ one: 'Para {count} pessoa', other: 'Para {count} pessoas' }),
+    appliances: plural({ one: '{count} eletrodoméstico', other: '{count} eletrodomésticos' }),
+  },
+  voice: {
+    natural: 'Voz natural',
+    naturalDetail: 'O Chef fala como uma pessoa de verdade, em todos os idiomas. Precisa de conexão com a internet.',
+    naturalGuest: 'Crie uma conta grátis para ouvir a voz natural do Chef. Até lá, os passos usam a voz do seu celular.',
+    choose: 'Voz do Chef',
+    voices: {
+      warm: 'Acolhedora',
+      friendly: 'Simpática',
+      gentle: 'Suave',
+      easygoing: 'Descontraída',
+    },
+    playSample: 'Ouvir uma amostra da voz {voice}',
+    stopSample: 'Parar a amostra',
+    sample: 'Oi! Eu sou o Chef. Vamos cozinhar algo delicioso juntos — eu explico cada passo para você.',
+    preparing: 'Preparando a voz do Chef…',
+    pace: 'Ritmo da narração',
+    paces: {
+      relaxed: 'Tranquilo',
+      normal: 'Normal',
+      brisk: 'Rápido',
+    },
+  },
+  appearance: {
+    system: 'Sistema',
+    light: 'Claro',
+    dark: 'Escuro',
+  },
+  deleteConfirm: {
+    title: 'Excluir sua conta?',
+    message: 'Seus créditos, o vínculo com a assinatura e suas contribuições serão apagados para sempre. As receitas neste celular continuam aqui. Cancele também qualquer assinatura nas configurações da loja de apps.',
+    confirm: 'Excluir conta',
+  },
+  toasts: {
+    deleted: 'Sua conta foi excluída',
+  },
+  footer: 'CookReel {version} · Feito para quem tem fome',
+} as const;

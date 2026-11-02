@@ -1,6 +1,273 @@
 import type { StarterTranslations } from './types';
 
-/** Starter recipes in this language (to be filled in by translation). */
-const translations: StarterTranslations = {};
+const GLOSSARY = {
+  jammy: { term: 'Ponto de geleia', meaning: 'Macio, espesso e encorpado, sem nenhum caldo aguado.' },
+  whistle: { term: 'Apito', meaning: 'O chiado alto que a panela de pressão faz ao soltar vapor — as receitas indianas contam os apitos.' },
+  tadka: { term: 'Tadka', meaning: 'Especiarias fritas rapidinho em gordura bem quente e despejadas sobre o prato para dar sabor.' },
+  simmer: { term: 'Fervura branda', meaning: 'Cozinhar logo abaixo do ponto de fervura, com bolhinhas pequenas e preguiçosas.' },
+  sear: { term: 'Selar', meaning: 'Cozinhar em fogo alto sem mexer o alimento, para dourar a parte de fora.' },
+  stirFry: { term: 'Saltear', meaning: 'Cozinhar rápido em fogo alto, mexendo o tempo todo.' },
+};
+
+/** As receitas iniciais em português do Brasil. */
+const translations: StarterTranslations = {
+  'starter-egg-bhurji': {
+    title: 'Ovos mexidos masala em 10 minutos (egg bhurji)',
+    description: 'Ovos mexidos picantes à moda indiana, com torradas: 28 g de proteína no prato, prontos antes de o café esfriar.',
+    cuisine: 'Indiana',
+    equipment: ['Frigideira antiaderente', 'Espátula', 'Tigela'],
+    storage: null,
+    tags: ['proteica', '15-min', 'ovovegetariana', 'uma-frigideira'],
+    ingredients: {
+      'eb-1': { name: 'Ovos', note: 'grandes', substitutes: ['200 g de paneer esfarelado'] },
+      'eb-2': { name: 'Cebola', note: 'pequena, bem picada' },
+      'eb-3': { name: 'Tomate', note: 'pequeno, bem picado' },
+      'eb-4': { name: 'Pimenta verde', note: 'picada' },
+      'eb-5': { name: 'Óleo ou manteiga' },
+      'eb-6': { name: 'Cúrcuma em pó' },
+      'eb-7': { name: 'Pimenta vermelha em pó', substitutes: ['Páprica'] },
+      'eb-8': { name: 'Garam masala' },
+      'eb-9': { name: 'Sal', note: 'a gosto' },
+      'eb-10': { name: 'Coentro fresco', note: 'picado' },
+      'eb-11': { name: 'Pão integral', note: 'torrado, para servir', substitutes: ['2 rotis', '1 pão francês'] },
+    },
+    steps: {
+      'eb-s1': {
+        title: 'Prepare tudo',
+        instruction: 'Pique bem a cebola, o tomate e a pimenta. Quebre os ovos numa tigela, junte uma pitada de sal e bata com um garfo por 20 segundos.',
+        tip: 'Pique tudo antes de levar a frigideira ao fogo: o bhurji cozinha rápido e não espera ninguém.',
+        narration: 'Para começar, pique bem miudinho a cebola, o tomate e a pimenta. Depois, quebre os ovos numa tigela com uma pitada de sal e bata bem.',
+      },
+      'eb-s2': {
+        title: 'Refogue a cebola',
+        instruction: 'Aqueça o óleo numa frigideira antiaderente em fogo médio. Junte a cebola e a pimenta e mexa até ficarem macias e levemente douradas.',
+        doneCue: 'As bordas da cebola douram e soltam um aroma adocicado.',
+        narration: 'Aqueça o óleo na frigideira em fogo médio e junte a cebola e a pimenta. Mexa de vez em quando, até ficarem macias e começarem a dourar, uns três minutos.',
+      },
+      'eb-s3': {
+        title: 'Cozinhe o tomate',
+        instruction: 'Junte o tomate, a cúrcuma, a pimenta em pó e uma pitada de sal. Mexa até o tomate desmanchar e chegar ao ponto de geleia.',
+        glossary: [GLOSSARY.jammy],
+        narration: 'Agora junte o tomate com a cúrcuma, a pimenta em pó e um pouquinho de sal. Vá mexendo até o tomate desmanchar e ficar espesso e brilhante, com cara de geleia.',
+      },
+      'eb-s4': {
+        title: 'Mexa os ovos com calma',
+        instruction: 'Abaixe o fogo. Despeje os ovos, espere 10 segundos e mexa devagar, raspando o fundo, até ficarem firmes, mas ainda brilhantes.',
+        tip: 'Tire do fogo um pouco antes do ponto: os ovos terminam de cozinhar no calor da frigideira.',
+        doneCue: 'Ovos macios e cremosos, sem nenhuma parte crua escorrendo.',
+        narration: 'Abaixe bem o fogo e despeje os ovos. Espere alguns segundos e mexa devagar, raspando o fundo, até ficarem firmes, mas ainda brilhantes.',
+      },
+      'eb-s5': {
+        title: 'Finalize e sirva',
+        instruction: 'Polvilhe o garam masala e o coentro, mexa uma vez e sirva bem quente com torradas com manteiga.',
+        narration: 'Polvilhe o garam masala e o coentro, dê uma última mexida e sirva bem quente com as torradas. Bom apetite!',
+      },
+    },
+  },
+
+  'starter-dal-tadka': {
+    title: 'Dal tadka na panela de pressão',
+    description: 'O clássico do dia a dia que todo cozinheiro iniciante deveria dominar: lentilhas cremosas com um tadka chiando de alho e cominho. Rende almoço para três dias.',
+    cuisine: 'Indiana',
+    equipment: ['Panela de pressão', 'Frigideira pequena', 'Batedor ou concha'],
+    storage: 'Dura 3 dias na geladeira ou 2 meses no freezer. Reaqueça com um pouco de água, mexendo até levantar fervura.',
+    tags: ['vegetariana', 'marmita', 'econômica', 'comida-afetiva'],
+    ingredients: {
+      'dt-1': { name: 'Toor dal (feijão-guandu partido)', substitutes: ['Masoor dal (lentilha vermelha)'] },
+      'dt-2': { name: 'Água' },
+      'dt-3': { name: 'Cúrcuma em pó' },
+      'dt-4': { name: 'Sal', note: 'ou a gosto' },
+      'dt-5': { name: 'Ghee ou óleo', substitutes: ['Qualquer óleo neutro (versão vegana)'] },
+      'dt-6': { name: 'Cominho em grãos' },
+      'dt-7': { name: 'Alho', note: 'bem picado' },
+      'dt-8': { name: 'Gengibre', note: 'ralado' },
+      'dt-9': { name: 'Cebola', note: 'média, bem picada' },
+      'dt-10': { name: 'Tomate', note: 'médio, picado' },
+      'dt-11': { name: 'Pimenta verde', note: 'aberta ao meio' },
+      'dt-12': { name: 'Pimenta caxemira em pó', substitutes: ['Páprica'] },
+      'dt-13': { name: 'Coentro fresco', note: 'picado' },
+      'dt-14': { name: 'Suco de limão' },
+    },
+    steps: {
+      'dt-s1': {
+        title: 'Lave o dal',
+        instruction: 'Lave o dal numa tigela com água três vezes, esfregando os grãos entre os dedos, até a água sair quase limpa.',
+        tip: 'Lavar tira a poeira e o excesso de amido, assim o dal não espuma nem transborda na panela de pressão.',
+        narration: 'Coloque o dal numa tigela com água e esfregue os grãos com delicadeza entre os dedos. Escorra e faça isso três vezes ao todo, até a água sair quase limpa.',
+      },
+      'dt-s2': {
+        title: 'Cozinhe na pressão',
+        instruction: 'Coloque na panela de pressão o dal, 600 ml de água, a cúrcuma e metade do sal. Tampe e cozinhe em fogo médio-alto por 3 apitos; depois desligue o fogo e deixe a pressão sair sozinha.',
+        glossary: [GLOSSARY.whistle],
+        doneCue: 'O dal está bem macio e desmancha quando apertado com uma colher.',
+        tip: 'Nunca force a tampa: espere a válvula de segurança baixar.',
+        narration: 'Coloque o dal na panela de pressão com seiscentos mililitros de água, a cúrcuma e metade do sal. Feche bem a tampa, cozinhe até ouvir três apitos e depois deixe a pressão sair sozinha.',
+      },
+      'dt-s3': {
+        title: 'Bata até ficar cremoso',
+        instruction: 'Abra a panela e bata o dal até ficar cremoso. Junte água quente aos poucos, até ficar com consistência de sopa grossa.',
+        narration: 'Abra a panela e bata o dal até ficar cremoso. Vá juntando água quente aos pouquinhos, até ele escorrer como uma sopa grossa.',
+      },
+      'dt-s4': {
+        title: 'Faça o tadka',
+        instruction: 'Aqueça o ghee numa frigideira pequena em fogo médio. Junte o cominho; quando chiar, acrescente o alho, o gengibre e a pimenta por 30 segundos. Junte a cebola e deixe dourar; depois, o tomate e a pimenta em pó, até amolecerem.',
+        glossary: [GLOSSARY.tadka],
+        tip: 'Se o cominho ficar preto, ele queimou e vai amargar: limpe a frigideira e comece de novo.',
+        narration: 'Agora é a vez do tadka. Aqueça o ghee e junte o cominho. Assim que chiar, coloque o alho, o gengibre e a pimenta. Depois doure a cebola e, por fim, cozinhe o tomate com a pimenta em pó até amolecer.',
+      },
+      'dt-s5': {
+        title: 'Ferva de leve e finalize',
+        instruction: 'Despeje o tadka sobre o dal, junte o resto do sal e deixe em fervura branda por 2 a 3 minutos. Finalize com coentro e um pouco de limão espremido.',
+        glossary: [GLOSSARY.simmer],
+        doneCue: 'Brilhante, com pontinhos de óleo avermelhado, e cobre as costas de uma colher.',
+        narration: 'Despeje esse tadka chiando sobre o dal, junte o resto do sal e deixe ferver bem de leve por dois ou três minutos. Finalize com coentro e um pouco de limão espremido.',
+      },
+    },
+  },
+
+  'starter-chicken-bowl': {
+    title: 'Bowl de frango ao alho e pimenta com arroz',
+    description: 'Um clássico de quem vai à academia: frango suculento com pimenta-do-reino e legumes crocantes salteados com arroz. São 40 g de proteína por bowl, e ele vai muito bem na marmita de amanhã.',
+    cuisine: 'Indo-chinesa',
+    equipment: ['Frigideira grande ou wok', 'Espátula', 'Tábua de corte'],
+    storage: 'Dura 2 dias na geladeira. Reaqueça até ficar bem quente por inteiro.',
+    tags: ['proteica', 'marmita', '20-min', 'uma-frigideira'],
+    ingredients: {
+      'cb-1': { name: 'Peito de frango', note: 'em pedaços pequenos', substitutes: ['Paneer em cubos', 'Tofu firme'] },
+      'cb-2': { name: 'Arroz cozido', note: 'arroz de ontem é perfeito', substitutes: ['Quinoa cozida'] },
+      'cb-3': { name: 'Óleo' },
+      'cb-4': { name: 'Alho', note: 'bem picado' },
+      'cb-5': { name: 'Pimenta-do-reino', note: 'moída na hora' },
+      'cb-6': { name: 'Shoyu' },
+      'cb-7': { name: 'Pimentão', note: 'em tiras' },
+      'cb-8': { name: 'Cebola', note: 'média, fatiada' },
+      'cb-9': { name: 'Cebolinha', note: 'picada' },
+      'cb-10': { name: 'Suco de limão' },
+      'cb-11': { name: 'Sal', note: 'a gosto' },
+    },
+    steps: {
+      'cb-s1': {
+        title: 'Tempere o frango',
+        instruction: 'Misture o frango com o shoyu, metade da pimenta-do-reino e uma pitada de sal. Fatie a cebola e o pimentão e pique o alho.',
+        tip: 'Seque o frango com papel-toalha antes, para ele dourar em vez de cozinhar no próprio vapor.',
+        narration: 'Misture o frango com o shoyu, metade da pimenta e uma pitada de sal. Enquanto ele pega gosto, fatie a cebola e o pimentão e pique o alho.',
+      },
+      'cb-s2': {
+        title: 'Sele o frango',
+        instruction: 'Aqueça o óleo numa frigideira grande em fogo alto. Coloque o frango numa camada só, deixe 2 minutos sem mexer e depois mexa e cozinhe até dourar e ficar cozido por dentro.',
+        glossary: [GLOSSARY.sear],
+        tip: 'Não lote a frigideira: se precisar, faça em duas levas.',
+        doneCue: 'O pedaço mais grosso não tem nada rosado por dentro e o caldo sai transparente.',
+        narration: 'Deixe a frigideira bem quente com o óleo e espalhe o frango numa camada só. Não mexa por dois minutos, para dourar, e depois mexa até ficar dourado e bem cozido por dentro.',
+      },
+      'cb-s3': {
+        title: 'Alho e legumes',
+        instruction: 'Abaixe para fogo médio. Junte o alho por 30 segundos, depois a cebola e o pimentão, e salteie até ficarem macios, mas ainda crocantes.',
+        glossary: [GLOSSARY.stirFry],
+        narration: 'Abaixe o fogo para médio. Junte o alho por meio minuto, depois a cebola e o pimentão, e salteie até ficarem macios, mas ainda crocantes.',
+      },
+      'cb-s4': {
+        title: 'Misture com o arroz',
+        instruction: 'Junte o arroz, desfaça os grumos e misture até tudo ficar bem quente. Tempere com o resto da pimenta e sal a gosto.',
+        narration: 'Junte o arroz, solte os grumos e misture tudo até ficar bem quente. Tempere com o resto da pimenta e um pouquinho de sal.',
+      },
+      'cb-s5': {
+        title: 'Finalize',
+        instruction: 'Esprema o limão por cima, espalhe a cebolinha e sirva. Guarde metade para o almoço de amanhã.',
+        narration: 'Esprema o limão por cima, espalhe a cebolinha e está feito. Guarde metade para o almoço de amanhã.',
+      },
+    },
+  },
+
+  'starter-peanut-noodles': {
+    title: 'Noodles cremosos de amendoim em 15 minutos',
+    description: 'Molho sedoso de amendoim e limão, noodles elásticos e edamame para turbinar a proteína vegetal. Só uma panela e uma tigela.',
+    cuisine: 'Asiática',
+    equipment: ['Panela grande', 'Escorredor', 'Tigela', 'Batedor ou garfo'],
+    storage: 'Fica melhor na hora. As sobras duram 1 dia na geladeira: solte com água morna e coma frio ou quente.',
+    tags: ['vegana', '15-min', 'uma-panela', 'proteica'],
+    ingredients: {
+      'pn-1': { name: 'Noodles de trigo secos', substitutes: ['Espaguete', 'Noodles hakka'] },
+      'pn-2': { name: 'Edamame congelado', substitutes: ['Ervilha congelada'] },
+      'pn-3': { name: 'Pasta de amendoim', note: 'lisa ou crocante' },
+      'pn-4': { name: 'Shoyu' },
+      'pn-5': { name: 'Suco de limão' },
+      'pn-6': { name: 'Açúcar ou melado' },
+      'pn-7': { name: 'Alho', note: 'ralado' },
+      'pn-8': { name: 'Pimenta calabresa' },
+      'pn-9': { name: 'Pepino', note: 'em fatias finas' },
+      'pn-10': { name: 'Cebolinha', note: 'picada' },
+      'pn-11': { name: 'Amendoim torrado', note: 'picado' },
+    },
+    steps: {
+      'pn-s1': {
+        title: 'Ferva a água',
+        instruction: 'Leve ao fogo uma panela grande com água e uma pitada de sal até ferver.',
+        tip: 'Tampe a panela: a água ferve bem mais rápido.',
+        narration: 'Encha uma panela grande com água, coloque uma pitada de sal e deixe levantar uma fervura bem forte.',
+      },
+      'pn-s2': {
+        title: 'Cozinhe os noodles e o edamame',
+        instruction: 'Junte os noodles e cozinhe conforme a embalagem, acrescentando o edamame nos últimos 2 minutos. Reserve meia xícara da água do cozimento e escorra.',
+        doneCue: 'Os noodles estão macios, mas ainda um pouco elásticos.',
+        narration: 'Junte os noodles e cozinhe como indica a embalagem, colocando o edamame nos dois minutos finais. Antes de escorrer, reserve meia xícara da água do cozimento.',
+      },
+      'pn-s3': {
+        title: 'Bata o molho',
+        instruction: 'Enquanto os noodles cozinham, bata a pasta de amendoim, o shoyu, o suco de limão, o açúcar, o alho e a pimenta calabresa com 3 a 4 colheres de sopa de água quente até ficar liso.',
+        tip: 'No começo o molho parece talhado: siga batendo, que ele fica sedoso.',
+        narration: 'Enquanto os noodles cozinham, bata a pasta de amendoim, o shoyu, o suco de limão, o açúcar, o alho e a pimenta calabresa com algumas colheradas de água quente, até ficar bem lisinho.',
+      },
+      'pn-s4': {
+        title: 'Misture',
+        instruction: 'Misture os noodles quentes e o edamame com o molho, juntando um pouco da água reservada de cada vez, até ficar brilhante e cremoso.',
+        narration: 'Misture os noodles quentes e o edamame com o molho, juntando um pouquinho da água reservada de cada vez, até ficar brilhante e cremoso.',
+      },
+      'pn-s5': {
+        title: 'Monte e sirva',
+        instruction: 'Divida em tigelas e cubra com pepino, cebolinha e amendoim picado. Coma na hora.',
+        narration: 'Divida tudo em tigelas e cubra com o pepino, a cebolinha e o amendoim picado. Coma na hora, ainda quentinho.',
+      },
+    },
+  },
+
+  'starter-overnight-oats': {
+    title: 'Aveia dormida proteica',
+    description: 'Dois minutos hoje à noite e o café da manhã de amanhã está garantido. Cremosa, adoçada com banana e com 30 g de proteína, sem ir ao fogo.',
+    cuisine: null,
+    equipment: ['Pote com tampa ou marmita', 'Colher'],
+    storage: 'Dura 3 dias na geladeira. Coloque a banana só na hora de comer.',
+    tags: ['sem-fogo', 'marmita', 'proteica', 'vegetariana'],
+    ingredients: {
+      'oo-1': { name: 'Aveia em flocos' },
+      'oo-2': { name: 'Leite', substitutes: ['Leite de soja', 'Leite de aveia'] },
+      'oo-3': { name: 'Iogurte grego', note: 'natural', substitutes: ['Coalhada seca'] },
+      'oo-4': { name: 'Sementes de chia' },
+      'oo-5': { name: 'Pasta de amendoim' },
+      'oo-6': { name: 'Banana', note: 'pequena, em rodelas' },
+      'oo-7': { name: 'Mel' },
+      'oo-8': { name: 'Canela' },
+    },
+    steps: {
+      'oo-s1': {
+        title: 'Misture a base',
+        instruction: 'Num pote, misture a aveia, a chia, o leite, o iogurte e a canela até não sobrar aveia seca.',
+        tip: 'No domingo, prepare três potes de uma vez e garanta cafés da manhã práticos até quarta.',
+        narration: 'Num pote, misture a aveia, a chia, o leite, o iogurte e a canela, até não sobrar nenhum floco seco.',
+      },
+      'oo-s2': {
+        title: 'Deixe na geladeira',
+        instruction: 'Tampe e leve à geladeira por pelo menos 6 horas, ou de um dia para o outro.',
+        doneCue: 'A aveia está macia e a mistura, espessa e fácil de pegar com a colher.',
+        narration: 'Tampe o pote e deixe na geladeira por pelo menos seis horas, ou de um dia para o outro.',
+      },
+      'oo-s3': {
+        title: 'Cubra e coma',
+        instruction: 'Mexa, solte com um pouco de leite se estiver grossa demais e cubra com banana em rodelas, pasta de amendoim e um fio de mel.',
+        narration: 'Dê uma mexida, solte com um pouquinho de leite se estiver grossa demais e cubra com a banana, a pasta de amendoim e um fio de mel.',
+      },
+    },
+  },
+};
 
 export default translations;
