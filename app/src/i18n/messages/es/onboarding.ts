@@ -1,0 +1,107 @@
+import { plural } from '../../catalog';
+
+export default {
+  steps: {
+    personas: { title: '¿Qué te trae\na CookReel?', subtitle: 'Elige todas las que encajen: adaptaremos tu pantalla de inicio.' },
+    diet: { title: '¿Cómo comes?', subtitle: 'Chef nunca te sugerirá nada que no puedas comer.' },
+    kitchen: { title: 'Tu cocina', subtitle: 'Las recetas solo usarán lo que de verdad tienes.' },
+    goals: { title: 'Tú y tus objetivos', subtitle: 'Para ajustar porciones, macros y presupuesto de compra.' },
+  },
+  hello: '¡Hola, {name}! 👋',
+  skipSetup: 'Omitir configuración',
+  start: 'Empezar a cocinar',
+
+  personas: {
+    saver: { title: 'Guardar recetas de YouTube', body: 'Tener a mano lo que encuentro y cocinarlo después' },
+    quick: { title: 'Comidas rápidas para el día a día', body: 'Entre el trabajo, los estudios o el gimnasio' },
+    fridge: { title: 'Cocinar con lo que tengo', body: 'Aprovechar lo que hay y desperdiciar menos' },
+    creator: { title: 'Crear y experimentar', body: 'Inventar platos nuevos y versiones propias' },
+    fitness: { title: 'Comer según mis objetivos', body: 'Proteína, calorías y macros' },
+    learner: { title: 'Aprender a cocinar', body: 'Paso a paso, desde lo básico' },
+  },
+  groups: {
+    diet: 'Dieta',
+    allergies: 'Alergias',
+    spice: 'Nivel de picante',
+    equipment: 'Tengo…',
+    time: 'Tiempo que suelo tener para cocinar',
+    skill: 'Nivel en la cocina',
+    household: 'Suelo cocinar para',
+    goal: 'Objetivo',
+    protein: 'Proteína diaria',
+    budget: 'Presupuesto de compra',
+  },
+  diets: {
+    vegetarian: 'Vegetariana',
+    eggetarian: 'Ovovegetariana',
+    'non-vegetarian': 'Como de todo',
+    vegan: 'Vegana',
+    pescatarian: 'Pescetariana',
+  },
+  allergies: {
+    peanuts: 'Maní/cacahuete',
+    treeNuts: 'Frutos secos',
+    dairy: 'Lácteos',
+    gluten: 'Gluten',
+    eggs: 'Huevo',
+    soy: 'Soya',
+    shellfish: 'Mariscos',
+    sesame: 'Sésamo',
+  },
+  spice: {
+    mild: 'Suave',
+    medium: 'Medio',
+    hot: 'Picante',
+  },
+  equipment: {
+    gasStove: 'Cocina de gas',
+    induction: 'Placa de inducción',
+    microwave: 'Microondas',
+    oven: 'Horno',
+    airFryer: 'Freidora de aire',
+    pressureCooker: 'Olla a presión',
+    riceCooker: 'Arrocera',
+    kettle: 'Hervidor eléctrico',
+    blender: 'Batidora/licuadora',
+    toaster: 'Tostadora',
+  },
+  time: {
+    minutes: '{n} min',
+    orMore: '{n}+ min',
+  },
+  skills: {
+    new: { title: 'Empiezo de cero', body: 'Explícamelo todo, por favor' },
+    basic: { title: 'Sé lo básico', body: 'Lentejas, huevos, pasta… ese nivel' },
+    confident: { title: 'Cocino con soltura', body: 'Ve al grano' },
+  },
+  household: {
+    justMe: 'Solo para mí',
+    people: plural({ one: '{count} persona', other: '{count} personas' }),
+  },
+  goals: {
+    build_muscle: 'Ganar músculo',
+    lose_fat: 'Perder grasa',
+    maintain: 'Mantenerme',
+    eat_healthy: 'Comer más sano',
+    none: 'Sin objetivo',
+  },
+  proteinGrams: '{n} g',
+  budgets: {
+    tight: 'Ajustado',
+    moderate: 'Moderado',
+    flexible: 'Flexible',
+  },
+
+  profile: {
+    title: 'Perfil culinario',
+    intro: 'Chef lo tiene en cuenta en cada receta: lo que comes, lo que tienes y lo que buscas.',
+    sections: {
+      personas: 'Qué te trae por aquí',
+      diet: 'Cómo comes',
+      kitchen: 'Tu cocina',
+      goals: 'Tú y tus objetivos',
+    },
+    save: 'Guardar perfil',
+    saved: 'Perfil culinario guardado',
+  },
+} as const;

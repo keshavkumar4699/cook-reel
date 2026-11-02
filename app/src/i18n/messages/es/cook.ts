@@ -1,0 +1,78 @@
+import { plural } from '../../catalog';
+
+export default {
+  notFound: 'Receta no encontrada',
+  voiceState: {
+    off: 'Voz apagada',
+    starting: 'Iniciando…',
+    listening: 'Escuchando',
+    paused: 'En pausa',
+    denied: 'Mic bloqueado',
+    unavailable: 'Sin voz',
+  },
+  top: {
+    close: 'Cerrar el modo cocina',
+    stepOf: 'Paso {current} de {total}',
+    voiceControl: 'Control por voz: {state}. Toca para activarlo o desactivarlo; mantén presionado para ver los comandos.',
+    ingredients: 'Ingredientes',
+  },
+  heard: '«{text}»',
+  video: {
+    allDone: 'Todos los pasos completados',
+    noClip: 'Este paso no tiene clip: sigue el texto de abajo',
+    looping: '▶ En bucle {start}–{end}',
+    aiNarration: 'Narración con IA',
+    embedBlocked: 'El canal ha desactivado la reproducción en otras apps.',
+    unavailable: 'Este video no se puede reproducir ahora mismo.',
+    playerTitle: 'Video de la receta',
+  },
+  done: {
+    title: '¡Lo conseguiste!',
+    subtitle: 'Ya puedes servir {title}. ¿Qué tal te quedó?',
+    stars: plural({ one: '{count} estrella', other: '{count} estrellas' }),
+    finish: 'Terminar',
+    toast: '¡Buen trabajo, chef! 🎉',
+  },
+  timer: {
+    started: 'Temporizador en marcha · {time}',
+    doneToast: '⏰ Se acabó el tiempo: {label}',
+    noTimer: 'Este paso no tiene temporizador',
+    timesUp: '¡Se acabó el tiempo!',
+    pause: 'Pausar temporizador',
+    resume: 'Reanudar temporizador',
+    cancel: 'Cancelar temporizador',
+  },
+  controls: {
+    previous: 'Paso anterior',
+    replay: 'Repetir este paso',
+    play: 'Reproducir',
+    pause: 'Pausar',
+    mute: 'Silenciar el video',
+    unmute: 'Activar el sonido del video',
+    readAloud: 'Leer el paso en voz alta',
+    stopReading: 'Dejar de leer',
+    next: 'Paso siguiente',
+  },
+  ingredients: {
+    title: 'Ingredientes',
+    forServings: plural({ one: 'Para {count} porción', other: 'Para {count} porciones' }),
+    readAloud: 'Léemelos en voz alta',
+  },
+  narration: {
+    preparing: 'Preparando la voz de Chef…',
+  },
+  help: {
+    title: 'Comandos de voz',
+    subtitle: 'Habla con normalidad: las frases cortas funcionan mejor',
+    micBlocked: 'El acceso al micrófono está desactivado. Actívalo en Configuración para usar el control por voz.',
+  },
+  step: {
+    startTimerLabel: plural({ one: 'Iniciar un temporizador de {count} minuto', other: 'Iniciar un temporizador de {count} minutos' }),
+    startTimer: 'Temporizador de {time}',
+    timeLeft: 'Quedan {time}',
+    timerDone: '¡Tiempo cumplido!',
+    whatDoesTermMean: '¿Qué significa «{term}»?',
+    glossaryTerm: '{term}:',
+    doneWhen: 'En su punto:',
+  },
+} as const;

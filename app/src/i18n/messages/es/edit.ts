@@ -1,0 +1,62 @@
+import { plural } from '../../catalog';
+
+export default {
+  titleEdit: 'Editar receta',
+  titleNew: 'Nueva receta',
+  fields: {
+    name: 'Nombre de la receta',
+    namePlaceholder: 'Las lentejas de la abuela',
+    description: 'Descripción',
+    descriptionPlaceholder: '¿Qué la hace especial?',
+    servings: 'Porciones',
+    prep: 'Prep. (min)',
+    cook: 'Cocción (min)',
+    difficulty: 'Dificultad',
+    tags: 'Etiquetas',
+    tagsPlaceholder: 'rápida, proteica, reconfortante',
+  },
+  ingredients: {
+    title: 'Ingredientes',
+    quantity: 'Cant.',
+    unit: 'Unidad',
+    name: 'Ingrediente',
+    remove: 'Quitar ingrediente',
+    add: 'Añadir ingrediente',
+  },
+  steps: {
+    title: 'Pasos',
+    placeholder: 'Qué hay que hacer en este paso',
+    timer: 'Tiempo (min)',
+    keepsClip: 'Conserva su clip de video',
+    remove: 'Eliminar paso',
+    add: 'Añadir paso',
+  },
+  defaultStepTitle: 'Paso {n}',
+  nutrition: {
+    title: 'Nutrición por porción',
+    hint: 'Opcional: completa lo que sepas.',
+    kcal: 'kcal',
+    protein: 'Proteína g',
+    carbs: 'Carbohid. g',
+    fat: 'Grasa g',
+  },
+  errors: {
+    noTitle: 'Ponle un nombre a tu receta.',
+    noIngredients: 'Añade al menos un ingrediente.',
+    noSteps: 'Añade al menos un paso.',
+  },
+  saveChanges: 'Guardar cambios',
+  saveRecipe: 'Guardar receta',
+  toasts: {
+    updated: 'Receta actualizada',
+    saved: 'Receta guardada en tu recetario',
+  },
+  paste: {
+    open: 'Pegar una lista',
+    title: 'Pegar ingredientes',
+    subtitle: 'Uno por línea: «2 tazas de arroz», «½ cdta de sal», «200 g de paneer en dados»',
+    placeholder: '2 tazas de arroz basmati\n1 cda de ghee\n½ cdta de cúrcuma',
+    add: 'Añadir estos',
+    added: plural({ one: '{count} ingrediente añadido', other: '{count} ingredientes añadidos' }),
+  },
+} as const;
