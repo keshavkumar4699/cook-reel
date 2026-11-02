@@ -3,8 +3,8 @@ export default {
   nameTitle: '{name} 👋',
   guestTitle: 'Bienvenue 👋',
   composer: {
-    title: 'Qu’est-ce qu’on cuisine aujourd’hui ?',
-    placeholder: 'ex. : paneer épicé en 20 min',
+    title: 'Qu’est-ce qu’on cuisine aujourd’hui ?',
+    placeholder: 'ex. : paneer épicé en 20 min',
     inputLabel: 'Décrivez ce que vous voulez cuisiner',
     send: 'Demander à Chef',
   },
@@ -25,7 +25,7 @@ export default {
   upsell: {
     badge: 'Crédits offerts',
     title: 'Débloquez Chef et les reels YouTube',
-    body: 'Créez un compte gratuit pour utiliser l’IA : vos premières recettes sont offertes.',
+    body: 'Créez un compte gratuit pour utiliser l’IA : vos premières recettes sont offertes.',
   },
   sections: {
     cookLater: { title: 'À cuisiner', subtitle: 'Mises de côté pour quand la faim se fera sentir' },
@@ -35,7 +35,7 @@ export default {
   },
   voiceTip: {
     title: 'Cuisinez mains libres',
-    body: 'En mode cuisine, dites « suivant », « retour » ou « pause » : plus besoin de toucher l’écran avec les mains pleines de farine.',
+    body: 'En mode cuisine, dites « suivant », « retour » ou « pause » : plus besoin de toucher l’écran avec les mains pleines de farine.',
     dismiss: 'Masquer l’astuce',
   },
 } as const;

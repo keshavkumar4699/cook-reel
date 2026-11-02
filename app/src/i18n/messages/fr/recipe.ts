@@ -48,16 +48,16 @@ export default {
     placeholder: 'Moins de piment la prochaine fois, un filet de citron vert…',
   },
   rating: {
-    title: 'Alors, c’était bon ?',
+    title: 'Alors, c’était bon ?',
     rate: plural({ one: 'Noter {count} sur 5', other: 'Noter {count} sur 5' }),
     timesCooked: plural({ one: 'Cuisinée {count} fois', other: 'Cuisinée {count} fois' }),
   },
   cookLater: {
     save: 'Garder pour cuisiner plus tard',
     add: 'Cuisiner plus tard',
-    remove: 'Retirer de « À cuisiner »',
-    saved: 'Enregistrée dans « À cuisiner »',
-    removed: 'Retirée de « À cuisiner »',
+    remove: 'Retirer de « À cuisiner »',
+    saved: 'Enregistrée dans « À cuisiner »',
+    removed: 'Retirée de « À cuisiner »',
   },
   menu: {
     more: 'Plus d’options',
@@ -69,7 +69,7 @@ export default {
     delete: 'Supprimer la recette',
   },
   deleteConfirm: {
-    title: 'Supprimer cette recette ?',
+    title: 'Supprimer cette recette ?',
     message: 'Elle sera supprimée de ce téléphone.',
   },
   toasts: {
@@ -80,7 +80,7 @@ export default {
   },
   cta: {
     experiment: 'Expérimenter',
-    startCooking: 'En cuisine !',
+    startCooking: 'En cuisine !',
     narratedClips: 'Extraits commentés',
     videoClips: 'Extraits vidéo',
     voiceGuided: 'Guidage vocal',
@@ -111,14 +111,14 @@ export default {
     line: '{quantity} {name}',
     optional: 'facultatif',
     toTaste: 'selon votre goût',
-    swapWith: 'Remplacer par : {items}',
+    swapWith: 'Remplacer par : {items}',
     substitutesFor: 'Alternatives à {name}',
   },
 
   // Liste des étapes
   steps: {
-    doneWhen: 'Signe que c’est prêt :',
+    doneWhen: 'Signe que c’est prêt :',
     clipRange: '{start}–{end}',
-    glossaryTerm: '{term} :',
+    glossaryTerm: '{term} :',
   },
 } as const;

@@ -1,6 +1,6 @@
 /** Commande vocale du mode cuisine. */
 export default {
-  quote: '« {word} »',
+  quote: '« {word} »',
   help: {
     move: 'Passer d’une étape à l’autre',
     playPause: 'Mettre l’extrait en pause ou le reprendre',

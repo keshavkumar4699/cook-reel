@@ -24,7 +24,7 @@ export default {
   },
   newCollection: {
     title: 'Nouvelle collection',
-    subtitle: 'Regroupez vos recettes à votre façon : « Week-end », « Enfants », « Fêtes »…',
+    subtitle: 'Regroupez vos recettes à votre façon : « Week-end », « Enfants », « Fêtes »…',
     namePlaceholder: 'Nom de la collection',
     create: 'Créer la collection',
     hint: 'Ajoutez-y des recettes depuis le menu ••• de n’importe quelle recette.',
@@ -41,7 +41,7 @@ export default {
   collectionSheet: {
     title: 'Collections',
     subtitle: 'Touchez pour ajouter ou retirer',
-    empty: 'Aucune collection pour l’instant : créez la première.',
+    empty: 'Aucune collection pour l’instant : créez la première.',
     newPlaceholder: 'Nouvelle collection',
   },
 } as const;

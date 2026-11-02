@@ -1,6 +1,6 @@
 import { plural } from '../../catalog';
 
-/** Mode cuisine : le lecteur plein écran, étape par étape. */
+/** Mode cuisine : le lecteur plein écran, étape par étape. */
 export default {
   notFound: 'Recette introuvable',
   voiceState: {
@@ -14,13 +14,13 @@ export default {
   top: {
     close: 'Fermer le mode cuisine',
     stepOf: 'Étape {current} sur {total}',
-    voiceControl: 'Commande vocale : {state}. Touchez pour activer ou désactiver, appui long pour voir les commandes.',
+    voiceControl: 'Commande vocale : {state}. Touchez pour activer ou désactiver, appui long pour voir les commandes.',
     ingredients: 'Ingrédients',
   },
-  heard: '« {text} »',
+  heard: '« {text} »',
   video: {
     allDone: 'Toutes les étapes sont terminées',
-    noClip: 'Pas d’extrait pour cette étape : suivez le texte ci-dessous',
+    noClip: 'Pas d’extrait pour cette étape : suivez le texte ci-dessous',
     looping: '▶ En boucle {start}–{end}',
     aiNarration: 'Narration IA',
     embedBlocked: 'La chaîne a désactivé la lecture dans d’autres applis.',
@@ -28,17 +28,17 @@ export default {
     playerTitle: 'Vidéo de la recette',
   },
   done: {
-    title: 'Vous avez réussi !',
-    subtitle: '{title} : c’est prêt ! Alors, verdict ?',
+    title: 'Vous avez réussi !',
+    subtitle: '{title} : c’est prêt ! Alors, verdict ?',
     stars: plural({ one: '{count} étoile', other: '{count} étoiles' }),
     finish: 'Terminer la recette',
-    toast: 'Bravo, chef ! 🎉',
+    toast: 'Bravo, chef ! 🎉',
   },
   timer: {
     started: 'Minuteur lancé · {time}',
-    doneToast: '⏰ Minuteur terminé : {label}',
+    doneToast: '⏰ Minuteur terminé : {label}',
     noTimer: 'Pas de minuteur pour cette étape',
-    timesUp: 'Temps écoulé !',
+    timesUp: 'Temps écoulé !',
     pause: 'Mettre le minuteur en pause',
     resume: 'Reprendre le minuteur',
     cancel: 'Annuler le minuteur',
@@ -64,7 +64,7 @@ export default {
   },
   help: {
     title: 'Commandes vocales',
-    subtitle: 'Parlez normalement : les phrases courtes fonctionnent le mieux',
+    subtitle: 'Parlez normalement : les phrases courtes fonctionnent le mieux',
     micBlocked: 'L’accès au micro est désactivé. Activez-le dans les réglages pour utiliser la commande vocale.',
   },
   step: {
@@ -72,8 +72,8 @@ export default {
     startTimer: 'Lancer un minuteur de {time}',
     timeLeft: 'Encore {time}',
     timerDone: 'Minuteur terminé',
-    whatDoesTermMean: 'Que veut dire « {term} » ?',
-    glossaryTerm: '{term} :',
-    doneWhen: 'Signe que c’est prêt :',
+    whatDoesTermMean: 'Que veut dire « {term} » ?',
+    glossaryTerm: '{term} :',
+    doneWhen: 'Signe que c’est prêt :',
   },
 } as const;

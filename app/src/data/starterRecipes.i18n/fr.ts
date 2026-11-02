@@ -1,6 +1,273 @@
 import type { StarterTranslations } from './types';
 
-/** Starter recipes in this language (to be filled in by translation). */
-const translations: StarterTranslations = {};
+const GLOSSARY = {
+  jammy: { term: 'Compoté', meaning: 'Tendre, épais et nappant, sans plus aucun jus liquide.' },
+  whistle: { term: 'Sifflet', meaning: 'Le sifflement sonore de l’autocuiseur quand il libère de la vapeur : les recettes indiennes les comptent.' },
+  tadka: { term: 'Tadka', meaning: 'Des épices grésillées dans de la matière grasse bien chaude, versées sur un plat pour le parfumer (on parle aussi de tempérage).' },
+  simmer: { term: 'Mijoter', meaning: 'Cuire juste en dessous de l’ébullition, avec de petites bulles paresseuses.' },
+  sear: { term: 'Saisir', meaning: 'Cuire à feu vif sans remuer, pour que l’extérieur dore.' },
+  stirFry: { term: 'Faire sauter', meaning: 'Cuire rapidement à feu vif en remuant sans arrêt.' },
+};
+
+/** Les recettes de départ en français. */
+const translations: StarterTranslations = {
+  'starter-egg-bhurji': {
+    title: 'Œufs brouillés masala en 10 min (egg bhurji)',
+    description: 'Des œufs brouillés épicés à l’indienne, avec des toasts : 28 g de protéines dans l’assiette, prêts avant que votre café ait refroidi.',
+    cuisine: 'Indienne',
+    equipment: ['Poêle antiadhésive', 'Spatule', 'Bol'],
+    storage: null,
+    tags: ['protéiné', '15-min', 'ovo-végétarien', 'une-seule-poêle'],
+    ingredients: {
+      'eb-1': { name: 'Œufs', note: 'gros', substitutes: ['200 g de paneer émietté'] },
+      'eb-2': { name: 'Oignon', note: 'petit, finement haché' },
+      'eb-3': { name: 'Tomate', note: 'petite, coupée en petits dés' },
+      'eb-4': { name: 'Piment vert', note: 'haché' },
+      'eb-5': { name: 'Huile ou beurre' },
+      'eb-6': { name: 'Curcuma en poudre' },
+      'eb-7': { name: 'Piment rouge en poudre', substitutes: ['Paprika'] },
+      'eb-8': { name: 'Garam masala' },
+      'eb-9': { name: 'Sel', note: 'selon votre goût' },
+      'eb-10': { name: 'Coriandre fraîche', note: 'hachée' },
+      'eb-11': { name: 'Pain complet', note: 'grillé, pour servir', substitutes: ['2 rotis', '1 petit pain (pav)'] },
+    },
+    steps: {
+      'eb-s1': {
+        title: 'Tout préparer',
+        instruction: 'Hachez finement l’oignon, la tomate et le piment. Cassez les œufs dans un bol, ajoutez une pincée de sel et battez-les à la fourchette pendant 20 secondes.',
+        tip: 'Coupez tout avant de mettre la poêle sur le feu : le bhurji cuit vite et n’attend personne.',
+        narration: 'Pour commencer, hachez bien finement l’oignon, la tomate et le piment. Cassez ensuite les œufs dans un bol avec une pincée de sel, et battez-les bien.',
+      },
+      'eb-s2': {
+        title: 'Faire fondre l’oignon',
+        instruction: 'Faites chauffer l’huile dans une poêle antiadhésive à feu moyen. Ajoutez l’oignon et le piment, et remuez jusqu’à ce qu’ils soient tendres et légèrement dorés.',
+        doneCue: 'Les bords de l’oignon dorent et dégagent une odeur sucrée.',
+        narration: 'Faites chauffer l’huile dans votre poêle à feu moyen, puis ajoutez l’oignon et le piment. Remuez de temps en temps jusqu’à ce qu’ils soient tendres et commencent tout juste à dorer, environ trois minutes.',
+      },
+      'eb-s3': {
+        title: 'Cuire la tomate',
+        instruction: 'Ajoutez la tomate, le curcuma, le piment en poudre et une pincée de sel. Remuez jusqu’à ce que la tomate se défasse et soit bien compotée.',
+        glossary: [GLOSSARY.jammy],
+        narration: 'Ajoutez maintenant la tomate avec le curcuma, le piment en poudre et un peu de sel. Remuez jusqu’à ce que la tomate se défasse et devienne épaisse et fondante, comme une compotée.',
+      },
+      'eb-s4': {
+        title: 'Brouiller en douceur',
+        instruction: 'Baissez le feu au minimum. Versez les œufs, laissez-les 10 secondes sans y toucher, puis remuez lentement en raclant le fond, jusqu’à ce qu’ils soient tout juste pris mais encore brillants.',
+        tip: 'Retirez la poêle du feu un peu avant la fin : les œufs cuisent encore dans la poêle chaude.',
+        doneCue: 'Des œufs moelleux et fondants, sans plus aucune partie liquide.',
+        narration: 'Baissez le feu au plus doux et versez les œufs. Laissez-les prendre quelques secondes, puis remuez lentement en raclant le fond, jusqu’à ce qu’ils soient tout juste pris mais encore brillants.',
+      },
+      'eb-s5': {
+        title: 'Finir et servir',
+        instruction: 'Parsemez de garam masala et de coriandre, mélangez une fois et servez bien chaud avec des toasts beurrés.',
+        narration: 'Saupoudrez de garam masala et de coriandre, mélangez une dernière fois, et servez bien chaud avec vos toasts. Bon appétit !',
+      },
+    },
+  },
+
+  'starter-dal-tadka': {
+    title: 'Dal tadka à l’autocuiseur',
+    description: 'L’incontournable des soirs de semaine quand on débute en cuisine : des lentilles crémeuses et un tadka grésillant à l’ail et au cumin. De quoi déjeuner pendant trois jours.',
+    cuisine: 'Indienne',
+    equipment: ['Autocuiseur', 'Petite poêle', 'Fouet ou louche'],
+    storage: 'Se conserve 3 jours au réfrigérateur ou 2 mois au congélateur. Réchauffez avec un trait d’eau, en remuant jusqu’à frémissement.',
+    tags: ['végétarien', 'batch-cooking', 'petit-budget', 'réconfortant'],
+    ingredients: {
+      'dt-1': { name: 'Toor dal (pois d’Angole cassés)', substitutes: ['Masoor dal (lentilles corail)'] },
+      'dt-2': { name: 'Eau' },
+      'dt-3': { name: 'Curcuma en poudre' },
+      'dt-4': { name: 'Sel', note: 'ou selon votre goût' },
+      'dt-5': { name: 'Ghee ou huile', substitutes: ['N’importe quelle huile neutre (version végane)'] },
+      'dt-6': { name: 'Graines de cumin' },
+      'dt-7': { name: 'Ail', note: 'finement haché' },
+      'dt-8': { name: 'Gingembre', note: 'râpé' },
+      'dt-9': { name: 'Oignon', note: 'moyen, finement haché' },
+      'dt-10': { name: 'Tomate', note: 'moyenne, coupée en dés' },
+      'dt-11': { name: 'Piment vert', note: 'fendu' },
+      'dt-12': { name: 'Piment du Cachemire en poudre', substitutes: ['Paprika'] },
+      'dt-13': { name: 'Coriandre fraîche', note: 'hachée' },
+      'dt-14': { name: 'Jus de citron' },
+    },
+    steps: {
+      'dt-s1': {
+        title: 'Rincer le dal',
+        instruction: 'Rincez le dal trois fois dans un saladier d’eau, en le frottant entre vos doigts, jusqu’à ce que l’eau soit presque claire.',
+        tip: 'Le rinçage retire la poussière et l’excès d’amidon : le dal ne débordera pas en moussant dans l’autocuiseur.',
+        narration: 'Mettez le dal dans un saladier d’eau et frottez-le doucement entre vos doigts. Égouttez, puis renouvelez l’opération trois fois, jusqu’à ce que l’eau soit presque claire.',
+      },
+      'dt-s2': {
+        title: 'Cuire sous pression',
+        instruction: 'Mettez le dal, 600 ml d’eau, le curcuma et la moitié du sel dans l’autocuiseur. Fermez le couvercle et faites cuire à feu moyen-vif pendant 3 sifflets, puis éteignez le feu et laissez la pression retomber d’elle-même.',
+        glossary: [GLOSSARY.whistle],
+        doneCue: 'Le dal est complètement tendre et s’écrase sous le dos d’une cuillère.',
+        tip: 'Ne forcez jamais l’ouverture du couvercle : patientez jusqu’à ce que l’indicateur de pression soit redescendu.',
+        narration: 'Versez le dal dans l’autocuiseur avec six cents millilitres d’eau, le curcuma et la moitié du sel. Verrouillez le couvercle, faites cuire jusqu’au troisième sifflet, puis laissez la pression retomber d’elle-même.',
+      },
+      'dt-s3': {
+        title: 'Lisser au fouet',
+        instruction: 'Ouvrez l’autocuiseur et fouettez le dal jusqu’à ce qu’il soit crémeux. Ajoutez de l’eau chaude petit à petit, jusqu’à obtenir la consistance d’une soupe épaisse.',
+        narration: 'Ouvrez l’autocuiseur et fouettez le dal jusqu’à ce qu’il devienne crémeux. Ajoutez un peu d’eau chaude à la fois, jusqu’à ce qu’il ait la consistance d’une soupe épaisse.',
+      },
+      'dt-s4': {
+        title: 'Préparer le tadka',
+        instruction: 'Faites chauffer le ghee à feu moyen dans une petite poêle. Ajoutez le cumin ; quand il grésille, ajoutez l’ail, le gingembre et le piment pendant 30 secondes. Faites dorer l’oignon, puis ajoutez la tomate et le piment en poudre jusqu’à ce qu’ils soient tendres.',
+        glossary: [GLOSSARY.tadka],
+        tip: 'Si le cumin noircit, il a brûlé et sera amer : essuyez la poêle et repartez de zéro.',
+        narration: 'Place au tadka. Faites chauffer le ghee et ajoutez le cumin. Dès qu’il grésille, ajoutez l’ail, le gingembre et le piment, puis faites dorer l’oignon, et enfin faites fondre la tomate avec le piment en poudre.',
+      },
+      'dt-s5': {
+        title: 'Mijoter et finir',
+        instruction: 'Versez le tadka dans le dal, ajoutez le reste du sel et laissez mijoter 2 à 3 minutes. Terminez avec la coriandre et un filet de citron.',
+        glossary: [GLOSSARY.simmer],
+        doneCue: 'Brillant, parsemé de gouttes d’huile rouge, il nappe le dos d’une cuillère.',
+        narration: 'Versez ce tadka grésillant sur le dal, ajoutez le reste du sel et laissez mijoter deux ou trois minutes. Terminez avec la coriandre et un filet de citron.',
+      },
+    },
+  },
+
+  'starter-chicken-bowl': {
+    title: 'Riz sauté au poulet, ail et poivre',
+    description: 'Un classique des sportifs : du poulet au poivre bien juteux et des légumes croquants sautés avec le riz. 40 g de protéines par bol, et il se transporte très bien pour le lendemain.',
+    cuisine: 'Indo-chinoise',
+    equipment: ['Grande poêle ou wok', 'Spatule', 'Planche à découper'],
+    storage: 'Se conserve 2 jours au réfrigérateur. Réchauffez jusqu’à ce que ce soit bien chaud à cœur.',
+    tags: ['protéiné', 'batch-cooking', '20-min', 'une-seule-poêle'],
+    ingredients: {
+      'cb-1': { name: 'Blanc de poulet', note: 'en petits morceaux', substitutes: ['Paneer en cubes', 'Tofu ferme'] },
+      'cb-2': { name: 'Riz cuit', note: 'un reste de riz, c’est parfait', substitutes: ['Quinoa cuit'] },
+      'cb-3': { name: 'Huile' },
+      'cb-4': { name: 'Ail', note: 'finement haché' },
+      'cb-5': { name: 'Poivre noir', note: 'fraîchement concassé' },
+      'cb-6': { name: 'Sauce soja' },
+      'cb-7': { name: 'Poivron', note: 'en lanières' },
+      'cb-8': { name: 'Oignon', note: 'moyen, émincé' },
+      'cb-9': { name: 'Oignons nouveaux', note: 'émincés' },
+      'cb-10': { name: 'Jus de citron' },
+      'cb-11': { name: 'Sel', note: 'selon votre goût' },
+    },
+    steps: {
+      'cb-s1': {
+        title: 'Assaisonner le poulet',
+        instruction: 'Mélangez le poulet avec la sauce soja, la moitié du poivre et une pincée de sel. Émincez l’oignon et le poivron, et hachez l’ail.',
+        tip: 'Séchez d’abord le poulet avec du papier absorbant : il dorera au lieu de bouillir.',
+        narration: 'Mélangez le poulet avec la sauce soja, la moitié du poivre et une pincée de sel. Pendant qu’il marine, émincez l’oignon et le poivron, et hachez l’ail.',
+      },
+      'cb-s2': {
+        title: 'Saisir le poulet',
+        instruction: 'Faites chauffer l’huile à feu vif dans une grande poêle. Ajoutez le poulet en une seule couche, laissez-le 2 minutes sans y toucher, puis remuez et faites cuire jusqu’à ce qu’il soit doré et cuit à cœur.',
+        glossary: [GLOSSARY.sear],
+        tip: 'Ne surchargez pas la poêle : faites cuire en deux fois si besoin.',
+        doneCue: 'Plus aucune trace de rose au cœur du morceau le plus épais, et le jus qui s’écoule est clair.',
+        narration: 'Faites bien chauffer la poêle avec l’huile, puis déposez le poulet en une seule couche. N’y touchez pas pendant deux minutes pour qu’il colore, puis remuez jusqu’à ce qu’il soit bien doré et cuit à cœur.',
+      },
+      'cb-s3': {
+        title: 'Ail et légumes',
+        instruction: 'Baissez à feu moyen. Ajoutez l’ail pendant 30 secondes, puis l’oignon et le poivron, et faites sauter jusqu’à ce qu’ils soient tout juste tendres mais encore croquants.',
+        glossary: [GLOSSARY.stirFry],
+        narration: 'Baissez à feu moyen. Ajoutez l’ail une trentaine de secondes, puis l’oignon et le poivron, et faites sauter jusqu’à ce qu’ils soient tendres mais encore un peu croquants.',
+      },
+      'cb-s4': {
+        title: 'Mélanger au riz',
+        instruction: 'Ajoutez le riz, défaites les grumeaux et mélangez jusqu’à ce que tout soit bien chaud. Assaisonnez avec le reste du poivre, et salez selon votre goût.',
+        narration: 'Ajoutez le riz, défaites les paquets et faites sauter le tout jusqu’à ce que ce soit bien chaud. Assaisonnez avec le reste du poivre et un peu de sel.',
+      },
+      'cb-s5': {
+        title: 'Finitions',
+        instruction: 'Arrosez de jus de citron, parsemez d’oignons nouveaux et servez. Gardez-en la moitié pour le déjeuner de demain.',
+        narration: 'Arrosez de jus de citron, parsemez d’oignons nouveaux, et c’est prêt. Mettez-en la moitié de côté pour le déjeuner de demain.',
+      },
+    },
+  },
+
+  'starter-peanut-noodles': {
+    title: 'Nouilles crémeuses à la cacahuète en 15 min',
+    description: 'Une sauce soyeuse cacahuète et citron vert, des nouilles bien fermes et des edamames pour un coup de pouce en protéines végétales. Une casserole et un bol suffisent.',
+    cuisine: 'Asiatique',
+    equipment: ['Grande casserole', 'Passoire', 'Bol', 'Fouet ou fourchette'],
+    storage: 'À déguster de préférence tout de suite. Les restes se gardent 1 jour au réfrigérateur : détendez-les avec un peu d’eau tiède et mangez-les froids ou tièdes.',
+    tags: ['végan', '15-min', 'une-seule-casserole', 'protéiné'],
+    ingredients: {
+      'pn-1': { name: 'Nouilles de blé séchées', substitutes: ['Spaghetti', 'Nouilles hakka'] },
+      'pn-2': { name: 'Edamames surgelés', substitutes: ['Petits pois surgelés'] },
+      'pn-3': { name: 'Beurre de cacahuète', note: 'lisse ou avec morceaux' },
+      'pn-4': { name: 'Sauce soja' },
+      'pn-5': { name: 'Jus de citron vert ou jaune' },
+      'pn-6': { name: 'Sucre ou sirop d’érable' },
+      'pn-7': { name: 'Ail', note: 'râpé' },
+      'pn-8': { name: 'Piment en flocons' },
+      'pn-9': { name: 'Concombre', note: 'en fines tranches' },
+      'pn-10': { name: 'Oignons nouveaux', note: 'émincés' },
+      'pn-11': { name: 'Cacahuètes grillées', note: 'concassées' },
+    },
+    steps: {
+      'pn-s1': {
+        title: 'Faire bouillir l’eau',
+        instruction: 'Portez à ébullition une grande casserole d’eau avec une pincée de sel.',
+        tip: 'Mettez un couvercle : l’eau bouillira beaucoup plus vite.',
+        narration: 'Remplissez une grande casserole d’eau, ajoutez une pincée de sel et portez à gros bouillons.',
+      },
+      'pn-s2': {
+        title: 'Cuire nouilles et edamames',
+        instruction: 'Ajoutez les nouilles et faites-les cuire comme indiqué sur le paquet, en ajoutant les edamames pour les 2 dernières minutes. Réservez un demi-verre d’eau de cuisson, puis égouttez.',
+        doneCue: 'Les nouilles sont tendres mais gardent un peu de tenue.',
+        narration: 'Plongez les nouilles et faites-les cuire comme indiqué sur le paquet, en ajoutant les edamames pour les deux dernières minutes. Avant d’égoutter, mettez de côté un demi-verre d’eau de cuisson.',
+      },
+      'pn-s3': {
+        title: 'Fouetter la sauce',
+        instruction: 'Pendant la cuisson des nouilles, fouettez le beurre de cacahuète, la sauce soja, le jus de citron vert, le sucre, l’ail et le piment avec 3 à 4 cuillères à soupe d’eau chaude, jusqu’à obtenir une sauce lisse.',
+        tip: 'Au début, la sauce a l’air de trancher : fouettez encore, elle va devenir soyeuse.',
+        narration: 'Pendant que les nouilles cuisent, fouettez le beurre de cacahuète, la sauce soja, le jus de citron vert, le sucre, l’ail et le piment avec quelques cuillerées d’eau chaude, jusqu’à ce que ce soit bien lisse.',
+      },
+      'pn-s4': {
+        title: 'Enrober de sauce',
+        instruction: 'Mélangez les nouilles chaudes et les edamames avec la sauce, en ajoutant un peu d’eau de cuisson réservée à la fois, jusqu’à ce que ce soit brillant et crémeux.',
+        narration: 'Enrobez les nouilles chaudes et les edamames de sauce, en ajoutant l’eau de cuisson réservée petit à petit, jusqu’à ce que ce soit brillant et crémeux.',
+      },
+      'pn-s5': {
+        title: 'Garnir et servir',
+        instruction: 'Répartissez dans des bols et garnissez de concombre, d’oignons nouveaux et de cacahuètes concassées. Dégustez aussitôt.',
+        narration: 'Répartissez le tout dans des bols et garnissez de concombre, d’oignons nouveaux et de cacahuètes concassées. Dégustez tout de suite, tant que c’est chaud.',
+      },
+    },
+  },
+
+  'starter-overnight-oats': {
+    title: 'Overnight oats protéinés',
+    description: 'Deux minutes ce soir, et le petit-déjeuner de demain est réglé. Crémeux, doux grâce à la banane et 30 g de protéines, sans aucune cuisson.',
+    cuisine: null,
+    equipment: ['Bocal ou boîte hermétique', 'Cuillère'],
+    storage: 'Se conserve 3 jours au réfrigérateur. Ajoutez la banane juste avant de déguster.',
+    tags: ['sans-cuisson', 'batch-cooking', 'protéiné', 'végétarien'],
+    ingredients: {
+      'oo-1': { name: 'Flocons d’avoine' },
+      'oo-2': { name: 'Lait', substitutes: ['Lait de soja', 'Lait d’avoine'] },
+      'oo-3': { name: 'Yaourt grec', note: 'nature', substitutes: ['Yaourt égoutté'] },
+      'oo-4': { name: 'Graines de chia' },
+      'oo-5': { name: 'Beurre de cacahuète' },
+      'oo-6': { name: 'Banane', note: 'petite, en rondelles' },
+      'oo-7': { name: 'Miel' },
+      'oo-8': { name: 'Cannelle' },
+    },
+    steps: {
+      'oo-s1': {
+        title: 'Mélanger la base',
+        instruction: 'Dans un bocal, mélangez les flocons d’avoine, les graines de chia, le lait, le yaourt et la cannelle jusqu’à ce qu’il ne reste plus de flocons secs.',
+        tip: 'Préparez trois bocaux d’un coup le dimanche : vos petits-déjeuners à emporter sont prêts jusqu’à mercredi.',
+        narration: 'Dans un bocal, mélangez les flocons d’avoine, les graines de chia, le lait, le yaourt et la cannelle, jusqu’à ce qu’il ne reste plus aucun flocon sec.',
+      },
+      'oo-s2': {
+        title: 'Une nuit au frais',
+        instruction: 'Fermez le couvercle et placez au réfrigérateur pendant au moins 6 heures, ou toute la nuit.',
+        doneCue: 'Les flocons sont tendres et le mélange est épais, assez pour se manger à la cuillère.',
+        narration: 'Posez le couvercle sur le bocal et placez-le au réfrigérateur pendant au moins six heures, ou toute la nuit.',
+      },
+      'oo-s3': {
+        title: 'Garnir et déguster',
+        instruction: 'Remuez, détendez avec un trait de lait si c’est trop épais, puis garnissez de rondelles de banane, de beurre de cacahuète et d’un filet de miel.',
+        narration: 'Donnez un petit coup de cuillère, détendez avec un trait de lait si c’est trop épais, puis garnissez de banane, de beurre de cacahuète et d’un filet de miel.',
+      },
+    },
+  },
+};
 
 export default translations;

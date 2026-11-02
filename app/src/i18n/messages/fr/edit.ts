@@ -8,7 +8,7 @@ export default {
     name: 'Nom de la recette',
     namePlaceholder: 'Le gratin dauphinois de mamie',
     description: 'Description',
-    descriptionPlaceholder: 'Qu’est-ce qui la rend unique ?',
+    descriptionPlaceholder: 'Qu’est-ce qui la rend unique ?',
     servings: 'Portions',
     prep: 'Prépa (min)',
     cook: 'Cuisson (min)',
@@ -26,7 +26,7 @@ export default {
   },
   steps: {
     title: 'Étapes',
-    placeholder: 'Que faut-il faire à cette étape ?',
+    placeholder: 'Que faut-il faire à cette étape ?',
     timer: 'Minuteur (min)',
     keepsClip: 'Garde son extrait vidéo',
     remove: 'Supprimer l’étape',
@@ -35,7 +35,7 @@ export default {
   defaultStepTitle: 'Étape {n}',
   nutrition: {
     title: 'Valeurs nutritionnelles par portion',
-    hint: 'Facultatif : indiquez ce que vous savez.',
+    hint: 'Facultatif : indiquez ce que vous savez.',
     kcal: 'kcal',
     protein: 'Protéines (g)',
     carbs: 'Glucides (g)',
@@ -52,11 +52,11 @@ export default {
     updated: 'Recette mise à jour',
     saved: 'Recette enregistrée',
   },
-  // Feuille « Coller une liste »
+  // Feuille « Coller une liste »
   paste: {
     open: 'Coller une liste',
     title: 'Coller des ingrédients',
-    subtitle: 'Un par ligne : « 2 c. à s. d’huile », « ½ c. à c. de sel », « 200 g de paneer, en dés »',
+    subtitle: 'Un par ligne : « 2 c. à s. d’huile », « ½ c. à c. de sel », « 200 g de paneer, en dés »',
     placeholder: '300 g de riz basmati\n1 c. à s. de ghee\n½ c. à c. de curcuma',
     add: 'Les ajouter',
     added: plural({ one: '{count} ingrédient ajouté', other: '{count} ingrédients ajoutés' }),

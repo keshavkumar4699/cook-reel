@@ -1,6 +1,6 @@
 import { plural } from '../../catalog';
 
-/** Éléments partagés : la feuille « Ajouter une recette », la pastille de crédits, le stepper et l’illustration d’accueil. */
+/** Éléments partagés : la feuille « Ajouter une recette », la pastille de crédits, le stepper et l’illustration d’accueil. */
 export default {
   createSheet: {
     title: 'Ajouter une recette',
@@ -27,6 +27,6 @@ export default {
     sideStep: 'ÉTAPE {n}',
     stepOf: 'ÉTAPE {current} SUR {total} · {range}',
     stepTitle: 'Faire sauter les nouilles',
-    sayNext: 'Dites « suivant »',
+    sayNext: 'Dites « suivant »',
   },
 } as const;

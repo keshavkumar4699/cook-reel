@@ -1,13 +1,13 @@
 import { plural } from '../../catalog';
 
-/** Chef, la discussion qui crée des recettes, et son mode « vide-frigo ». */
+/** Chef, la discussion qui crée des recettes, et son mode « vide-frigo ». */
 export default {
   subtitle: {
     freeQuestions: 'Questions gratuites',
     creditsPerRecipe: plural({ one: '{count} crédit par recette', other: '{count} crédits par recette' }),
   },
   describe: {
-    heading: 'De quoi avez-vous\nenvie ?',
+    heading: 'De quoi avez-vous\nenvie ?',
     intro: 'Décrivez un plat, une envie ou une situation. Je vous pose quelques questions, puis j’écris une recette adaptée à votre cuisine.',
   },
   ideas: {
@@ -18,13 +18,13 @@ export default {
   },
   fridge: {
     screenTitle: 'Vide-frigo',
-    heading: 'Qu’avez-vous dans votre cuisine ?',
+    heading: 'Qu’avez-vous dans votre cuisine ?',
     intro: 'Touchez ce que vous avez. On part du principe que vous avez du sel, de l’huile et les épices de base.',
-    empty: 'Rien pour l’instant : ajoutez des ingrédients ci-dessous',
+    empty: 'Rien pour l’instant : ajoutez des ingrédients ci-dessous',
     addPlaceholder: 'Ajouter autre chose…',
     pickAtLeast: plural({ one: 'Choisissez au moins {count} ingrédient', other: 'Choisissez au moins {count} ingrédients' }),
     findRecipe: plural({ one: 'Trouver une recette avec {count} ingrédient', other: 'Trouver une recette avec {count} ingrédients' }),
-    prompt: 'Voici ce que j’ai : {list}. Qu’est-ce que je peux préparer ?',
+    prompt: 'Voici ce que j’ai : {list}. Qu’est-ce que je peux préparer ?',
     groups: {
       protein: 'Protéines',
       veg: 'Légumes',
@@ -77,7 +77,7 @@ export default {
     cookNow: 'Cuisiner maintenant',
   },
   composer: {
-    startPlaceholder: 'ex. : paneer, épicé, 20 minutes',
+    startPlaceholder: 'ex. : paneer, épicé, 20 minutes',
     replyPlaceholder: 'Répondre à Chef…',
     label: 'Écrire à Chef',
     send: 'Envoyer',
