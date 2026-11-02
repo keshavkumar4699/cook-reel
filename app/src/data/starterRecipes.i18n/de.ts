@@ -1,6 +1,273 @@
 import type { StarterTranslations } from './types';
 
-/** Starter recipes in this language (to be filled in by translation). */
-const translations: StarterTranslations = {};
+const GLOSSARY = {
+  jammy: { term: 'Sämig', meaning: 'Weich, dicklich und saucig – ohne wässrigen Saft.' },
+  whistle: { term: 'Pfiff', meaning: 'Das laute Zischen, mit dem ein Schnellkochtopf Dampf ablässt – viele Rezepte zählen die Pfiffe.' },
+  tadka: { term: 'Tadka', meaning: 'Gewürze, die in heißem Fett angebraten und dann für mehr Aroma über ein Gericht gegossen werden – eine Art Würzöl.' },
+  simmer: { term: 'Köcheln', meaning: 'Knapp unter dem Siedepunkt garen, mit kleinen, trägen Bläschen.' },
+  sear: { term: 'Scharf anbraten', meaning: 'Bei starker Hitze braten, ohne das Gargut zu bewegen, damit die Außenseite braun wird.' },
+  stirFry: { term: 'Unter Rühren braten', meaning: 'Bei starker Hitze schnell braten und dabei ständig rühren – wie im Wok.' },
+};
+
+/** Starter recipes in German. */
+const translations: StarterTranslations = {
+  'starter-egg-bhurji': {
+    title: 'Masala-Rührei in 10 Minuten',
+    description: 'Egg Bhurji, das würzige indische Rührei, mit Toast – 28 g Protein auf dem Teller und fertig, bevor dein Kaffee kalt wird.',
+    cuisine: 'Indisch',
+    equipment: ['Beschichtete Pfanne', 'Pfannenwender', 'Schüssel'],
+    storage: null,
+    tags: ['proteinreich', '15-minuten', 'vegetarisch', 'pfannengericht'],
+    ingredients: {
+      'eb-1': { name: 'Eier', note: 'Größe L', substitutes: ['200 g zerbröckelter Paneer'] },
+      'eb-2': { name: 'Zwiebel', note: 'klein, fein gehackt' },
+      'eb-3': { name: 'Tomate', note: 'klein, fein gehackt' },
+      'eb-4': { name: 'grüne Chilischote', note: 'gehackt' },
+      'eb-5': { name: 'Öl oder Butter' },
+      'eb-6': { name: 'Kurkumapulver' },
+      'eb-7': { name: 'Chilipulver', substitutes: ['Paprikapulver'] },
+      'eb-8': { name: 'Garam Masala' },
+      'eb-9': { name: 'Salz', note: 'nach Geschmack' },
+      'eb-10': { name: 'Koriandergrün', note: 'gehackt' },
+      'eb-11': { name: 'Vollkornbrot', note: 'getoastet, zum Servieren', substitutes: ['2 Rotis', '1 Pav (weiches Brötchen)'] },
+    },
+    steps: {
+      'eb-s1': {
+        title: 'Alles vorbereiten',
+        instruction: 'Hacke Zwiebel, Tomate und Chili fein. Schlage die Eier in eine Schüssel, gib eine Prise Salz dazu und verquirle alles 20 Sekunden mit einer Gabel.',
+        tip: 'Erst alles schneiden, dann die Pfanne auf den Herd – Bhurji ist ruckzuck fertig und wartet auf niemanden.',
+        narration: 'Als Erstes hackst du Zwiebel, Tomate und Chili schön fein. Dann schlägst du die Eier in eine Schüssel, gibst eine Prise Salz dazu und verquirlst alles kräftig.',
+      },
+      'eb-s2': {
+        title: 'Zwiebel anschwitzen',
+        instruction: 'Erhitze das Öl in einer beschichteten Pfanne bei mittlerer Hitze. Gib Zwiebel und Chili hinein und rühre, bis sie weich und leicht goldgelb sind.',
+        doneCue: 'Die Zwiebelränder werden goldgelb und duften süßlich.',
+        narration: 'Lass das Öl bei mittlerer Hitze in der Pfanne warm werden und gib dann Zwiebel und Chili dazu. Rühr ab und zu um, bis beides weich ist und gerade goldgelb wird. Das dauert etwa drei Minuten.',
+      },
+      'eb-s3': {
+        title: 'Tomate einkochen',
+        instruction: 'Gib Tomate, Kurkuma, Chilipulver und eine Prise Salz dazu. Rühre so lange, bis die Tomate zerfällt und sämig wird.',
+        glossary: [GLOSSARY.jammy],
+        narration: 'Jetzt kommen die Tomate, die Kurkuma, das Chilipulver und etwas Salz dazu. Rühr immer wieder um, bis die Tomate zerfällt und dick und sämig aussieht.',
+      },
+      'eb-s4': {
+        title: 'Eier sanft stocken lassen',
+        instruction: 'Stell die Hitze auf niedrig. Gieß die Eier hinein, lass sie 10 Sekunden in Ruhe und rühre sie dann langsam um. Schab dabei über den Boden, bis die Eier gerade gestockt, aber noch glänzend sind.',
+        tip: 'Nimm die Pfanne lieber etwas früher vom Herd – in der heißen Pfanne garen die Eier nach.',
+        doneCue: 'Weiche, saftige Flocken – und kein flüssiges Ei mehr.',
+        narration: 'Dreh die Hitze ganz herunter und gieß die Eier hinein. Lass ihnen ein paar Sekunden Zeit, dann rührst du langsam um und schabst dabei über den Boden, bis sie gerade gestockt, aber noch schön glänzend sind.',
+      },
+      'eb-s5': {
+        title: 'Verfeinern und servieren',
+        instruction: 'Streue Garam Masala und Koriander darüber, rühre einmal um und serviere alles heiß mit gebuttertem Toast.',
+        narration: 'Streu Garam Masala und Koriander darüber, rühr ein letztes Mal um und servier alles heiß mit deinem Toast. Guten Appetit!',
+      },
+    },
+  },
+
+  'starter-dal-tadka': {
+    title: 'Dal Tadka aus dem Schnellkochtopf',
+    description: 'Der Alltagsklassiker für alle, die gerade kochen lernen: cremige Linsen mit einem brutzelnden Knoblauch-Kreuzkümmel-Tadka. Reicht für drei Tage Mittagessen.',
+    cuisine: 'Indisch',
+    equipment: ['Schnellkochtopf', 'Kleine Pfanne', 'Schneebesen oder Schöpfkelle'],
+    storage: 'Hält sich 3 Tage im Kühlschrank oder 2 Monate im Gefrierfach. Mit einem Schuss Wasser unter Rühren erhitzen, bis es blubbert.',
+    tags: ['vegetarisch', 'meal-prep', 'günstig', 'wohlfühlessen'],
+    ingredients: {
+      'dt-1': { name: 'Toor Dal (halbierte Straucherbsen)', substitutes: ['Masoor Dal (rote Linsen)'] },
+      'dt-2': { name: 'Wasser' },
+      'dt-3': { name: 'Kurkumapulver' },
+      'dt-4': { name: 'Salz', note: 'oder nach Geschmack' },
+      'dt-5': { name: 'Ghee oder Öl', substitutes: ['Beliebiges neutrales Öl (vegan)'] },
+      'dt-6': { name: 'Kreuzkümmelsamen' },
+      'dt-7': { name: 'Knoblauch', note: 'fein gehackt' },
+      'dt-8': { name: 'Ingwer', note: 'gerieben' },
+      'dt-9': { name: 'Zwiebel', note: 'mittelgroß, fein gehackt' },
+      'dt-10': { name: 'Tomate', note: 'mittelgroß, klein geschnitten' },
+      'dt-11': { name: 'grüne Chilischote', note: 'längs eingeschnitten' },
+      'dt-12': { name: 'Kashmiri-Chilipulver', substitutes: ['Paprikapulver, edelsüß'] },
+      'dt-13': { name: 'Koriandergrün', note: 'gehackt' },
+      'dt-14': { name: 'Zitronensaft' },
+    },
+    steps: {
+      'dt-s1': {
+        title: 'Dal waschen',
+        instruction: 'Wasche das Dal dreimal in einer Schüssel mit Wasser und reibe es dabei zwischen den Fingern, bis das Wasser fast klar bleibt.',
+        tip: 'Das Waschen entfernt Staub und überschüssige Stärke – so schäumt das Dal im Topf nicht über.',
+        narration: 'Gib das Dal in eine Schüssel mit Wasser und reib es sanft zwischen den Fingern. Gieß das Wasser ab und mach das insgesamt dreimal, bis es fast klar bleibt.',
+      },
+      'dt-s2': {
+        title: 'Im Schnellkochtopf garen',
+        instruction: 'Gib Dal, 600 ml Wasser, Kurkuma und die Hälfte des Salzes in den Schnellkochtopf. Verschließe den Deckel und gare alles bei mittlerer bis starker Hitze, bis der Topf 3-mal gepfiffen hat. Schalte dann den Herd aus und lass den Druck von selbst entweichen.',
+        tip: 'Öffne den Deckel nie mit Gewalt – erst, wenn das Ventil ganz abgesunken ist.',
+        doneCue: 'Das Dal ist ganz weich und lässt sich mit einem Löffel zerdrücken.',
+        glossary: [GLOSSARY.whistle],
+        narration: 'Gib das Dal mit sechshundert Millilitern Wasser, der Kurkuma und der Hälfte des Salzes in den Schnellkochtopf. Verschließ den Deckel und lass den Topf dreimal pfeifen. Danach schaltest du den Herd aus und lässt den Druck von selbst entweichen.',
+      },
+      'dt-s3': {
+        title: 'Glatt rühren',
+        instruction: 'Öffne den Topf und schlage das Dal mit dem Schneebesen cremig. Gib nach und nach heißes Wasser dazu, bis es sich wie eine dicke Suppe gießen lässt.',
+        narration: 'Öffne jetzt den Topf und rühr das Dal mit dem Schneebesen schön cremig. Gib nach und nach etwas heißes Wasser dazu, bis es fließt wie eine dicke Suppe.',
+      },
+      'dt-s4': {
+        title: 'Tadka zubereiten',
+        instruction: 'Erhitze das Ghee in einer kleinen Pfanne bei mittlerer Hitze und gib den Kreuzkümmel hinein. Sobald er brutzelt, brätst du Knoblauch, Ingwer und Chili 30 Sekunden mit. Gib dann die Zwiebel dazu, bis sie goldbraun ist, und anschließend Tomate und Chilipulver, bis alles weich ist.',
+        tip: 'Wird der Kreuzkümmel schwarz, ist er verbrannt und schmeckt bitter – dann wisch die Pfanne aus und fang von vorn an.',
+        glossary: [GLOSSARY.tadka],
+        narration: 'Jetzt kommt das Tadka. Erhitz das Ghee und gib den Kreuzkümmel hinein. Sobald er brutzelt, kommen Knoblauch, Ingwer und Chili dazu. Dann brätst du die Zwiebel goldbraun an und gibst zum Schluss die Tomate mit dem Chilipulver dazu, bis alles weich ist.',
+      },
+      'dt-s5': {
+        title: 'Köcheln und verfeinern',
+        instruction: 'Gieß das Tadka in das Dal, gib das restliche Salz dazu und lass alles 2 bis 3 Minuten köcheln. Verfeinere es zum Schluss mit Koriander und einem Spritzer Zitrone.',
+        doneCue: 'Das Dal glänzt, zeigt rote Fettaugen und überzieht den Rücken eines Löffels.',
+        glossary: [GLOSSARY.simmer],
+        narration: 'Gieß das brutzelnde Tadka ins Dal, gib das restliche Salz dazu und lass alles zwei bis drei Minuten köcheln. Zum Schluss kommen Koriander und ein Spritzer Zitrone dazu.',
+      },
+    },
+  },
+
+  'starter-chicken-bowl': {
+    title: 'Knoblauch-Pfeffer-Hähnchen-Bowl',
+    description: 'Ein Klassiker für die Sporttasche: saftiges Pfefferhähnchen und knackiges Gemüse, mit Reis durchgeschwenkt. 40 g Protein pro Bowl – und perfekt zum Mitnehmen für morgen.',
+    cuisine: 'Indisch-chinesisch',
+    equipment: ['Große Pfanne oder Wok', 'Pfannenwender', 'Schneidebrett'],
+    storage: 'Hält sich 2 Tage im Kühlschrank. Zum Aufwärmen erhitzen, bis es durch und durch dampfend heiß ist.',
+    tags: ['proteinreich', 'meal-prep', '20-minuten', 'pfannengericht'],
+    ingredients: {
+      'cb-1': { name: 'Hähnchenbrust', note: 'in mundgerechten Stücken', substitutes: ['Paneer-Würfel', 'Naturtofu'] },
+      'cb-2': { name: 'gekochter Reis', note: 'Reis vom Vortag ist perfekt', substitutes: ['gekochte Quinoa'] },
+      'cb-3': { name: 'Öl' },
+      'cb-4': { name: 'Knoblauch', note: 'fein gehackt' },
+      'cb-5': { name: 'schwarzer Pfeffer', note: 'frisch zerstoßen' },
+      'cb-6': { name: 'Sojasauce' },
+      'cb-7': { name: 'Paprikaschote', note: 'in Streifen geschnitten' },
+      'cb-8': { name: 'Zwiebel', note: 'mittelgroß, in Streifen geschnitten' },
+      'cb-9': { name: 'Frühlingszwiebeln', note: 'in Ringe geschnitten' },
+      'cb-10': { name: 'Zitronensaft' },
+      'cb-11': { name: 'Salz', note: 'nach Geschmack' },
+    },
+    steps: {
+      'cb-s1': {
+        title: 'Hähnchen würzen',
+        instruction: 'Vermische das Hähnchen mit der Sojasauce, der Hälfte des schwarzen Pfeffers und einer Prise Salz. Schneide Zwiebel und Paprika in Streifen und hacke den Knoblauch.',
+        tip: 'Tupfe das Hähnchen vorher mit Küchenpapier trocken – so wird es braun, statt im eigenen Saft zu dünsten.',
+        narration: 'Vermisch das Hähnchen mit der Sojasauce, der Hälfte des Pfeffers und einer Prise Salz. Während es zieht, schneidest du Zwiebel und Paprika in Streifen und hackst den Knoblauch.',
+      },
+      'cb-s2': {
+        title: 'Hähnchen scharf anbraten',
+        instruction: 'Erhitze das Öl in einer großen Pfanne bei starker Hitze. Leg das Hähnchen in einer Schicht hinein und lass es 2 Minuten unberührt. Rühre dann um und brate es, bis es goldbraun und durchgegart ist.',
+        tip: 'Füll die Pfanne nicht zu voll – brate das Hähnchen notfalls in zwei Portionen.',
+        doneCue: 'Auch das dickste Stück ist innen nicht mehr rosa, und der austretende Saft ist klar.',
+        glossary: [GLOSSARY.sear],
+        narration: 'Erhitz das Öl in der Pfanne, bis es richtig heiß ist, und leg das Hähnchen in einer einzigen Schicht hinein. Lass es zwei Minuten in Ruhe, damit es schön braun wird. Danach rührst du um, bis es goldbraun und ganz durchgegart ist.',
+      },
+      'cb-s3': {
+        title: 'Knoblauch und Gemüse',
+        instruction: 'Stell die Hitze auf mittlere Stufe. Brate den Knoblauch 30 Sekunden an, gib dann Zwiebel und Paprika dazu und brate alles unter Rühren, bis das Gemüse gerade gar, aber noch knackig ist.',
+        glossary: [GLOSSARY.stirFry],
+        narration: 'Stell die Hitze auf mittlere Stufe. Brat den Knoblauch eine halbe Minute an, gib dann Zwiebel und Paprika dazu und brat alles unter Rühren, bis das Gemüse zart ist, aber noch ein bisschen Biss hat.',
+      },
+      'cb-s4': {
+        title: 'Reis untermischen',
+        instruction: 'Gib den Reis dazu, lockere Klumpen auf und schwenke alles, bis es dampfend heiß ist. Würze mit dem restlichen Pfeffer und Salz nach Geschmack.',
+        narration: 'Gib jetzt den Reis dazu, lockere alle Klumpen auf und schwenk alles gut durch, bis es dampfend heiß ist. Würz mit dem restlichen Pfeffer und etwas Salz.',
+      },
+      'cb-s5': {
+        title: 'Anrichten',
+        instruction: 'Beträufle alles mit Zitronensaft, streu die Frühlingszwiebeln darüber und serviere. Pack die Hälfte fürs Mittagessen morgen ein.',
+        narration: 'Beträufle alles mit Zitronensaft, streu die Frühlingszwiebeln darüber, und schon kannst du servieren. Pack die Hälfte fürs Mittagessen morgen ein.',
+      },
+    },
+  },
+
+  'starter-peanut-noodles': {
+    title: 'Cremige Erdnussnudeln in 15 Minuten',
+    description: 'Seidige Erdnuss-Limetten-Sauce, bissfeste Nudeln und Edamame als pflanzlicher Proteinkick. Du brauchst nur einen Topf und eine Schüssel.',
+    cuisine: 'Asiatisch',
+    equipment: ['Großer Topf', 'Sieb', 'Schüssel', 'Schneebesen oder Gabel'],
+    storage: 'Frisch am besten. Reste halten sich 1 Tag im Kühlschrank – mit etwas warmem Wasser auflockern und kalt oder warm essen.',
+    tags: ['vegan', '15-minuten', 'one-pot', 'proteinreich'],
+    ingredients: {
+      'pn-1': { name: 'getrocknete Weizennudeln', substitutes: ['Spaghetti', 'Hakka-Nudeln'] },
+      'pn-2': { name: 'TK-Edamame', substitutes: ['TK-Erbsen'] },
+      'pn-3': { name: 'Erdnussbutter', note: 'cremig oder stückig' },
+      'pn-4': { name: 'Sojasauce' },
+      'pn-5': { name: 'Limetten- oder Zitronensaft' },
+      'pn-6': { name: 'Zucker oder Ahornsirup' },
+      'pn-7': { name: 'Knoblauch', note: 'gerieben' },
+      'pn-8': { name: 'Chiliflocken' },
+      'pn-9': { name: 'Salatgurke', note: 'in dünne Scheiben geschnitten' },
+      'pn-10': { name: 'Frühlingszwiebeln', note: 'in Ringe geschnitten' },
+      'pn-11': { name: 'geröstete Erdnüsse', note: 'gehackt' },
+    },
+    steps: {
+      'pn-s1': {
+        title: 'Wasser aufkochen',
+        instruction: 'Bring einen großen Topf Wasser mit einer Prise Salz zum Kochen.',
+        tip: 'Leg einen Deckel auf den Topf – so kocht das Wasser viel schneller.',
+        narration: 'Füll einen großen Topf mit Wasser, gib eine Prise Salz dazu und bring alles sprudelnd zum Kochen.',
+      },
+      'pn-s2': {
+        title: 'Nudeln und Edamame kochen',
+        instruction: 'Gib die Nudeln hinein und koche sie nach Packungsanleitung; die Edamame kommen für die letzten 2 Minuten dazu. Heb eine halbe Tasse Kochwasser auf und gieß dann ab.',
+        doneCue: 'Die Nudeln sind weich, haben aber noch etwas Biss.',
+        narration: 'Gib die Nudeln ins Wasser und koch sie so lange, wie es auf der Packung steht. In den letzten zwei Minuten kommen die Edamame dazu. Bevor du abgießt, heb eine halbe Tasse vom Kochwasser auf.',
+      },
+      'pn-s3': {
+        title: 'Sauce anrühren',
+        instruction: 'Während die Nudeln kochen, verrühre Erdnussbutter, Sojasauce, Limettensaft, Zucker, Knoblauch und Chiliflocken mit 3 bis 4 Esslöffeln heißem Wasser, bis alles glatt ist.',
+        tip: 'Anfangs sieht die Sauce geronnen aus – bleib einfach dran und rühr kräftig, dann wird sie seidig.',
+        narration: 'Während die Nudeln kochen, verrührst du Erdnussbutter, Sojasauce, Limettensaft, Zucker, Knoblauch und Chiliflocken mit ein paar Löffeln heißem Wasser, bis alles schön glatt ist.',
+      },
+      'pn-s4': {
+        title: 'Durchschwenken',
+        instruction: 'Schwenke die heißen Nudeln und Edamame in der Sauce und gib nach und nach einen Schuss vom aufgehobenen Kochwasser dazu, bis alles glänzend und cremig ist.',
+        narration: 'Schwenk die heißen Nudeln und Edamame in der Sauce und gib immer wieder einen Schuss vom aufgehobenen Wasser dazu, bis alles glänzt und schön cremig ist.',
+      },
+      'pn-s5': {
+        title: 'Garnieren und servieren',
+        instruction: 'Verteile alles auf Schüsseln und garniere mit Gurke, Frühlingszwiebeln und gehackten Erdnüssen. Am besten sofort essen.',
+        narration: 'Verteil alles auf Schüsseln und gib Gurke, Frühlingszwiebeln und gehackte Erdnüsse darüber. Am besten isst du sofort, solange es noch warm ist.',
+      },
+    },
+  },
+
+  'starter-overnight-oats': {
+    title: 'Proteinreiche Overnight Oats',
+    description: 'Heute Abend zwei Minuten, morgen ist das Frühstück erledigt. Cremig, bananensüß und 30 g Protein – ganz ohne Kochen.',
+    cuisine: null,
+    equipment: ['Schraubglas oder Lunchbox', 'Löffel'],
+    storage: 'Hält sich 3 Tage im Kühlschrank. Die Banane erst kurz vor dem Essen dazugeben.',
+    tags: ['ohne-kochen', 'meal-prep', 'proteinreich', 'vegetarisch'],
+    ingredients: {
+      'oo-1': { name: 'Haferflocken' },
+      'oo-2': { name: 'Milch', substitutes: ['Sojamilch', 'Hafermilch'] },
+      'oo-3': { name: 'griechischer Joghurt', note: 'natur', substitutes: ['abgetropfter Joghurt'] },
+      'oo-4': { name: 'Chiasamen' },
+      'oo-5': { name: 'Erdnussbutter' },
+      'oo-6': { name: 'Banane', note: 'klein, in Scheiben' },
+      'oo-7': { name: 'Honig' },
+      'oo-8': { name: 'Zimt' },
+    },
+    steps: {
+      'oo-s1': {
+        title: 'Grundmischung anrühren',
+        instruction: 'Verrühre Haferflocken, Chiasamen, Milch, Joghurt und Zimt in einem Glas, bis keine trockenen Flocken mehr übrig sind.',
+        tip: 'Mach sonntags gleich drei Gläser – dann hast du bis Mittwoch jeden Morgen ein Frühstück zum Mitnehmen.',
+        narration: 'Verrühr in einem Glas die Haferflocken, die Chiasamen, die Milch, den Joghurt und den Zimt, bis keine trockenen Flocken mehr übrig sind.',
+      },
+      'oo-s2': {
+        title: 'Über Nacht kühlen',
+        instruction: 'Verschließe das Glas und stell es mindestens 6 Stunden oder über Nacht in den Kühlschrank.',
+        doneCue: 'Die Flocken sind weich, und die Masse ist dick und lässt sich gut löffeln.',
+        narration: 'Setz den Deckel drauf und stell das Glas für mindestens sechs Stunden in den Kühlschrank, am besten über Nacht.',
+      },
+      'oo-s3': {
+        title: 'Garnieren und genießen',
+        instruction: 'Rühre einmal um, lockere die Masse mit einem Schuss Milch auf, falls sie zu dick ist, und gib dann Bananenscheiben, Erdnussbutter und etwas Honig darauf.',
+        narration: 'Rühr einmal gut um. Wenn es zu dick ist, lockerst du es mit einem Schuss Milch auf. Dann kommen Banane, Erdnussbutter und ein bisschen Honig obendrauf.',
+      },
+    },
+  },
+};
 
 export default translations;

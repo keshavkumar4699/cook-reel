@@ -1,0 +1,88 @@
+import { plural } from '../../catalog';
+
+/** Me tab: account, credits and settings. */
+export default {
+  cook: 'Kochfan',
+  guest: 'Gast',
+  signedIn: 'Angemeldet',
+  recipesOnPhone: plural({ one: '{count} Rezept auf diesem Handy', other: '{count} Rezepte auf diesem Handy' }),
+  credits: {
+    title: 'Credits',
+    starter: 'Starter',
+    refill: 'Plan-Credits werden am {date} auf {allowance} aufgefüllt',
+    extra: plural({ one: '{count} Extra-Credit', other: '{count} Extra-Credits' }),
+    starterNote: 'Einmalige Start-Credits. Mit einem Abo bekommst du jeden Monat neue.',
+    more: 'Mehr Credits holen',
+    plans: 'Pläne ansehen',
+  },
+  guestCard: {
+    title: 'Chef und YouTube-Reels freischalten',
+    body: 'Erstelle ein kostenloses Konto, um KI-Funktionen zu nutzen. Deine Rezepte bleiben so oder so auf diesem Handy.',
+    cta: 'Kostenloses Konto erstellen',
+  },
+  groups: {
+    cooking: 'Kochen',
+    voice: 'Stimme und Vorlesen',
+    appearance: 'Darstellung',
+    language: 'Sprache',
+    privacy: 'Datenschutz',
+    purchases: 'Käufe',
+    account: 'Konto',
+  },
+  rows: {
+    profile: 'Kochprofil',
+    profileEmpty: 'Ernährung, Küche, Ziele',
+    voiceControl: 'Sprachsteuerung',
+    voiceControlDetail: 'Sag beim Kochen „weiter“, „zurück“, „Pause“',
+    readAloud: 'Schritte vorlesen',
+    readAloudDetail: 'Bei YouTube Shorts immer an',
+    language: 'App-Sprache',
+    sharing: 'Chef darf von meinen Importen lernen',
+    sharingDetail: 'Rezepte aus Videos, die du importierst, verbessern die Vorschläge für alle. Wenn du das ausschaltest, werden sie wieder entfernt.',
+    plans: 'Pläne und Credits',
+    restore: 'Käufe wiederherstellen',
+    manage: 'Abo verwalten',
+    signOut: 'Abmelden',
+    deleteAccount: 'Konto löschen',
+  },
+  profileSummary: {
+    household: plural({ one: 'Für {count} Person', other: 'Für {count} Personen' }),
+    appliances: plural({ one: '{count} Gerät', other: '{count} Geräte' }),
+  },
+  voice: {
+    natural: 'Natürliche Stimme',
+    naturalDetail: 'Chef klingt wie ein echter Mensch – in jeder Sprache. Braucht eine Internetverbindung.',
+    naturalGuest: 'Erstelle ein kostenloses Konto, um die natürliche Stimme von Chef zu hören. Bis dahin liest die Stimme deines Handys die Schritte vor.',
+    choose: 'Stimme von Chef',
+    voices: {
+      warm: 'Warm',
+      friendly: 'Freundlich',
+      gentle: 'Sanft',
+      easygoing: 'Locker',
+    },
+    playSample: 'Hörprobe von {voice} abspielen',
+    stopSample: 'Hörprobe stoppen',
+    sample: 'Hallo! Ich bin Chef. Lass uns zusammen etwas Leckeres kochen – ich begleite dich durch jeden Schritt.',
+    preparing: 'Die Stimme von Chef wird vorbereitet …',
+    pace: 'Vorlesetempo',
+    paces: {
+      relaxed: 'Gemütlich',
+      normal: 'Normal',
+      brisk: 'Zügig',
+    },
+  },
+  appearance: {
+    system: 'System',
+    light: 'Hell',
+    dark: 'Dunkel',
+  },
+  deleteConfirm: {
+    title: 'Konto löschen?',
+    message: 'Deine Credits, die Verknüpfung zu deinem Abo und deine Beiträge werden endgültig entfernt. Die Rezepte auf diesem Handy bleiben erhalten. Kündige ein laufendes Abo bitte auch in den Einstellungen deines App-Stores.',
+    confirm: 'Konto löschen',
+  },
+  toasts: {
+    deleted: 'Dein Konto wurde gelöscht',
+  },
+  footer: 'CookReel {version} · Gemacht für hungrige Menschen',
+} as const;
