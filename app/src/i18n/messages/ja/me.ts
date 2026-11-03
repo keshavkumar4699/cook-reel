@@ -56,7 +56,7 @@ export default {
     choose: 'シェフの声',
     voices: {
       warm: 'あたたかい',
-      friendly: '親しみやすい',
+      friendly: 'ほがらか',
       gentle: 'やさしい',
       easygoing: 'おおらか',
     },

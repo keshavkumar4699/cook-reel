@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Platform, StyleSheet, Switch, View } from 'react-native';
 import { radius, useTheme } from '@/theme';
 import { Icon, type IconName } from './Icon';
 import { PressableScale } from './PressableScale';
@@ -66,22 +66,26 @@ export function SettingsRow({
 /** The app's switch colours on every platform. */
 export function SettingsSwitch({ value, onValueChange, label }: { value: boolean; onValueChange: (value: boolean) => void; label?: string }) {
   const { colors } = useTheme();
+  // react-native-web draws the thumb outside the track in right-to-left pages; keep it left-to-right there.
   return (
-    <Switch
-      value={value}
-      onValueChange={onValueChange}
-      accessibilityLabel={label}
-      trackColor={{ true: colors.primary, false: colors.borderStrong }}
-      thumbColor="#FFFFFF"
-      ios_backgroundColor={colors.borderStrong}
-      // react-native-web reads these instead of thumbColor/trackColor.
-      {...({ activeThumbColor: '#FFFFFF', activeTrackColor: colors.primary } as object)}
-    />
+    <View style={Platform.OS === 'web' ? styles.ltr : undefined}>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        accessibilityLabel={label}
+        trackColor={{ true: colors.primary, false: colors.borderStrong }}
+        thumbColor="#FFFFFF"
+        ios_backgroundColor={colors.borderStrong}
+        // react-native-web reads these instead of thumbColor/trackColor.
+        {...({ activeThumbColor: '#FFFFFF', activeTrackColor: colors.primary } as object)}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   title: { marginBottom: 8, marginStart: 4 },
+  ltr: { direction: 'ltr' },
   group: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12, minHeight: 58 },
   rowIcon: { width: 32, height: 32, borderRadius: radius.xs, alignItems: 'center', justifyContent: 'center' },

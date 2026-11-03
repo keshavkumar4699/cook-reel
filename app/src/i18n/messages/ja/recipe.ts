@@ -79,7 +79,7 @@ export default {
   },
   cta: {
     experiment: 'アレンジ',
-    startCooking: '料理をはじめる',
+    startCooking: '作りはじめる',
     narratedClips: 'ナレーション付きクリップ',
     videoClips: '動画クリップ',
     voiceGuided: '音声ガイド付き',

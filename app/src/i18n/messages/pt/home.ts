@@ -19,8 +19,8 @@ export default {
   actions: {
     youtube: { title: 'Do YouTube', body: 'Vídeo → reels de passos' },
     builder: { title: 'Criar com o Chef', body: 'Descreva qualquer prato' },
-    fridge: { title: 'Da minha geladeira', body: 'Use o que você tem' },
-    manual: { title: 'Escrever a minha', body: 'Receitas de família' },
+    fridge: { title: 'Na geladeira', body: 'Use o que você tem' },
+    manual: { title: 'Minha receita', body: 'Receitas de família' },
   },
   upsell: {
     badge: 'Créditos grátis',

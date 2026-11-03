@@ -4,7 +4,7 @@ import { plural } from '../../catalog';
 export default {
   welcome: {
     heroLine1: 'どんな料理も、',
-    heroLine2: 'ひとつずつ、かんたんに。',
+    heroLine2: '一歩ずつ。',
     body: 'YouTubeのレシピをハンズフリーのステップリールに。シェフなら、あなたのキッチン・目標・予算に合った料理を考えてくれます。',
     guest: 'アカウントなしで続ける',
     note: 'レシピの保存と調理は無料です。AI機能にはアカウントが必要です。新規アカウントには最初から無料クレジットが付きます。',
