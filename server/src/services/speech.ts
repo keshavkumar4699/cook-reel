@@ -63,7 +63,7 @@ const ACCENT: Partial<Record<AppLanguage, string>> = {
 /** Delivery direction: a warm home cook talking a friend through the recipe — never a robotic announcer. */
 export function speechStyle(language: AppLanguage, pace: SpeechPace): string {
   const accent = ACCENT[language] ? ` ${ACCENT[language]}` : '';
-  return `Warm, friendly and encouraging, like a home cook talking a friend through a recipe in their own kitchen${accent}, ${PACE[pace]}, with natural pauses between sentences. Relaxed and human, never robotic or salesy.`;
+  return `Warm, friendly and encouraging, like a home cook talking a friend through a recipe in their own kitchen${accent}, ${PACE[pace]}, with natural pauses between sentences. Relaxed and human, never robotic or salesy. Say abbreviated measures in full, the way a cook would ("tbsp" as "tablespoons").`;
 }
 
 /** Rough speaking time, used to reserve fair-use budget before synthesis and to sanity-check the audio. */
