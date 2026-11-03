@@ -1,0 +1,78 @@
+import { plural } from '../../catalog';
+
+export default {
+  notFound: 'Ricetta non trovata',
+  voiceState: {
+    off: 'Voce spenta',
+    starting: 'Avvio…',
+    listening: 'In ascolto',
+    paused: 'In pausa',
+    denied: 'Mic bloccato',
+    unavailable: 'Senza voce',
+  },
+  top: {
+    close: 'Chiudi la modalità cucina',
+    stepOf: 'Passaggio {current} di {total}',
+    voiceControl: 'Controllo vocale: {state}. Tocca per attivarlo o disattivarlo, tieni premuto per i comandi.',
+    ingredients: 'Ingredienti',
+  },
+  heard: '«{text}»',
+  video: {
+    allDone: 'Tutti i passaggi completati',
+    noClip: 'Nessuna clip per questo passaggio: segui il testo qui sotto',
+    looping: '▶ In loop {start}–{end}',
+    aiNarration: 'Voce IA',
+    embedBlocked: 'Il creator ha disattivato la riproduzione in altre app.',
+    unavailable: 'Al momento non è possibile riprodurre questo video.',
+    playerTitle: 'Video della ricetta',
+  },
+  done: {
+    title: 'Ce l’hai fatta!',
+    subtitle: 'In tavola: {title}. Com’è andata?',
+    stars: plural({ one: '{count} stella', other: '{count} stelle' }),
+    finish: 'Ho finito',
+    toast: 'Ottimo lavoro, chef! 🎉',
+  },
+  timer: {
+    started: 'Timer avviato · {time}',
+    doneToast: '⏰ Tempo scaduto: {label}',
+    noTimer: 'Questo passaggio non ha un timer',
+    timesUp: 'Tempo scaduto!',
+    pause: 'Metti in pausa il timer',
+    resume: 'Riprendi il timer',
+    cancel: 'Annulla il timer',
+  },
+  controls: {
+    previous: 'Passaggio precedente',
+    replay: 'Riguarda questo passaggio',
+    play: 'Riproduci',
+    pause: 'Pausa',
+    mute: 'Disattiva l’audio del video',
+    unmute: 'Attiva l’audio del video',
+    readAloud: 'Leggi il passaggio ad alta voce',
+    stopReading: 'Interrompi la lettura',
+    next: 'Passaggio successivo',
+  },
+  ingredients: {
+    title: 'Ingredienti',
+    forServings: plural({ one: 'Per {count} porzione', other: 'Per {count} porzioni' }),
+    readAloud: 'Leggimeli',
+  },
+  narration: {
+    preparing: 'Preparo la voce di Chef…',
+  },
+  help: {
+    title: 'Comandi vocali',
+    subtitle: 'Parla normalmente: le frasi brevi funzionano meglio',
+    micBlocked: 'L’accesso al microfono è disattivato. Attivalo nelle Impostazioni per usare il controllo vocale.',
+  },
+  step: {
+    startTimerLabel: plural({ one: 'Avvia un timer di {count} minuto', other: 'Avvia un timer di {count} minuti' }),
+    startTimer: 'Avvia timer {time}',
+    timeLeft: 'Mancano {time}',
+    timerDone: 'Tempo scaduto',
+    whatDoesTermMean: 'Cosa significa {term}?',
+    glossaryTerm: '{term}:',
+    doneWhen: 'Pronto quando',
+  },
+} as const;

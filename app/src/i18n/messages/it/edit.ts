@@ -1,0 +1,62 @@
+import { plural } from '../../catalog';
+
+export default {
+  titleEdit: 'Modifica ricetta',
+  titleNew: 'Nuova ricetta',
+  fields: {
+    name: 'Nome della ricetta',
+    namePlaceholder: 'Le lasagne della nonna',
+    description: 'Descrizione',
+    descriptionPlaceholder: 'Cosa la rende speciale?',
+    servings: 'Porzioni',
+    prep: 'Prep. (min)',
+    cook: 'Cottura (min)',
+    difficulty: 'Difficoltà',
+    tags: 'Tag',
+    tagsPlaceholder: 'veloce, proteica, coccola',
+  },
+  ingredients: {
+    title: 'Ingredienti',
+    quantity: 'Q.tà',
+    unit: 'Unità',
+    name: 'Ingrediente',
+    remove: 'Rimuovi ingrediente',
+    add: 'Aggiungi ingrediente',
+  },
+  steps: {
+    title: 'Passaggi',
+    placeholder: 'Cosa fare in questo passaggio',
+    timer: 'Timer (min)',
+    keepsClip: 'Mantiene la sua clip video',
+    remove: 'Rimuovi passaggio',
+    add: 'Aggiungi passaggio',
+  },
+  defaultStepTitle: 'Passaggio {n}',
+  nutrition: {
+    title: 'Valori per porzione',
+    hint: 'Facoltativo: inserisci quello che sai.',
+    kcal: 'kcal',
+    protein: 'Proteine g',
+    carbs: 'Carboidrati g',
+    fat: 'Grassi g',
+  },
+  errors: {
+    noTitle: 'Dai un nome alla tua ricetta.',
+    noIngredients: 'Aggiungi almeno un ingrediente.',
+    noSteps: 'Aggiungi almeno un passaggio.',
+  },
+  saveChanges: 'Salva modifiche',
+  saveRecipe: 'Salva ricetta',
+  toasts: {
+    updated: 'Ricetta aggiornata',
+    saved: 'Ricetta salvata nel tuo ricettario',
+  },
+  paste: {
+    open: 'Incolla una lista',
+    title: 'Incolla gli ingredienti',
+    subtitle: 'Uno per riga: «2 tazze di riso», «½ cucchiaino di sale», «200 g di paneer a cubetti»',
+    placeholder: '2 tazze di riso basmati\n1 cucchiaio di ghee\n½ cucchiaino di curcuma',
+    add: 'Aggiungi questi',
+    added: plural({ one: '{count} ingrediente aggiunto', other: '{count} ingredienti aggiunti' }),
+  },
+} as const;
