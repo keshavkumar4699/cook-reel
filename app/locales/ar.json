@@ -1,4 +1,4 @@
 {
-  "NSMicrophoneUsageDescription": "CookReel listens for \"next\", \"back\" and \"stop\" so you can cook hands-free.",
-  "NSSpeechRecognitionUsageDescription": "CookReel turns your voice commands into actions while you cook."
+  "NSMicrophoneUsageDescription": "يستمع CookReel إلى أوامر مثل «التالي» و«السابق» و«توقف» و«شغّل المؤقت» ليصبح الطبخ ممكنًا دون استخدام اليدين.",
+  "NSSpeechRecognitionUsageDescription": "يحوّل CookReel أوامرك الصوتية إلى إجراءات أثناء الطبخ."
 }

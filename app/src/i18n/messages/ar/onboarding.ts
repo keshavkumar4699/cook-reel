@@ -1,0 +1,107 @@
+import { plural } from '../../catalog';
+
+export default {
+  steps: {
+    personas: { title: 'ما الذي أتى بك\nإلى CookReel؟', subtitle: 'يمكن اختيار أكثر من إجابة — وسنرتّب الشاشة الرئيسية بناءً عليها.' },
+    diet: { title: 'ما نظامك الغذائي؟', subtitle: 'لن يقترح شيف أبدًا ما لا يناسب نظامك.' },
+    kitchen: { title: 'مطبخك', subtitle: 'لن تستخدم الوصفات إلا الأدوات المتوفرة لديك فعلًا.' },
+    goals: { title: 'أنت وأهدافك', subtitle: 'لضبط الحصص والعناصر الغذائية وميزانية البقالة.' },
+  },
+  hello: 'أهلًا {name} 👋',
+  skipSetup: 'تخطي الإعداد',
+  start: 'لنبدأ الطبخ',
+
+  personas: {
+    saver: { title: 'حفظ وصفات YouTube', body: 'الاحتفاظ بما أجده لأطبخه لاحقًا' },
+    quick: { title: 'وجبات سريعة في زحمة اليوم', body: 'بين العمل والدراسة والنادي' },
+    fridge: { title: 'الطبخ بما لديّ', body: 'الاستفادة مما في الثلاجة وتقليل الهدر' },
+    creator: { title: 'الابتكار والتجربة', body: 'أطباق جديدة ولمسات مبتكرة' },
+    fitness: { title: 'أكل يناسب أهدافي', body: 'البروتين والسعرات والعناصر الغذائية' },
+    learner: { title: 'تعلّم الطبخ', body: 'خطوة بخطوة، من الأساسيات' },
+  },
+  groups: {
+    diet: 'النظام الغذائي',
+    allergies: 'الحساسية',
+    spice: 'مستوى الحرارة',
+    equipment: 'لديّ…',
+    time: 'الوقت المتاح للطبخ عادةً',
+    skill: 'مهارة الطبخ',
+    household: 'لمن أطبخ عادةً',
+    goal: 'الهدف',
+    protein: 'هدف البروتين اليومي',
+    budget: 'ميزانية البقالة',
+  },
+  diets: {
+    vegetarian: 'نباتي',
+    eggetarian: 'نباتي مع البيض',
+    'non-vegetarian': 'غير نباتي',
+    vegan: 'نباتي صرف',
+    pescatarian: 'نباتي مع السمك',
+  },
+  allergies: {
+    peanuts: 'فول سوداني',
+    treeNuts: 'مكسرات',
+    dairy: 'ألبان',
+    gluten: 'غلوتين',
+    eggs: 'بيض',
+    soy: 'صويا',
+    shellfish: 'قشريات بحرية',
+    sesame: 'سمسم',
+  },
+  spice: {
+    mild: 'خفيف',
+    medium: 'متوسط',
+    hot: 'حار',
+  },
+  equipment: {
+    gasStove: 'موقد غاز',
+    induction: 'موقد حثّي',
+    microwave: 'ميكروويف',
+    oven: 'فرن',
+    airFryer: 'قلاية هوائية',
+    pressureCooker: 'قدر ضغط',
+    riceCooker: 'طنجرة أرز',
+    kettle: 'غلاية كهربائية',
+    blender: 'خلاط',
+    toaster: 'محمصة خبز',
+  },
+  time: {
+    minutes: '{n} د',
+    orMore: '{n}+ د',
+  },
+  skills: {
+    new: { title: 'أول مرة في المطبخ', body: 'شرح كل شيء من فضلك' },
+    basic: { title: 'أعرف الأساسيات', body: 'شوربة عدس، بيض، معكرونة — هذا المستوى' },
+    confident: { title: 'خبرة جيدة في الطبخ', body: 'لا حاجة إلى الشرح المفصّل' },
+  },
+  household: {
+    justMe: 'لي وحدي',
+    people: plural({ zero: 'لا أحد', one: 'شخص واحد', two: 'شخصان', few: '{count} أشخاص', many: '{count} شخصًا', other: '{count} شخص' }),
+  },
+  goals: {
+    build_muscle: 'بناء العضلات',
+    lose_fat: 'خسارة الدهون',
+    maintain: 'الحفاظ على الوزن',
+    eat_healthy: 'أكل صحي أكثر',
+    none: 'دون هدف',
+  },
+  proteinGrams: '{n} غ',
+  budgets: {
+    tight: 'محدودة',
+    moderate: 'متوسطة',
+    flexible: 'مرنة',
+  },
+
+  profile: {
+    title: 'ملف الطبخ',
+    intro: 'يعتمد شيف على هذه المعلومات في كل وصفة: نظامك الغذائي، وأدوات مطبخك، وأهدافك.',
+    sections: {
+      personas: 'ما الذي أتى بك',
+      diet: 'نظامك الغذائي',
+      kitchen: 'مطبخك',
+      goals: 'أنت وأهدافك',
+    },
+    save: 'حفظ الملف',
+    saved: 'حُفظ ملف الطبخ',
+  },
+} as const;

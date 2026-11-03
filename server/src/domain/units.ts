@@ -28,12 +28,12 @@ const ALIASES: Record<UnitCode, string[]> = {
   clove: ['clove', 'cloves', 'diente', 'dientes', 'gousse', 'gousses', 'zehe', 'zehen', 'dente', 'dentes', 'spicchio', 'spicchi', 'فص', 'فصوص', '片', 'かけ'],
   slice: ['slice', 'slices', 'rebanada', 'rebanadas', 'loncha', 'lonchas', 'rodaja', 'rodajas', 'tranche', 'tranches', 'scheibe', 'scheiben', 'fatia', 'fatias', 'fetta', 'fette', 'شريحة', 'شرائح', '枚'],
   can: ['can', 'cans', 'tin', 'tins', 'lata', 'latas', 'boîte', 'boîtes', 'dose', 'dosen', 'lattina', 'lattine', 'barattolo', 'علبة', 'علب', '缶'],
-  bunch: ['bunch', 'bunches', 'manojo', 'manojos', 'botte', 'bottes', 'bouquet', 'bund', 'maço', 'maços', 'mazzo', 'mazzi', 'mazzetto', 'حزمة', 'باقة', '束', '把'],
-  pinch: ['pinch', 'pinches', 'pizca', 'pizcas', 'pincée', 'pincées', 'prise', 'prisen', 'pitada', 'pitadas', 'pizzico', 'pizzichi', 'رشة', 'つまみ', 'ひとつまみ'],
-  handful: ['handful', 'handfuls', 'puñado', 'puñados', 'poignée', 'poignées', 'handvoll', 'punhado', 'punhados', 'manciata', 'manciate', 'حفنة', 'つかみ', 'ひとつかみ'],
+  bunch: ['bunch', 'bunches', 'manojo', 'manojos', 'botte', 'bottes', 'bouquet', 'bund', 'maço', 'maços', 'mazzo', 'mazzi', 'mazzetto', 'حزمة', 'حزم', 'باقة', '束', '把'],
+  pinch: ['pinch', 'pinches', 'pizca', 'pizcas', 'pincée', 'pincées', 'prise', 'prisen', 'pitada', 'pitadas', 'pizzico', 'pizzichi', 'رشة', 'رشات', 'つまみ', 'ひとつまみ'],
+  handful: ['handful', 'handfuls', 'puñado', 'puñados', 'poignée', 'poignées', 'handvoll', 'punhado', 'punhados', 'manciata', 'manciate', 'حفنة', 'حفنات', 'つかみ', 'ひとつかみ'],
   sprig: ['sprig', 'sprigs', 'ramita', 'ramitas', 'brin', 'brins', 'zweig', 'zweige', 'raminho', 'raminhos', 'rametto', 'rametti', 'غصن', 'أغصان', '枝'],
-  stick: ['stick', 'sticks', 'rama', 'ramas', 'bâton', 'bâtons', 'stange', 'stangen', 'pau', 'paus', 'stecca', 'stecche', 'عود'],
-  packet: ['packet', 'packets', 'pack', 'packs', 'sachet', 'sachets', 'sobre', 'sobres', 'paquete', 'paquetes', 'paquet', 'paquets', 'päckchen', 'packung', 'pck', 'pacote', 'pacotes', 'sachê', 'bustina', 'bustine', 'confezione', 'كيس', 'عبوة', '袋', 'パック'],
+  stick: ['stick', 'sticks', 'rama', 'ramas', 'bâton', 'bâtons', 'stange', 'stangen', 'pau', 'paus', 'stecca', 'stecche', 'عود', 'أعواد'],
+  packet: ['packet', 'packets', 'pack', 'packs', 'sachet', 'sachets', 'sobre', 'sobres', 'paquete', 'paquetes', 'paquet', 'paquets', 'päckchen', 'packung', 'pck', 'pacote', 'pacotes', 'sachê', 'bustina', 'bustine', 'confezione', 'كيس', 'أكياس', 'عبوة', '袋', 'パック'],
 };
 
 /** Lower-cases and drops a trailing dot, so "Cucharadas." and "cucharadas" match. */
