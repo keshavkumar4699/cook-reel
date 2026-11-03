@@ -1,0 +1,88 @@
+import { plural } from '../../catalog';
+
+/** Me tab: account, credits and settings. */
+export default {
+  cook: 'ユーザー',
+  guest: 'ゲスト',
+  signedIn: 'ログイン中',
+  recipesOnPhone: plural({ other: 'この端末に{count}件のレシピ' }),
+  credits: {
+    title: 'クレジット',
+    starter: 'スターター',
+    refill: '{date}にプランのクレジットが{allowance}まで補充されます',
+    extra: plural({ other: '追加クレジット{count}' }),
+    starterNote: '1回限りのスタータークレジットです。サブスクリプションに登録すると毎月クレジットが届きます。',
+    more: 'クレジットを追加',
+    plans: 'プランを見る',
+  },
+  guestCard: {
+    title: 'シェフとYouTubeリールを使おう',
+    body: '無料アカウントを作るとAI機能が使えます。どちらの場合もレシピはこの端末に保存されたままです。',
+    cta: '無料アカウントを作成',
+  },
+  groups: {
+    cooking: '料理',
+    voice: '音声とナレーション',
+    appearance: '表示',
+    language: '言語',
+    privacy: 'プライバシー',
+    purchases: '購入',
+    account: 'アカウント',
+  },
+  rows: {
+    profile: '料理プロフィール',
+    profileEmpty: '食事制限・キッチン・目標',
+    voiceControl: '音声操作',
+    voiceControlDetail: '料理中に「次へ」「戻って」「ストップ」と話しかける',
+    readAloud: 'ステップを読み上げる',
+    readAloudDetail: 'YouTubeショートでは常にオン',
+    language: 'アプリの言語',
+    sharing: '取り込んだレシピでシェフの学習に協力',
+    sharingDetail: '取り込んだ動画のレシピは、みんなへの提案の改善に役立ちます。オフにすると提供を取り消します。',
+    plans: 'プランとクレジット',
+    restore: '購入を復元',
+    manage: 'サブスクリプションを管理',
+    signOut: 'ログアウト',
+    deleteAccount: 'アカウントを削除',
+  },
+  profileSummary: {
+    household: plural({ other: '{count}人分を料理' }),
+    appliances: plural({ other: '調理家電{count}台' }),
+  },
+  voice: {
+    natural: 'ナチュラル音声',
+    naturalDetail: 'どの言語でも、シェフが人のように自然に話します。インターネット接続が必要です。',
+    naturalGuest: '無料アカウントを作ると、シェフのナチュラル音声が聞けます。それまでは端末の音声で読み上げます。',
+    choose: 'シェフの声',
+    voices: {
+      warm: 'あたたかい',
+      friendly: '親しみやすい',
+      gentle: 'やさしい',
+      easygoing: 'おおらか',
+    },
+    playSample: '{voice}のサンプルを再生',
+    stopSample: 'サンプルを停止',
+    sample: 'こんにちは！シェフです。一緒においしいものを作りましょう。ひとつひとつ、わかりやすくご案内しますね。',
+    preparing: 'シェフの声を準備中…',
+    pace: '読み上げの速さ',
+    paces: {
+      relaxed: 'ゆっくり',
+      normal: 'ふつう',
+      brisk: 'はやめ',
+    },
+  },
+  appearance: {
+    system: 'システム設定',
+    light: 'ライト',
+    dark: 'ダーク',
+  },
+  deleteConfirm: {
+    title: 'アカウントを削除しますか？',
+    message: 'クレジット、サブスクリプションとの連携、提供したデータは完全に削除されます。この端末のレシピは残ります。サブスクリプションはアプリストアの設定から解約してください。',
+    confirm: 'アカウントを削除',
+  },
+  toasts: {
+    deleted: 'アカウントを削除しました',
+  },
+  footer: 'CookReel {version} · お腹をすかせたみんなのために',
+} as const;
