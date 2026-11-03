@@ -6,6 +6,7 @@ reels and lets you design new dishes with an AI chef that knows your kitchen, yo
 ![Welcome, home, recipe, cook mode and YouTube import](docs/screenshots/showcase-1.jpg)
 ![AI builder, experiments, voice control, meal plan and pricing](docs/screenshots/showcase-2.jpg)
 ![Library, shopping list, dark mode and settings](docs/screenshots/showcase-3.jpg)
+![Spanish home, German recipe, Arabic (right-to-left) home, Japanese cook mode, and the line shown while Chef's voice is prepared](docs/screenshots/showcase-languages.jpg)
 
 ## What it does
 
@@ -301,7 +302,7 @@ Portuguese and Italian understand the English commands too. The full lists are i
 
 ```bash
 cd server && npm run typecheck && npm test     # 101 tests: credits, billing, auth, API, YouTube, RAG, languages, natural voice
-cd app && npm run typecheck && npm run lint && npm test   # 52 tests: voice commands, formatting, shopping list, ingredient parsing, YouTube links
+cd app && npm run typecheck && npm run lint && npm test   # 191 tests: every catalog vs English, voice commands in 8 languages, plurals, formatting, speech text, starter translations
 cd app && npx expo export --platform android  # confirms the Hermes bundle builds
 ```
 
