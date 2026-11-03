@@ -174,7 +174,8 @@ export default function Home() {
               <Txt variant="headline" numberOfLines={1}>
                 {a.title}
               </Txt>
-              <Txt variant="footnote" color="textMuted" numberOfLines={1}>
+              {/* Two lines: longer languages need the room (German, Spanish, Portuguese…). */}
+              <Txt variant="footnote" color="textMuted" numberOfLines={2}>
                 {a.body}
               </Txt>
             </PressableScale>

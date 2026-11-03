@@ -18,8 +18,8 @@ export default {
   },
   actions: {
     youtube: { title: 'Von YouTube', body: 'Video → Schritt-Reels' },
-    builder: { title: 'Mit Chef erstellen', body: 'Wunschgericht beschreiben' },
-    fridge: { title: 'Aus dem Kühlschrank', body: 'Nutze, was da ist' },
+    builder: { title: 'Chef fragen', body: 'Wunschgericht beschreiben' },
+    fridge: { title: 'Resteküche', body: 'Nutze, was da ist' },
     manual: { title: 'Selbst schreiben', body: 'Familienlieblinge' },
   },
   upsell: {

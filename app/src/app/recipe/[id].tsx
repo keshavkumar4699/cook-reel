@@ -241,7 +241,7 @@ export default function RecipeDetail() {
           {recipe.equipment.length ? (
             <View style={styles.block}>
               <Txt variant="title3" style={styles.blockTitle}>
-                You’ll need
+                {t('recipe.sections.equipment')}
               </Txt>
               <View style={[styles.badges, { marginTop: 0 }]}>
                 {recipe.equipment.map((e) => (
